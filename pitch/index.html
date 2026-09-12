@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kindred · Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F2F4F1; --card: #FFFFFF; --ink: #14261F; --muted: #5F6D66; --line: #D8DED9;
+  --moss: #2F6B4F; --moss-deep: #1E4A36; --moss-soft: #E4EEE8;
+  --plum: #6D2E5B; --plum-soft: #F1E4EC;
+  --amber: #C98A1E; --amber-soft: #FBF1DC; --amber-ink: #7A520C;
+  --rust: #C2572F; --rust-soft: #F9E7E0;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-feature-settings: "ss01", "cv11"; color-scheme: light; }
+.deck { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; }
+.slide { height: 100vh; scroll-snap-align: start; padding: clamp(2rem, 4.5vh, 3.2rem) clamp(1.5rem, 6vw, 6rem); display: grid; grid-template-rows: auto 1fr auto; position: relative;
+  background: radial-gradient(60rem 40rem at 10% 0%, rgba(255,255,255,0.7), transparent 60%), radial-gradient(50rem 36rem at 95% 100%, rgba(228,238,232,0.6), transparent 60%), var(--paper); }
+.kicker { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.slide h1, .slide h2 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; }
+.slide h1 { font-size: clamp(2.6rem, 6.4vw, 6rem); font-weight: 800; }
+.slide h2 { font-size: clamp(1.8rem, 3.3vw, 3.1rem); max-width: 24ch; }
+.slide h2 em { font-style: normal; color: var(--plum); }
+.body { align-self: center; min-height: 0; }
+.foot { display: flex; justify-content: space-between; gap: 2rem; font-size: 0.72rem; color: var(--muted); }
+.foot .src { max-width: 72%; }
+.foot .legal { white-space: nowrap; }
+p { margin: 0; }
+.lede { font-size: clamp(1.05rem, 1.5vw, 1.4rem); color: var(--muted); max-width: 52ch; line-height: 1.45; }
+.mono { font-family: var(--mono); font-weight: 500; }
+.pill { display: inline-block; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; padding: 0.22em 0.7em; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); vertical-align: middle; background: var(--card); }
+.pill.mono { font-family: var(--mono); text-transform: none; letter-spacing: 0; font-size: 0.72rem; }
+.pill.ex { border-color: var(--amber); color: var(--amber-ink); background: var(--amber-soft); }
+.pill.live { border-color: var(--moss); color: var(--moss-deep); background: var(--moss-soft); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: clamp(1rem, 2vw, 1.6rem); }
+
+/* slide 1 */
+.hero { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+.mark { display: inline-block; vertical-align: middle; margin-right: 0.35em; }
+.brand { font-family: var(--display); font-size: clamp(3.4rem, 7.2vw, 7.2rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; color: var(--plum); }
+.tagline { margin-top: 1.2rem; font-size: clamp(1rem, 1.35vw, 1.3rem); color: var(--muted); max-width: 34ch; line-height: 1.45; }
+.who { font-family: var(--display); font-size: clamp(1.6rem, 2.6vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; color: var(--moss-deep); }
+.who .pill { margin-left: 0.6rem; }
+.facts { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; gap: 0.8rem; }
+.facts li { padding-left: 1.3rem; position: relative; font-size: clamp(0.95rem, 1.22vw, 1.18rem); color: var(--muted); line-height: 1.4; }
+.facts li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--line); }
+.facts li b { color: var(--ink); font-weight: 600; }
+.facts li .lab { font-family: var(--mono); font-size: 0.86em; color: var(--rust); white-space: nowrap; }
+.facts li .tag { font-family: var(--mono); font-size: 0.72em; color: var(--plum); font-weight: 500; }
+.facts.moss li::before { background: var(--moss); }
+.close { margin-top: 1.4rem; font-family: var(--display); font-weight: 700; letter-spacing: -0.015em; font-size: clamp(1.15rem, 1.7vw, 1.6rem); color: var(--ink); max-width: 30ch; line-height: 1.2; }
+
+/* slide 2 */
+.scale { display: grid; margin-top: 1.2rem; }
+.row { display: grid; grid-template-columns: minmax(12rem, 0.4fr) 1fr; gap: clamp(1rem, 3vw, 3rem); align-items: baseline; padding: 0.8rem 0; border-top: 1px solid var(--line); }
+.row .n { font-family: var(--display); font-size: clamp(2.6rem, 5vw, 4.8rem); font-weight: 800; line-height: 0.9; letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; }
+.row .n small { font-size: 0.42em; color: var(--muted); font-weight: 600; letter-spacing: -0.01em; margin-left: 0.08em; }
+.row .l { font-size: clamp(0.95rem, 1.28vw, 1.22rem); color: var(--muted); line-height: 1.38; max-width: 56ch; }
+.row .l b { color: var(--ink); font-weight: 600; }
+.row .s { margin-top: 0.3rem; font-size: 0.74rem; color: var(--muted); max-width: 70ch; line-height: 1.4; }
+.row .s .pill { margin-right: 0.5rem; }
+
+/* slide 3 */
+.cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(0.8rem, 1.5vw, 1.25rem); margin-top: 2rem; }
+.col h3 { font-family: var(--display); font-weight: 700; font-size: clamp(1.15rem, 1.8vw, 1.6rem); margin: 0 0 0.5rem; letter-spacing: -0.02em; }
+.col p { color: var(--muted); font-size: clamp(0.92rem, 1.12vw, 1.08rem); line-height: 1.45; }
+.col .num { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+.col.rust { border-color: var(--rust); } .col.rust .num { color: var(--rust); }
+.col.amber { border-color: var(--amber); } .col.amber .num { color: var(--amber-ink); }
+.col.plum { border-color: var(--plum); background: var(--plum-soft); } .col.plum .num { color: var(--plum); }
+
+/* slide 4 */
+.pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(0.8rem, 1.5vw, 1.25rem); margin-top: 1.4rem; }
+.pillar { border: 1px solid var(--line); background: var(--card); border-radius: 14px; padding: 0.8rem 1rem; border-top-width: 3px; }
+.pillar b { display: block; font-family: var(--display); font-weight: 700; font-size: clamp(1rem, 1.35vw, 1.25rem); letter-spacing: -0.015em; }
+.pillar span { display: block; font-size: clamp(0.8rem, 0.98vw, 0.94rem); color: var(--muted); line-height: 1.38; margin-top: 0.2rem; }
+.pillar.rust { border-top-color: var(--rust); } .pillar.rust b { color: var(--rust); }
+.pillar.amber { border-top-color: var(--amber); } .pillar.amber b { color: var(--amber-ink); }
+.pillar.plum { border-top-color: var(--plum); } .pillar.plum b { color: var(--plum); }
+.flow { display: grid; grid-template-columns: repeat(8, 1fr); gap: 1.1rem; align-items: stretch; margin-top: 1.4rem; }
+.flow div { border-top: 3px solid var(--line); padding-top: 0.55rem; font-size: clamp(0.72rem, 0.88vw, 0.86rem); color: var(--muted); position: relative; line-height: 1.32; }
+.flow div b { display: block; font-family: var(--display); font-size: clamp(0.9rem, 1.15vw, 1.1rem); font-weight: 700; letter-spacing: -0.015em; color: var(--ink); margin-bottom: 0.2rem; line-height: 1.1; }
+.flow div:not(:last-child)::after { content: "→"; position: absolute; right: -0.95rem; top: 0.45rem; color: var(--line); font-size: 0.9rem; }
+.flow div.rust { border-color: var(--rust); } .flow div.rust b { color: var(--rust); }
+.flow div.amber { border-color: var(--amber); } .flow div.amber b { color: var(--amber-ink); }
+.flow div.plum { border-color: var(--plum); } .flow div.plum b { color: var(--plum); }
+.flow div.moss { border-color: var(--moss); } .flow div.moss b { color: var(--moss-deep); }
+.under { margin-top: 1.3rem; display: grid; gap: 0.45rem; }
+.under p { font-size: clamp(0.88rem, 1.08vw, 1.02rem); color: var(--muted); line-height: 1.4; max-width: 84ch; }
+.under p b { color: var(--ink); font-weight: 600; }
+.under .lab { font-family: var(--mono); font-size: 0.9em; }
+.under .w { color: var(--rust); } .under .k { color: var(--amber-ink); }
+
+/* slide 6 */
+.q { font-family: var(--display); font-weight: 600; font-size: clamp(1.1rem, 1.9vw, 1.8rem); line-height: 1.22; letter-spacing: -0.015em; max-width: 36ch; }
+.q::before { content: "“"; color: var(--plum); } .q::after { content: "”"; color: var(--plum); }
+.q + .who2 { margin-top: 0.5rem; font-size: 0.8rem; color: var(--muted); }
+.qs { display: grid; gap: 1.7rem; }
+.chapters { margin-top: 0.2rem; font-family: var(--display); font-weight: 600; font-size: clamp(1rem, 1.4vw, 1.3rem); color: var(--plum); }
+
+/* slide 7 */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(0.8rem, 1.5vw, 1.25rem); margin-top: 1.8rem; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.1rem; }
+.stat .n { font-family: var(--display); font-size: clamp(2rem, 3.6vw, 3.4rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; color: var(--plum); }
+.stat .n small { font-size: 0.45em; color: var(--muted); }
+.stat.rust .n { color: var(--rust); }
+.stat .l { margin-top: 0.5rem; font-size: clamp(0.82rem, 1.02vw, 0.98rem); color: var(--muted); line-height: 1.38; }
+.roadmap { margin-top: 1.3rem; font-size: clamp(0.9rem, 1.12vw, 1.08rem); color: var(--muted); max-width: 84ch; line-height: 1.4; }
+.roadmap b { color: var(--ink); font-weight: 600; }
+
+.pager { position: fixed; right: 1rem; bottom: 1rem; font-size: 0.72rem; color: var(--muted); font-family: var(--mono); }
+@media (max-width: 900px) { .hero, .cols3, .pillars { grid-template-columns: 1fr; } .stat-row { grid-template-columns: 1fr 1fr; } .flow { grid-template-columns: repeat(2, 1fr); } .flow div::after { display: none; } .row { grid-template-columns: 1fr; } .foot .legal { white-space: normal; } }
+@media print { .deck { height: auto; overflow: visible; } .slide { height: 100vh; page-break-after: always; } .pager { display: none; } }
+.voice { margin-top: 0.6rem; font-family: var(--display); font-weight: 500; font-size: clamp(1rem, 1.4vw, 1.3rem); color: #6D2E5B; line-height: 1.3; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1. Eleanor -->
+<section class="slide">
+  <span class="kicker">OpenAI × Anima Healthcare Hackathon · London · 12 September 2026</span>
+  <div class="body hero">
+    <div>
+      <div class="brand"><svg class="mark" width="0.78em" height="0.78em" viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="24" r="14" fill="none" stroke="#2F6B4F" stroke-width="5"/><circle cx="30" cy="24" r="14" fill="none" stroke="#6D2E5B" stroke-width="5"/></svg><span class="product">Kindred</span></div>
+      <p class="tagline">A care companion for older people and patients with chronic conditions. Patients choose what to share with family members and carers; their choices appear in the GP consent view.</p>
+    </div>
+    <div class="card">
+      <div class="who">Eleanor Chen, 83 <span class="pill mono">SIM-000006</span></div>
+      <ul class="facts">
+        <li>Four abnormal blood panels since May, white cells <span class="lab">2.7 · 1.6 · 1.3 · 2.1 ×10⁹/L</span> against a range of 4 to 11. <b>Each one was filed. Nobody looked at them together.</b> The only message she ever received was about paperwork.</li>
+        <li>Admitted at <b>04:20 this morning</b>. A GP appointment still booked for 08:30.</li>
+        <li>Landline only. Her husband could not drive her to her last review. <b>Nothing in her record has gone to her family.</b></li>
+      </ul>
+      <p class="close">She is the human middleware between her clinicians and her family.</p>
+      <p class="voice">“I want to know what that is. I want to know what’s going on. I want to be aware.”</p>
+    </div>
+  </div>
+  <div class="foot"><span class="src">Built on the Anima simulated NHS neighbourhood. All patient data synthetic, authored by the simulator, not by us. Fictional demo, not an official NHS product.</span><span class="legal">Team 5</span></div>
+</section>
+
+<!-- 2. The scale -->
+<section class="slide">
+  <span class="kicker">The scale</span>
+  <div class="body">
+    <h2>This is not one patient.</h2>
+    <div class="scale">
+      <div class="row">
+        <div class="n">47<small>%</small></div>
+        <div><p class="l">of blood results have <b>no record of being communicated</b> to the patient. 31% for abnormal results.</p><p class="s">PACT audit, 2,572 patients, 57 practices</p></div>
+      </div>
+      <div class="row">
+        <div class="n">5.6<small>m</small></div>
+        <div><p class="l">results a month, around <b>68m a year</b>, with no evidence the patient was told.</p><p class="s"><span class="pill ex">Extrapolated</span>12m NHS App result views a month at 47%</p></div>
+      </div>
+      <div class="row">
+        <div class="n">35,000</div>
+        <div><p class="l"><b>GP-hours every working day</b> spent managing results.</p><p class="s"><span class="pill ex">Extrapolated</span>74 minutes a day per doctor across 28,426 FTE GPs in England</p></div>
+      </div>
+      <div class="row">
+        <div class="n">1<small>reading</small></div>
+        <div><p class="l">is not effective at spotting decline. <b>The trajectory is</b>, and every GP system already holds the data.</p><p class="s">41 serious incidents in 13 months from uncommunicated results, including a 45 mm lung mass (HSIB 2019). 5 million unpaid carers. 0.4% of portal users have shared access.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">Watson (PACT) 2024 · NHS App roadmap Jul 2026 · Poon 2004 · NHS England GP Workforce Jul 2026 · Stow 2018 · HSIB 2019 · Census 2021 · Wolff 2016. Working in the speaker notes.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+</section>
+
+<!-- 3. Why it happens -->
+<section class="slide">
+  <span class="kicker">Why it happens</span>
+  <div class="body">
+    <h2 style="max-width:30ch">Results go nowhere, then aren't understood, <em>then the family is locked out.</em></h2>
+    <div class="cols3">
+      <div class="col card rust"><div class="num">01</div><h3>Not seen coming</h3><p>Results are reviewed one at a time. No one reads the trend.</p></div>
+      <div class="col card amber"><div class="num">02</div><h3>Not told</h3><p>No reliable “patient informed” state exists in the record, and nothing routes a result to the people who need to act.</p></div>
+      <div class="col card plum"><div class="num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>03</div><h3>Not understood, locked out</h3><p>The App shows the number and says ring your GP; only 51% of adults can find the out-of-range value. Proxy access hands a person the whole record after a practice-led setup, and almost nobody has it.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">Citations in the speaker notes.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+</section>
+
+<!-- 4. The solution -->
+<section class="slide">
+  <span class="kicker">The solution</span>
+  <div class="body">
+    <h2 style="max-width:36ch"><span class="product">Kindred</span> turns every result into the right explanation and next action for every trusted person, <em>under the patient's control.</em></h2>
+    <div class="pillars">
+      <div class="pillar rust"><b>1. Sees it coming</b><span>Proactive, longitudinal. A year of bloods and a week of watch data become improving, watch, worsening.</span></div>
+      <div class="pillar amber"><b>2. Tells her first</b><span>Transparency. The disclosure gate: nothing goes to the family until she has been told.</span></div>
+      <div class="pillar plum"><b>3. Tells the right people the right way</b><span>Consent. Three levels over six record categories, enforced in every tool call, a version per person.</span></div>
+    </div>
+    <div class="flow">
+      <div class="rust"><b>Trend engine</b>reads a year of bloods</div>
+      <div class="rust"><b>Flags worsening</b>improving, watch, worsening</div>
+      <div class="amber"><b>Result lands</b>or a trend is flagged</div>
+      <div class="amber"><b>Has she been told?</b>the gate checks</div>
+      <div class="amber"><b>Held / Released</b>held until she has been talked through it</div>
+      <div class="plum"><b>Her consent</b>big news waits for her yes</div>
+      <div class="plum"><b>Per-person version</b>Grace numbers, Idris logistics, Thomas yes/no</div>
+      <div class="moss"><b>Act</b>explain, notify, or raise a task</div>
+    </div>
+    <div class="under">
+      <p><b>If nobody tells her within three days,</b> the agent raises a GP task and phones her landline.</p>
+      <p>On Eleanor's real values the engine flags her liver trend as <span class="lab w">worsening</span> and her white cells as <span class="lab k">watch</span>.</p>
+    </div>
+  </div>
+  <div class="foot"><span class="src">Proxy access gives a person the record. <span class="product">Kindred</span> gives each person their role.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+</section>
+
+<!-- 5. The demo -->
+<section class="slide">
+  <span class="kicker">The demo</span>
+  <div class="body">
+    <h2>90 seconds, live against Anima.</h2>
+    <ul class="facts moss" style="max-width:72ch;margin-top:1.6rem;gap:0.85rem">
+      <li><b>Eleanor's trend cards,</b> improving / watch / worsening, generated from her real panel history. <span class="pill live">Live from the prototype</span></li>
+      <li><b>Order the LFT in Anima; advance the clock 121 minutes.</b> The result lands as a real state change.</li>
+      <li><b>Held.</b> Eleanor's phone: a result has arrived and the practice will talk her through it. Family sees nothing.</li>
+      <li><b>Her yes.</b> Three versions go out: Grace numbers, Idris logistics, Thomas yes/no. A task appears in Anima's activity trail.</li>
+      <li><b>Grace asks about a result she cannot see.</b> <span class="mono">NOT_SHARED</span>, no hint. She asks for access; Eleanor approves from a card; the GP consent view updates live.</li>
+      <li><b>The morning check</b> reads the 08:30 appointment from the record and posts to the family group: who can give Eleanor a lift?</li>
+    </ul>
+  </div>
+  <div class="foot"><span class="src">Visibly simulated: WhatsApp delivery, relative identity checks, the clinician's “discussed with patient” tap, the persona switcher. Consent writes go to the companion backend, not native FHIR Consent on the remote simulator.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+</section>
+
+<!-- 6. 10 Year Health Plan fit -->
+<section class="slide">
+  <span class="kicker">10 Year Health Plan fit</span>
+  <div class="body qs">
+    <div><p class="q">There are 3 shifts, but only one core purpose: to put power in patients' hands.</p><p class="who2">Chapter 1, p22</p></div>
+    <div><p class="q">Patients will have control over whether this data is shared.</p><p class="who2">Chapter 3, My Health, pp50 to 51. And My Carer, p51: carers gain access to the App on their loved one's behalf.</p></div>
+    <div><p class="q">The most common reasons for complaints is poor communication.</p><p class="who2">Chapter 6, p89</p></div>
+    <p class="chapters">Chapters 2, 3 and 6.</p>
+  </div>
+  <div class="foot"><span class="src">Fit for the Future: the 10 Year Health Plan for England, July 2025.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+</section>
+
+<!-- 7. Close and proof -->
+<section class="slide">
+  <span class="kicker">Close</span>
+  <div class="body">
+    <h1 style="max-width:14ch">No result ever sits uncommunicated.</h1>
+    <p class="lede" style="margin-top:1rem;max-width:52ch">And when it is communicated, every trusted person gets the right version, in their words, under her control.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="n">3 <small>× 6</small></div><div class="l">sharing levels over six record categories, plus custom mixes</div></div>
+      <div class="stat"><div class="n">Every</div><div class="l">agent tool call checks consent and is written to the audit rail</div></div>
+      <div class="stat rust"><div class="n">6</div><div class="l">plain-English trend cards from a year of bloods and the watch data in her record</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">transaction mirrors each consent change to the GP view: observation plus audit</div></div>
+    </div>
+    <p class="roadmap"><b>Next:</b> fold the trend engine, the gate and the escalation, prototyped today against the live Anima world, into the app. Pilot at one practice. Wire consent to NHS App proxy access.</p>
+  </div>
+  <div class="foot"><span class="src">All patient data synthetic. Fictional demo, not an official NHS product.</span><span class="legal"><span class="product">Kindred</span> · Team 5</span></div>
+</section>
+
+</div>
+<div class="pager" id="pager"></div>
+<script>
+// Product name lives here only. Change it once and every slide, the title and the pager follow.
+const PRODUCT = "Kindred";
+for (const el of document.querySelectorAll(".product")) el.textContent = PRODUCT;
+document.title = `${PRODUCT} · Pitch`;
+const deck = document.getElementById("deck"), slides = [...document.querySelectorAll(".slide")], pager = document.getElementById("pager");
+const idx = () => Math.round(deck.scrollTop / innerHeight);
+const go = (i) => deck.scrollTo({ top: Math.max(0, Math.min(slides.length - 1, i)) * innerHeight, behavior: "smooth" });
+addEventListener("keydown", (e) => { if (["ArrowRight", "ArrowDown", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(idx() + 1); } if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); go(idx() - 1); } });
+deck.addEventListener("scroll", () => { pager.textContent = `${idx() + 1} / ${slides.length}`; });
+pager.textContent = `1 / ${slides.length}`;
+</script>
+</body>
+</html>
