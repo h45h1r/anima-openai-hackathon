@@ -59,10 +59,36 @@ function clearSid() {
 }
 
 function calmAskStatus(message: string) {
-  if (/retriev|ground|evidence|search/i.test(message)) return "Looking at the record…";
-  if (/consent|policy|filter/i.test(message)) return "Checking what you can see…";
+  if (/retriev|ground|evidence|search|looking|record/i.test(message)) return "Looking through the record…";
+  if (/consent|policy|filter|access|can see/i.test(message)) return "Checking what you can see…";
+  if (/appoint|slot|book|diary/i.test(message)) return "Checking appointments…";
+  if (/remember|prefer|sav/i.test(message)) return "Saving preference…";
   if (/model|openai|writ|phras/i.test(message)) return "Writing…";
-  return message || "Working…";
+  if (/connect|fallback/i.test(message)) return "Connecting…";
+  return message || "Looking through the record…";
+}
+
+function calmToolStatus(tool: string) {
+  switch (tool) {
+    case "get_permitted_evidence":
+    case "patient.context.read":
+    case "intent.classify":
+      return "Looking through the record…";
+    case "consent.evaluate":
+      return "Checking what you can see…";
+    case "appointment_assist":
+      return "Checking appointments…";
+    case "remember":
+    case "memory.recall":
+      return "Saving preference…";
+    case "update_consent":
+      return "Updating access…";
+    case "answer.generate":
+    case "answer.refine":
+      return "Writing…";
+    default:
+      return "Looking through the record…";
+  }
 }
 
 export function useCareClinical(kindred: AppState | null, kindredViewerId: string | null) {
@@ -340,7 +366,7 @@ export function useCareClinical(kindred: AppState | null, kindredViewerId: strin
             setAskStatus(calmAskStatus(event.message));
             setAskTransport("sse");
           } else if (event.type === "tool") {
-            setAskStatus(`Using ${event.tool}…`);
+            setAskStatus(calmToolStatus(String(event.tool || "")));
             setAskTransport("sse");
           } else if (event.type === "stream_reset") {
             setAskStreamText("");

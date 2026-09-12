@@ -34,23 +34,23 @@ export function buildUserFacingPolicyNotice(input: {
     reasonCodes.includes('PATIENT_MISMATCH');
 
   if (reasonCodes.includes('VIEWER_MISMATCH') || reasonCodes.includes('PATIENT_MISMATCH')) {
-    return 'This viewer is not authorised for this patient.';
+    return 'This view isn’t set up for that person. Open Circle to check who’s linked.';
   }
 
   if (outcome === 'hold' || (held && !reasonCodes.includes('ACTIVE_GRANT') && outcome !== 'partial')) {
-    return `I can't show that yet — it's waiting for ${name} to release it.`;
+    return `I can’t show that yet — it’s waiting for ${name} to release it. You can ask them in Circle.`;
   }
 
   if (outcome === 'deny') {
-    return "That isn't shared with your role.";
+    return "That isn’t shared with you yet. Ask them to open Circle if they’d like to share more.";
   }
 
   // partial — only mention when the ask actually needed blocked clinical topics
   if (intent === 'share_consent' || intent === 'appointment' || intent === 'vitals_bp') {
     // BP empty-state answers are enough; suppress unrelated catalogue omissions.
     // Only surface a hold notice if results are held and the viewer might otherwise expect labs.
-    if (intent === 'vitals_bp' && held && deniedInformationClasses.includes('laboratory_results')) {
-      return `I can't show that yet — it's waiting for ${name} to release it.`;
+  if (intent === 'vitals_bp' && held && deniedInformationClasses.includes('laboratory_results')) {
+      return `I can’t show that yet — it’s waiting for ${name} to release it. You can ask them in Circle.`;
     }
     return '';
   }
@@ -62,10 +62,10 @@ export function buildUserFacingPolicyNotice(input: {
 
   if (needsLabs && labsBlocked) {
     if (held) {
-      return `I can't show that yet — it's waiting for ${name} to release it.`;
+      return `I can’t show that yet — it’s waiting for ${name} to release it. You can ask them in Circle.`;
     }
     if (notGranted) {
-      return "That isn't shared with your role.";
+      return "That isn’t shared with you yet. Ask them to open Circle if they’d like to share more.";
     }
   }
 
@@ -74,10 +74,10 @@ export function buildUserFacingPolicyNotice(input: {
   }
 
   if (held) {
-    return `I can't show that yet — it's waiting for ${name} to release it.`;
+    return `I can’t show that yet — it’s waiting for ${name} to release it. You can ask them in Circle.`;
   }
   if (notGranted && labsBlocked) {
-    return "That isn't shared with your role.";
+    return "That isn’t shared with you yet. Ask them to open Circle if they’d like to share more.";
   }
   return '';
 }

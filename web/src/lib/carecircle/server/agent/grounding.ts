@@ -302,6 +302,9 @@ export function selectBpMeasurements(measurements: Measurement[]): Measurement[]
   );
 }
 
+const PATIENT_UNCERTAINTY =
+  'This restates what the record shows for you. It is not a diagnosis or treatment plan — check with the care team if you are unsure.';
+
 export function buildShareConsentAnswer(input: {
   question: string;
   policyNotice?: string;
@@ -310,15 +313,15 @@ export function buildShareConsentAnswer(input: {
   const wantsDaughter = /\bdaughter\b/i.test(input.question);
   const who = wantsDaughter ? 'your daughter' : 'family or supporters';
   const answer = input.viewerIsPatient
-    ? `Sharing is controlled in Kindred Circle — three sharing levels (Everything, Only practical, Important updates). Nothing goes to ${who} unless you put them on a level. Open Circle in Kindred, or CareCircle’s Circle tab to adjust the Ask demo filter.`
-    : `I can't change who has access from this viewer. Kindred Circle owns sharing levels; the patient manages access there (or in CareCircle’s Circle tab for this Ask demo). Ask them to review access if they want to share more with ${who}.`;
+    ? `Sharing is controlled in Kindred Circle — three levels (Everything, Only practical, Important updates). Nothing goes to ${who} unless you put them on a level.\n\n**What to do next**\nOpen Circle to adjust who can see what.`
+    : `I can’t change who has access from this view. Kindred Circle owns sharing levels; the patient manages access there.\n\n**What to do next**\nAsk them to review Circle if they want to share more with ${who}.`;
   return {
     answer,
     facts: [],
     policyNotice: input.policyNotice || undefined,
     citations: [],
     escalation: input.viewerIsPatient
-      ? 'Open Kindred Circle (or CareCircle → Circle) to change sharing levels.'
+      ? 'Open Kindred Circle to change sharing levels.'
       : 'Ask the patient to open Kindred Circle if they want to change sharing.',
   };
 }
@@ -339,22 +342,22 @@ export function buildDeterministicAnswer(input: {
     return {
       answer:
         input.policyNotice ||
-        "I can't show that yet — it's waiting for the patient to release it.",
+        "I can’t show that yet — it’s waiting for the patient to release it. Ask them to check Circle.",
       facts: [],
       policyNotice: input.policyNotice,
       citations: [],
-      escalation: 'Please check with the patient or the clinical team for disclosure status.',
+      escalation: 'Ask the patient to review Circle, or check with the clinical team.',
     };
   }
   if (input.outcome === 'deny') {
     return {
       answer:
         input.policyNotice ||
-        "That isn't shared with your role. I can help with topics the patient has already shared.",
+        "That isn’t shared with you yet. Ask the patient to open Circle if they’d like to share more.",
       facts: [],
       policyNotice: input.policyNotice,
       citations: [],
-      escalation: 'Ask the patient to review Kindred Circle (sharing levels) if they want to share more.',
+      escalation: 'Ask the patient to review Kindred Circle if they want to share more.',
     };
   }
 
@@ -389,8 +392,7 @@ export function buildDeterministicAnswer(input: {
     return {
       answer: proseFromFacts(facts, { short: true }),
       facts,
-      uncertainty:
-        'This restates what the synthetic record shows. It is not a diagnosis or treatment recommendation.',
+      uncertainty: PATIENT_UNCERTAINTY,
       policyNotice: input.policyNotice || undefined,
       citations: [
         {
@@ -585,8 +587,7 @@ export function buildDeterministicAnswer(input: {
   return {
     answer,
     facts,
-    uncertainty:
-      'This restates what the synthetic record shows. It is not a diagnosis or treatment recommendation.',
+    uncertainty: PATIENT_UNCERTAINTY,
     recordedNextStep,
     policyNotice: input.policyNotice || undefined,
     citations,
@@ -612,35 +613,48 @@ export function proseFromFacts(
     const ok = valueLines.filter((l) => !/outside illustrative range/i.test(l));
     const focused = /kidney|u&e|liver|full blood count|requested/i.test(dateLine || '');
 
-    const parts: string[] = [];
-    if (dateLine) parts.push(dateLine.replace(/\.$/, ''));
+    const knowBits: string[] = [];
+    if (dateLine) knowBits.push(dateLine.replace(/\.$/, ''));
+    const valueBullets = [
+      ...flagged.slice(0, short ? 3 : 6).map((l) => `• ${stripFactChrome(l)}`),
+      ...ok.slice(0, short || focused ? 4 : 4).map((l) => `• ${stripFactChrome(l)}`),
+    ];
+    if (prev && !short) knowBits.push(prev.replace(/\.$/, ''));
+
+    const meaningBits: string[] = [];
     if (flagged.length) {
-      parts.push(
-        `What stands out: ${flagged
-          .slice(0, short ? 3 : 6)
-          .map(stripFactChrome)
-          .join('; ')}.`,
+      meaningBits.push(
+        short
+          ? `${flagged.length === 1 ? 'One value sits' : 'Some values sit'} outside the illustrative range shown on the record.`
+          : `${flagged.length === 1 ? 'One value sits' : `${flagged.length} values sit`} outside the illustrative range shown on the record — worth noting with the care team if it hasn’t been discussed.`,
       );
+    } else if (valueBullets.length) {
+      meaningBits.push('The noted values sit within the illustrative ranges on the record.');
     }
-    if (ok.length) {
-      const sample = ok.slice(0, short || focused ? 4 : 4).map(stripFactChrome);
-      parts.push(
-        flagged.length
-          ? `Other noted values include ${sample.join('; ')}.`
-          : `Key values: ${sample.join('; ')}.`,
-      );
+    if (prev && !short) {
+      meaningBits.push('A previous reading is included above so you can see the change over time.');
     }
-    if (prev && !short) parts.push(prev);
-    if (short && !focused) {
-      return `${parts.slice(0, 4).join(' ')} Ask if you want the full panel.`;
-    }
-    return parts.join(' ');
+
+    const nextBits = short && !focused
+      ? ['Ask if you want the full panel, or take these figures to your next review.']
+      : ['Take these figures to your next review if you want them explained in context.'];
+
+    const sections = [
+      `**What we know**\n${[...knowBits, ...valueBullets].join('\n')}`,
+      meaningBits.length ? `**What it means**\n${meaningBits.join('\n')}` : '',
+      `**What to do next**\n${nextBits.join('\n')}`,
+    ].filter(Boolean);
+
+    return sections.join('\n\n');
   }
 
   const lead = lines[0];
   const rest = lines.slice(1, short ? 3 : 5).map(stripFactChrome);
-  if (!rest.length) return lead;
-  return `${lead} ${rest.join(' ')}`;
+  if (!rest.length) {
+    return `**What we know**\n${lead}\n\n**What it means**\nThis is what the permitted record shows for that question.\n\n**What to do next**\nAsk the care team if you want this explained in more detail.`;
+  }
+  const bullets = rest.map((r) => `• ${r}`).join('\n');
+  return `**What we know**\n${lead}\n${bullets}\n\n**What it means**\nThese are the permitted details that match your question.\n\n**What to do next**\nAsk the care team if you want this explained in more detail.`;
 }
 
 function stripFactChrome(line: string): string {
@@ -701,7 +715,7 @@ function summariseUnknown(value: unknown, depth: number): string {
       .slice(0, 4)
       .map((v) => summariseUnknown(v, depth + 1))
       .filter(Boolean)
-      .join('; ');
+      .join('. ');
   }
   if (typeof value === 'object') {
     const o = value as Record<string, unknown>;
@@ -716,7 +730,7 @@ function summariseUnknown(value: unknown, depth: number): string {
           const unit = a.unit ? ` ${a.unit}` : '';
           return v !== undefined ? `${name} ${v}${unit}` : name;
         });
-      return `${panel}: ${bits.join('; ')}`;
+      return `${panel}: ${bits.join(', ')}`;
     }
     if (Array.isArray(o.entries)) {
       const bodies = (o.entries as Record<string, unknown>[])
@@ -737,7 +751,7 @@ function summariseUnknown(value: unknown, depth: number): string {
         const who = asText(o.sentBy);
         const stage = asText(o.stage);
         const head = [stage && `Status: ${humanStatus(stage)}`, who && `From ${who}`].filter(Boolean).join('. ');
-        return [head, parts.join(' ')].filter(Boolean).join(' — ');
+        return [head, parts.join(' ')].filter(Boolean).join('. ');
       }
     }
     const preferredKeys = ['text', 'body', 'summary', 'notes', 'reason', 'message', 'notice', 'statusText', 'followUp'];
@@ -752,10 +766,11 @@ function summariseUnknown(value: unknown, depth: number): string {
       .slice(0, 4)
       .map(([k, v]) => {
         if (v && typeof v === 'object') return '';
-        return `${k}: ${String(v)}`;
+        const label = k.replace(/_/g, ' ');
+        return `${label}: ${String(v)}`;
       })
       .filter(Boolean)
-      .join('; ')
+      .join('. ')
       .slice(0, 220);
   }
   return '';
@@ -940,7 +955,7 @@ export async function clarifyAppointment(
           : undefined,
       availableSlots: slots.slice(0, 8),
       notice:
-        'No booking was submitted. CareCircle distinguishes preference, request, available slots, and confirmed bookings. Confirm an exact patient and slot before book_appointment.',
+        'No booking was submitted. Kindred can clarify preference, request, available slots, and confirmed bookings — it will not book a slot until you confirm the exact patient and time.',
     };
   }
 
@@ -964,7 +979,7 @@ export async function clarifyAppointment(
       requestSummary: request ? truncate(humaniseEventSummary(request), 180) : undefined,
       availableSlots: slots.slice(0, 8),
       notice:
-        'Available diary slots were retrieved from the GP appointment book. No booking has been made. Confirm an exact patient and slot before any book_appointment action.',
+        'Available diary slots were retrieved from the GP appointment book. No booking has been made. Confirm an exact patient and time before any booking is submitted.',
     };
   }
 
@@ -974,7 +989,7 @@ export async function clarifyAppointment(
       preferenceSummary,
       requestSummary: request ? truncate(`${request.title}: ${humaniseEventSummary(request)}`, 200) : undefined,
       notice:
-        'CareCircle can clarify preferences and recorded requests. Live open slots were not returned for the queried dates, so no booking is offered.',
+        'Kindred can clarify preferences and recorded requests. Live open slots were not returned for the queried dates, so no booking is offered.',
     };
   }
 

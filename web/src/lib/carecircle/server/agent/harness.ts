@@ -64,7 +64,7 @@ import {
   type MemoryKind,
   memoryKinds,
 } from './memoryStore';
-import { PROMPT_VERSION } from './prompts';
+import { PROMPT_VERSION, REFINE_STYLE_INSTRUCTIONS } from './prompts';
 import { buildUserFacingPolicyNotice, patientFirstName } from '../consent/messages';
 
 export type RunAgentInput = {
@@ -111,7 +111,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
     }
   };
 
-  emitStatus('Retrieving…');
+  emitStatus('Looking through the record…');
 
   const bag: {
     evidence: EvidenceItem[];
@@ -300,7 +300,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       const t0 = Date.now();
       bag.evidence = catalogueEvidence(input.context);
       emit({ type: 'tool', tool: 'patient.context.read', status: 'ok', detail: input.context.patientId });
-      emitStatus('Retrieving…');
+      emitStatus('Looking through the record…');
       appendTrace(ctx, {
         tool: 'patient.context.read',
         status: 'ok',
@@ -310,7 +310,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       });
 
       const t1 = Date.now();
-      emitStatus('Checking consent…');
+      emitStatus('Checking what you can see…');
       const decision = evaluateConsent({
         policy: bag.policy,
         viewerId: input.viewerId,
@@ -564,12 +564,12 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           JSON.stringify(facts),
           `Draft answer (fallback): ${bag.answer?.answer || ''}`,
           `Question: ${input.question}`,
+          REFINE_STYLE_INSTRUCTIONS,
           followUp || labFocus.focused
-            ? `Style: answer THIS question only. If it is a follow-up, do not repeat the full prior panel — focus on the asked analytes/topic (${labFocus.topicIds.join(', ') || 'as asked'}).`
+            ? `Focus: answer THIS question only. If it is a follow-up, do not repeat the full prior panel — focus on the asked analytes/topic (${labFocus.topicIds.join(', ') || 'as asked'}).`
             : short
-              ? `Style: short plain language, 3–6 sentences max. No full panel dump. No cheerleading closer.`
-              : `Style: concise. Prefer highlights over a full dump unless asked.`,
-          `Rewrite using ONLY the structured facts above. Do not introduce any number not listed in STRUCTURED_FACTS.`,
+              ? `Focus: short plain language, keep the three beats brief. No full panel dump.`
+              : `Focus: concise highlights over a full dump unless asked.`,
         ].join('\n');
 
         // Fresh session so nested agent state does not collide with the pipeline session.
@@ -618,7 +618,11 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         }
         const text = String(nested?.output?.text || buffered || '').trim();
         const parsed = tryParseModelExtras(text);
-        const prose = stripTrailingJson(text) || parsed.answer;
+        let prose = finalizeVisibleProse(text, parsed.answer);
+        // If the model returned mostly JSON / fences, fall back to deterministic draft.
+        if (!prose || looksLikeJsonProse(prose)) {
+          prose = bag.answer?.answer || '';
+        }
         const grounded =
           Boolean(prose) &&
           proseMatchesFacts(prose!, facts, bag.allowedMeasurements.filter((m) =>
@@ -711,13 +715,17 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           });
           if (refined && bag.answer) {
             const facts = bag.answer.facts || [];
-            const ok = proseMatchesFacts(
-              refined.answer,
-              facts,
-              bag.allowedMeasurements.filter((m) => facts.some((f) => f.evidenceIds.includes(m.evidenceId))),
-            );
+            const cleaned = finalizeVisibleProse(refined.answer) || refined.answer;
+            const candidate = looksLikeJsonProse(cleaned) ? '' : cleaned;
+            const ok =
+              Boolean(candidate) &&
+              proseMatchesFacts(
+                candidate,
+                facts,
+                bag.allowedMeasurements.filter((m) => facts.some((f) => f.evidenceIds.includes(m.evidenceId))),
+              );
             const answer = ok
-              ? refined.answer
+              ? candidate
               : proseFromFacts(facts, {
                   short: prefersShortPlain(
                     bag.memoriesUsed.map((m) => m.content).join(' '),
@@ -888,7 +896,7 @@ function safeJson<T>(raw: unknown, fallback: T): T {
 function statusForToolName(name: string): string {
   switch (name) {
     case 'get_permitted_evidence':
-      return 'Retrieving…';
+      return 'Looking through the record…';
     case 'appointment_assist':
       return 'Checking appointments…';
     case 'remember':
@@ -896,7 +904,7 @@ function statusForToolName(name: string): string {
     case 'update_consent':
       return 'Updating access…';
     default:
-      return 'Checking…';
+      return 'Looking through the record…';
   }
 }
 
@@ -922,21 +930,53 @@ function tryParseModelExtras(text: string): {
   return {};
 }
 
+function stripCodeFences(text: string): string {
+  let t = text.trim();
+  // ```json ... ``` or ``` ... ```
+  const fenced = t.match(/^```(?:json|markdown|md|text)?\s*([\s\S]*?)```\s*$/i);
+  if (fenced) return fenced[1].trim();
+  t = t.replace(/```(?:json|markdown|md|text)?\s*([\s\S]*?)```/gi, (_, inner) => String(inner || '').trim());
+  return t.trim();
+}
+
 function stripTrailingJson(text: string): string {
-  const start = text.lastIndexOf('\n{');
-  if (start >= 0 && text.trimEnd().endsWith('}')) {
-    return text.slice(0, start).trim();
+  let t = stripCodeFences(text);
+  const start = t.lastIndexOf('\n{');
+  if (start >= 0 && t.trimEnd().endsWith('}')) {
+    return t.slice(0, start).trim();
   }
   // whole-message JSON
-  if (text.trim().startsWith('{')) {
+  if (t.trim().startsWith('{')) {
     try {
-      const obj = JSON.parse(text) as { answer?: string };
-      if (obj.answer) return obj.answer;
+      const obj = JSON.parse(t) as { answer?: string };
+      if (obj.answer) return String(obj.answer).trim();
     } catch {
       /* ignore */
     }
   }
-  return text.trim();
+  return t.trim();
+}
+
+/** True when visible text still looks like a JSON object/array (or fence residue). */
+function looksLikeJsonProse(text: string): boolean {
+  const t = text.trim();
+  if (!t) return true;
+  if (/^```/.test(t)) return true;
+  if (!(t.startsWith('{') || t.startsWith('['))) return false;
+  try {
+    JSON.parse(t);
+    return true;
+  } catch {
+    // Incomplete / trailing JSON blobs still shouldn't reach the UI.
+    return /"[a-zA-Z_]+"\s*:/.test(t) && (t.match(/[{[]/g) || []).length >= 2;
+  }
+}
+
+function finalizeVisibleProse(text: string, fallbackAnswer?: string): string {
+  const stripped = stripTrailingJson(text);
+  if (stripped && !looksLikeJsonProse(stripped)) return stripped;
+  if (fallbackAnswer && !looksLikeJsonProse(fallbackAnswer)) return fallbackAnswer.trim();
+  return '';
 }
 
 /**
@@ -983,8 +1023,7 @@ async function refineWithResponsesApi(input: {
             facts: input.draft.facts,
             draftAnswer: input.draft.answer,
             question: input.question,
-            instruction:
-              'Rephrase STRUCTURED facts only. Every number must appear in facts. Answer the latest question; for follow-ups do not dump the full prior panel. Short plain language if memories ask for it. No cheerleading. Return JSON only: {answer, uncertainty}',
+            instruction: `${REFINE_STYLE_INSTRUCTIONS} Prefer a prose answer body. If you must use JSON, return {answer, uncertainty} only — never put JSON in the visible answer field.`,
           }),
         },
       ],
@@ -1008,16 +1047,17 @@ async function refineWithResponsesApi(input: {
   }
   if (!content) return null;
   try {
-    const parsed = JSON.parse(content) as { answer?: string; uncertainty?: string };
+    const parsed = JSON.parse(stripCodeFences(content)) as { answer?: string; uncertainty?: string };
     if (parsed.answer) {
-      return { answer: parsed.answer, uncertainty: parsed.uncertainty };
+      return { answer: finalizeVisibleProse(parsed.answer) || parsed.answer, uncertainty: parsed.uncertainty };
     }
   } catch {
     /* model sometimes returns prose */
   }
-  const prose = content.trim();
+  const extras = tryParseModelExtras(content);
+  const prose = finalizeVisibleProse(content, extras.answer);
   if (!prose) return null;
-  return { answer: prose };
+  return { answer: prose, uncertainty: extras.uncertainty };
 }
 
 export function suggestionsForViewer(ctx: ClinicalContext, policy: ConsentPolicyState, viewerId: string) {

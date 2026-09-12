@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import type { AppState, Person } from "@/lib/types";
 import { levelLabel } from "@/lib/levels";
-import { Button, Pill } from "../ui";
+import { Avatar, Button, KindredMark, Pill, Prose } from "../ui";
 import ResultChart from "./ResultChart";
 import type { CareClinical, AskThreadMessage } from "@/hooks/useCareClinical";
 import { kindredLevelForPerson } from "@/lib/carecircle/viewers";
@@ -25,6 +25,15 @@ export default function AskPanel({
   const threadEnd = useRef<HTMLDivElement | null>(null);
   const thread = care.askThread;
   const level = viewer.id === state.patientId ? "everything" : kindredLevelForPerson(state, viewer.id);
+  const agent = state.people.find((p) => p.role === "agent") || {
+    id: "kindred",
+    name: "Kindred",
+    shortName: "Kindred",
+    role: "agent" as const,
+    relation: "Care companion",
+    color: "#6D2E5B",
+    initials: "K",
+  };
 
   useEffect(() => {
     const draft = sessionStorage.getItem("kindred.draftQuestion");
@@ -105,8 +114,7 @@ export default function AskPanel({
           <h1 className="font-display text-[26px] font-bold leading-tight sm:text-3xl">Ask</h1>
           <p className="mt-1 text-[15px] text-muted">
             Grounded clinical answers for <strong>{care.session?.selectedPatientName || state.patient.name}</strong>,
-            filtered for <strong>{viewer.shortName}</strong>
-            {care.askTransport ? ` · ${care.askTransport.toUpperCase()}` : ""}. Access is managed in Circle.
+            filtered for <strong>{viewer.shortName}</strong>. Access is managed in Circle.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -159,32 +167,31 @@ export default function AskPanel({
               <ThreadBubble
                 key={msg.id}
                 msg={msg}
+                agent={agent}
                 sourcesOpen={sourcesOpen}
                 setSourcesOpen={setSourcesOpen}
                 isLatestAssistant={msg.id === latestAssistant?.id && !busy}
+                onOpenCircle={onOpenCircle}
               />
             ))}
             {busy && streamingText ? (
-              <div className="rounded-2xl bg-paper px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-wider text-plum">Kindred Ask</div>
-                <div className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed">
-                  {streamingText}
-                  <span className="animate-pulse">▍</span>
+              <div className="flex items-end gap-2">
+                <Avatar person={agent} size={28} />
+                <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-[15px] leading-relaxed text-ink shadow-sm ring-1 ring-line sm:max-w-[75%]">
+                  <Prose text={streamingText} />
+                  <span className="pulse-soft ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 rounded-sm bg-plum/60" />
                 </div>
               </div>
             ) : busy ? (
-              <div className="rounded-2xl bg-paper px-4 py-3 text-sm text-muted">{care.askStatus || "Retrieving…"}</div>
+              <div className="flex items-end gap-2">
+                <Avatar person={agent} size={28} />
+                <div className="rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-sm text-muted shadow-sm ring-1 ring-line">
+                  {care.askStatus || "Looking through the record…"}
+                </div>
+              </div>
             ) : null}
             <div ref={threadEnd} />
           </div>
-
-          {thread.length ? (
-            <div className="border-t border-line px-4 py-2">
-              <Button variant="ghost" size="sm" disabled={busy} onClick={() => care.clearAskThread()}>
-                Clear conversation
-              </Button>
-            </div>
-          ) : null}
 
           <form onSubmit={onSubmit} className="border-t border-line p-4">
             <label htmlFor="kindred-ask" className="sr-only">
@@ -198,7 +205,14 @@ export default function AskPanel({
               placeholder={thread.length ? "e.g. What about my kidney results?" : "e.g. Explain my latest blood tests"}
               className="w-full resize-none rounded-2xl border border-line bg-paper px-4 py-3 text-[15px] outline-none focus:border-plum"
             />
-            <div className="mt-2 flex justify-end">
+            <div className="mt-2 flex items-center justify-between gap-2">
+              {thread.length ? (
+                <Button variant="ghost" size="sm" disabled={busy} onClick={() => care.clearAskThread()}>
+                  Clear conversation
+                </Button>
+              ) : (
+                <span />
+              )}
               <Button type="submit" variant="plum" disabled={busy || !question.trim()}>
                 {busy ? "Working…" : "Ask"}
               </Button>
@@ -251,81 +265,115 @@ export default function AskPanel({
 
 function ThreadBubble({
   msg,
+  agent,
   sourcesOpen,
   setSourcesOpen,
   isLatestAssistant,
+  onOpenCircle,
 }: {
   msg: AskThreadMessage;
+  agent: Person;
   sourcesOpen: boolean;
   setSourcesOpen: (fn: (v: boolean) => boolean) => void;
   isLatestAssistant: boolean;
+  onOpenCircle: () => void;
 }) {
   if (msg.role === "user") {
     return (
-      <div className="ml-8 rounded-2xl bg-ink px-4 py-3 text-white">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-white/60">You</div>
-        <div className="mt-1 text-[15px] leading-relaxed">{msg.text}</div>
+      <div className="flex items-end justify-end gap-2">
+        <div className="max-w-[88%] rounded-2xl rounded-br-md bg-moss px-3.5 py-2.5 text-[15px] leading-relaxed text-white sm:max-w-[75%]">
+          {msg.text}
+        </div>
       </div>
     );
   }
 
   const run = msg.run;
   const citations = run?.answer?.citations || [];
+  const hasExtras =
+    isLatestAssistant &&
+    Boolean(
+      (run?.answer?.policyNotice && !/^Remembered:/i.test(run.answer.policyNotice)) ||
+        run?.answer?.facts?.length ||
+        run?.answer?.visualisationSpec?.points?.length ||
+        citations.length ||
+        run?.answer?.uncertainty,
+    );
 
   return (
-    <div className="mr-8 rounded-2xl bg-paper px-4 py-3">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-plum">Kindred Ask</div>
-      <div className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed">{msg.text}</div>
-
-      {isLatestAssistant && run?.answer?.policyNotice && !/^Remembered:/i.test(run.answer.policyNotice) ? (
-        <div className="mt-2 rounded-xl bg-plum-soft/80 px-3 py-2 text-sm text-plum">{run.answer.policyNotice}</div>
-      ) : null}
-
-      {isLatestAssistant && run?.answer?.facts?.length ? (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-sm font-semibold text-muted">Key points from the record</summary>
-          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm">
-            {run.answer.facts.slice(0, 8).map((f: { text: string }, i: number) => (
-              <li key={i}>{f.text}</li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
-
-      {isLatestAssistant && run?.answer?.visualisationSpec?.points?.length ? (
-        <div className="mt-3">
-          <ResultChart
-            title={run.answer.visualisationSpec.title}
-            unit={run.answer.visualisationSpec.unit}
-            points={run.answer.visualisationSpec.points}
-            referenceLow={run.answer.visualisationSpec.referenceLow}
-            referenceHigh={run.answer.visualisationSpec.referenceHigh}
-            referenceLabel={run.answer.visualisationSpec.referenceLabel}
-          />
+    <div className="flex items-end gap-2">
+      <Avatar person={agent} size={28} />
+      <div className="flex max-w-[88%] flex-col gap-1 sm:max-w-[75%]">
+        <div className="rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-[15px] leading-relaxed text-ink shadow-sm ring-1 ring-line">
+          <Prose text={msg.text} />
         </div>
-      ) : null}
 
-      {isLatestAssistant && citations.length ? (
-        <div className="mt-2">
-          <Button variant="secondary" size="sm" onClick={() => setSourcesOpen((v) => !v)}>
-            {sourcesOpen ? "Hide sources" : `Sources (${citations.length})`}
-          </Button>
-          {sourcesOpen ? (
-            <ul className="mt-2 space-y-1 text-sm text-muted">
-              {citations.map((c: { evidenceId: string; title: string; date?: string }) => (
-                <li key={c.evidenceId}>
-                  {c.title}
-                  {c.date ? ` · ${c.date.slice(0, 10)}` : ""}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      ) : null}
+        {hasExtras ? (
+          <div className="mt-1 space-y-2 border-t border-line/70 pt-2">
+            {isLatestAssistant && run?.answer?.policyNotice && !/^Remembered:/i.test(run.answer.policyNotice) ? (
+              <div className="rounded-xl bg-plum-soft/70 px-3 py-2 text-sm text-plum">
+                {run.answer.policyNotice}{" "}
+                <button type="button" className="font-semibold underline" onClick={onOpenCircle}>
+                  Open Circle
+                </button>
+              </div>
+            ) : null}
 
-      {isLatestAssistant && run?.answer?.uncertainty ? (
-        <p className="mt-2 text-sm text-muted">{run.answer.uncertainty}</p>
-      ) : null}
+            {isLatestAssistant && run?.answer?.facts?.length ? (
+              <details className="group">
+                <summary className="cursor-pointer text-[12px] font-semibold text-muted hover:text-ink">
+                  Key points from the record
+                </summary>
+                <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted">
+                  {run.answer.facts.slice(0, 8).map((f: { text: string }, i: number) => (
+                    <li key={i}>{f.text}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+
+            {isLatestAssistant && run?.answer?.visualisationSpec?.points?.length ? (
+              <div className="pt-1">
+                <ResultChart
+                  title={run.answer.visualisationSpec.title}
+                  unit={run.answer.visualisationSpec.unit}
+                  points={run.answer.visualisationSpec.points}
+                  referenceLow={run.answer.visualisationSpec.referenceLow}
+                  referenceHigh={run.answer.visualisationSpec.referenceHigh}
+                  referenceLabel={run.answer.visualisationSpec.referenceLabel}
+                />
+              </div>
+            ) : null}
+
+            {isLatestAssistant && citations.length ? (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setSourcesOpen((v) => !v)}
+                  className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold text-plum hover:bg-plum-soft"
+                >
+                  <KindredMark size={12} />
+                  {sourcesOpen ? "Hide sources" : `Sources · ${citations.length}`}
+                </button>
+                {sourcesOpen ? (
+                  <ul className="mt-1.5 space-y-1 text-[12px] text-muted">
+                    {citations.map((c: { evidenceId: string; title: string; date?: string }) => (
+                      <li key={c.evidenceId}>
+                        {c.title}
+                        {c.date ? ` · ${c.date.slice(0, 10)}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
+
+            {isLatestAssistant && run?.answer?.uncertainty ? (
+              <p className="text-[12px] leading-relaxed text-muted">{run.answer.uncertainty}</p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
