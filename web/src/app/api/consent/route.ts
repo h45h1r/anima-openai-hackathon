@@ -1,8 +1,9 @@
+import { withRuntimeState } from '@/lib/store';
 import { NextResponse } from "next/server";
 import { ensureLoaded, setConsent } from "@/lib/store";
 import { CATEGORIES, type Category } from "@/lib/types";
 
-export async function PATCH(req: Request) {
+async function handlePATCH(req: Request) {
   try {
   const body = (await req.json()) as { granteeId: string; category: Category; allowed: boolean; actorId?: string; expectedVersion?: number };
   const state = await ensureLoaded();
@@ -14,4 +15,8 @@ export async function PATCH(req: Request) {
   const res = await setConsent({ granteeId: body.granteeId, category: body.category, allowed: body.allowed, expectedVersion: body.expectedVersion, actorId, via: "app" });
   return NextResponse.json({ ok: true, ...res });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Consent could not be saved.' }, {status:(error as {status?:number}).status || 503}); }
+}
+
+export async function PATCH(req: Request) {
+  return withRuntimeState(() => handlePATCH(req));
 }

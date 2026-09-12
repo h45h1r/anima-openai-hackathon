@@ -13,16 +13,17 @@ interface Snapshot {
   audit: { id: string; action: string; detail: string; createdAt: string; memberName: string }[];
   sync: { resourceId: string | null };
 }
+const serviceHeaders: Record<string, string> = process.env.COMPANION_BYPASS_SECRET ? { 'x-vercel-protection-bypass': process.env.COMPANION_BYPASS_SECRET } : {};
 let session: { patientId: string; cookie: string } | undefined;
 export async function consentRequest<T>(patientId: string, path: string, method = 'GET', input?: unknown): Promise<T> {
   if (!session || session.patientId !== patientId) {
-    const response = await fetch(`${base}/api/companion/patient/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ patientId }), cache: 'no-store', signal: AbortSignal.timeout(10000) });
-    if (!response.ok) throw new Error('The local consent database is unavailable. Start sim-app on port 4192.');
+    const response = await fetch(`${base}/api/companion/patient/session`, { method: 'POST', headers: { ...serviceHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ patientId }), cache: 'no-store', signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error('The consent service is unavailable. Please try again.');
     const cookie = response.headers.get('set-cookie')?.split(';')[0];
     if (!cookie) throw new Error('The consent service did not create a session.');
     session = { patientId, cookie };
   }
-  const response = await fetch(`${base}/api/companion/patient${path}?patientId=${encodeURIComponent(patientId)}`, { method, headers: { Cookie: session.cookie, 'Content-Type': 'application/json' }, ...(input === undefined ? {} : { body: JSON.stringify(input) }), cache: 'no-store', signal: AbortSignal.timeout(10000) });
+  const response = await fetch(`${base}/api/companion/patient${path}?patientId=${encodeURIComponent(patientId)}`, { method, headers: { ...serviceHeaders, Cookie: session.cookie, 'Content-Type': 'application/json' }, ...(input === undefined ? {} : { body: JSON.stringify(input) }), cache: 'no-store', signal: AbortSignal.timeout(10000) });
   const result = await response.json();
   if (!response.ok) {
     if (response.status === 401) session = undefined;

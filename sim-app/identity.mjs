@@ -4,7 +4,15 @@ import { readFile } from 'node:fs/promises';
 const random = () => randomBytes(32).toString('base64url');
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const json = (res, status, data, headers = {}) => {res.writeHead(status, {'Content-Type':'application/json','Cache-Control':'no-store',...headers});res.end(JSON.stringify(data));return true;};
-async function body(req) {let value='';for await(const chunk of req){value+=chunk;if(value.length>32768)throw Error('Request too large');}return req.headers['content-type']?.includes('application/json')?JSON.parse(value || '{}'):Object.fromEntries(new URLSearchParams(value));}
+async function body(req) {
+  if (req.body !== undefined) {
+    const size = Buffer.byteLength(typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    if (size > 32768) throw Object.assign(new Error('Request too large.'), { status: 413 });
+    try {
+      return typeof req.body === 'string' ? (req.headers['content-type']?.includes('application/x-www-form-urlencoded') ? Object.fromEntries(new URLSearchParams(req.body)) : JSON.parse(req.body || '{}')) : req.body;
+    } catch { throw Object.assign(new Error('Invalid JSON.'), { status: 400 }); }
+  }
+let value='';for await(const chunk of req){value+=chunk;if(value.length>32768)throw Error('Request too large');}return req.headers['content-type']?.includes('application/json')?JSON.parse(value || '{}'):Object.fromEntries(new URLSearchParams(value));}
 
 export async function createIdentityHandler({pool, worldId}) {
   const original=await readFile(new URL('./public/cis2/index.html',import.meta.url),'utf8');

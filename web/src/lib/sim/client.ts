@@ -63,7 +63,7 @@ async function call<T>(path: string, init: RequestInit = {}, attempts = 4): Prom
     try {
       const res = await fetch(`${BASE}${path}`, {
         ...init,
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", ...(init.headers ?? {}) },
+        headers: { ...(process.env.COMPANION_BYPASS_SECRET ? { "x-vercel-protection-bypass": process.env.COMPANION_BYPASS_SECRET } : {}), Authorization: `Bearer ${key}`, "Content-Type": "application/json", ...(init.headers ?? {}) },
         cache: "no-store",
       });
       if (res.status >= 500) throw new Error(`sim ${res.status} on ${path}`);

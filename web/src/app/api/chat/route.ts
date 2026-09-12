@@ -1,10 +1,11 @@
+import { withRuntimeState } from '@/lib/store';
 import { NextResponse } from "next/server";
 import { agentTurn } from "@/lib/agent/runtime";
 import { ensureLoaded } from "@/lib/store";
 
 export const maxDuration = 120;
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const body = (await req.json()) as { threadId: string; actorId: string; text: string };
   const state = await ensureLoaded();
   const thread = state.threads[body.threadId];
@@ -14,4 +15,8 @@ export async function POST(req: Request) {
   if (state.busyThreads.includes(body.threadId)) return NextResponse.json({ error: "Kindred is still replying" }, { status: 409 });
   const msg = await agentTurn({ threadId: body.threadId, actorId: body.actorId, text: body.text.trim() });
   return NextResponse.json({ ok: true, messageId: msg.id });
+}
+
+export async function POST(req: Request) {
+  return withRuntimeState(() => handlePOST(req));
 }

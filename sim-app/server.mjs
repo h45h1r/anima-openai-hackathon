@@ -14,6 +14,14 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), 'public');
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ico': 'image/x-icon', '.txt': 'text/plain' };
 const send = (res, status, body, type = 'application/json') => { res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Anima-Source': 'local-app' }); res.end(type.startsWith('text/') ? body : JSON.stringify(body)); };
 async function body(req) {
+  if (req.body !== undefined) {
+    const size = Buffer.byteLength(typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    if (size > 256000) throw Object.assign(new Error('Request too large.'), { status: 413 });
+    try {
+      return typeof req.body === 'string' ? (req.headers['content-type']?.includes('application/x-www-form-urlencoded') ? Object.fromEntries(new URLSearchParams(req.body)) : JSON.parse(req.body || '{}')) : req.body;
+    } catch { throw Object.assign(new Error('Invalid JSON.'), { status: 400 }); }
+  }
+
   let text = '';
   for await (const chunk of req) { text += chunk; if (Buffer.byteLength(text) > 256000) fail(413, 'Request body too large.'); }
   if (req.headers['content-type']?.includes('application/x-www-form-urlencoded')) return Object.fromEntries(new URLSearchParams(text));
@@ -109,10 +117,15 @@ export const server = http.createServer(async (req, res) => {
   } catch (error) { if (!res.headersSent) send(res, error.status || (error.code === 'ENOENT' ? 404 : 500), { error: error.message }); else res.end(); }
 });
 
-const telephony = attachTelephony(server, { listCalls: () => listResources('gp', ['telephone-call']), updateCall, authenticate: apiKey => apiKey === 'local-demo' });
+const telephony = process.env.VERCEL ? { ready: Promise.resolve(), refresh: async () => {} } : attachTelephony(server, { listCalls: () => listResources('gp', ['telephone-call']), updateCall, authenticate: apiKey => apiKey === 'local-demo' });
 await telephony.ready;
+export default async function handler(req, res) {
+  await server.listeners('request')[0](req, res);
+}
 const port = Number(process.env.PORT || 4192);
-server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`Full local app: http://localhost:${port}/control/`));
+if (!process.env.VERCEL) server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`Full local app: http://localhost:${port}/control/`));
+if (!process.env.VERCEL) {
 let ticking = false;
 const timer = setInterval(async () => { if (ticking) return; ticking = true; try { await getClock(); } catch (error) { console.error(error.message); } finally { ticking = false; } }, 3000);
 timer.unref();
+}

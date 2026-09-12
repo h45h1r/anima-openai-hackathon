@@ -1,8 +1,11 @@
-// In-memory store fed by the NHS-SIM. Single process, survives Next.js HMR via
-// globalThis. Every mutation broadcasts a full snapshot to connected SSE
-// clients so every open persona view updates at the same time.
+// Local mode keeps process state; database mode restores and commits an isolated
+// patient snapshot for each request. Clinical data and consent come from the sim.
 
 import { loadStateFromSim } from "./sim/mapper";
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { randomUUID } from 'node:crypto';
+import { PATIENT_SIM_ID } from './data/circle';
+import { withRuntimeSnapshot, runtimeSnapshot, restoreRuntimeSnapshot } from './runtime-store';
 import { simConfigured } from "./sim/client";
 import { applyConsentSnapshot, consentRequest, getConsentSnapshot, toStoredCategory, type ConsentMember } from "./consent-store";
 import type { AgentMode, AppState, AuditEntry, AuditKind, Category, ConsentCheck, Message } from "./types";
@@ -20,6 +23,36 @@ interface StoreShape {
   consentRefresh?: Promise<void>;
   consentCheckedAt?: number;
   consentQueue?: Promise<unknown>;
+}
+
+const requestStore = new AsyncLocalStorage<StoreShape>();
+let runtimeBase: { state: AppState; expires: number } | undefined;
+let runtimeBaseLoading: Promise<AppState> | undefined;
+
+async function loadRuntimeBase(): Promise<AppState> {
+  if (runtimeBase && runtimeBase.expires > Date.now()) return structuredClone(runtimeBase.state);
+  runtimeBaseLoading ??= loadStateFromSim(agentMode(), agentModel()).then(state => {
+    runtimeBase = { state, expires: Date.now() + 15000 };
+    return state;
+  }).finally(() => { runtimeBaseLoading = undefined; });
+  return structuredClone(await runtimeBaseLoading);
+}
+
+/** Requests use isolated state; only successful mutations commit to the patient row. */
+export async function withRuntimeState<T>(work: () => Promise<T>, write = true): Promise<T> {
+  if (!process.env.DATABASE_URL || requestStore.getStore()) return work();
+  return withRuntimeSnapshot(PATIENT_SIM_ID, write, async saved => {
+    const scope: StoreShape = { state: await loadRuntimeBase(), loading: null, listeners: new Set(), broadcastTimer: null };
+    return requestStore.run(scope, async () => {
+      await refreshConsent(true);
+      scope.state = restoreRuntimeSnapshot(scope.state, saved);
+      try {
+        const value = await work();
+        const success = !(value instanceof Response) || value.ok;
+        return { value, ...(write && success && scope.state.loaded ? { snapshot: runtimeSnapshot(scope.state) } : {}) };
+      } finally { if (scope.broadcastTimer) clearTimeout(scope.broadcastTimer); }
+    });
+  });
 }
 
 declare global {
@@ -73,6 +106,8 @@ function emptyState(err?: string): AppState {
 }
 
 function getStore(): StoreShape {
+  const scoped = requestStore.getStore();
+  if (scoped) return scoped;
   if (!globalThis.__kindredStore) {
     globalThis.__kindredStore = { state: emptyState(), loading: null, listeners: new Set(), broadcastTimer: null };
   }
@@ -120,6 +155,7 @@ export function subscribe(fn: Listener): () => void {
 
 let counter = 0;
 export function newId(prefix: string): string {
+  if (process.env.DATABASE_URL) return `${prefix}-${randomUUID()}`;
   counter += 1;
   return `${prefix}-${Date.now().toString(36)}-${counter.toString(36)}`;
 }
@@ -159,6 +195,7 @@ export function mutate(fn: (draft: AppState) => void): AppState {
 
 /** Re-fetch everything from the sim (keeps nothing local). */
 export async function resetState(): Promise<AppState> {
+  if (process.env.DATABASE_URL) runtimeBase = undefined;
   const s = getStore();
   s.state = { ...emptyState(), loaded: false };
   scheduleBroadcast();

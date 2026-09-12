@@ -1,8 +1,8 @@
-import { ensureLoaded, getState, subscribe, refreshConsent } from "@/lib/store";
+import { ensureLoaded, getState, subscribe, refreshConsent, withRuntimeState } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+async function localGET(req: Request) {
   const encoder = new TextEncoder();
   let unsubscribe: (() => void) | null = null;
   let keepalive: NodeJS.Timeout | null = null;
@@ -53,4 +53,46 @@ export async function GET(req: Request) {
       Connection: "keep-alive",
     },
   });
+}
+
+export const maxDuration = 60;
+
+export async function GET(req: Request) {
+  if (!process.env.DATABASE_URL) return localGET(req);
+  const encoder = new TextEncoder();
+  let timer: ReturnType<typeof setInterval> | undefined;
+  let deadline: ReturnType<typeof setTimeout> | undefined;
+  let closed = false;
+  let polling = false;
+  let end: () => void = () => {};
+  const stream = new ReadableStream({
+    start(controller) {
+      end = () => {
+        if (closed) return;
+        closed = true;
+        clearInterval(timer);
+        clearTimeout(deadline);
+        req.signal.removeEventListener('abort', end);
+        try { controller.close(); } catch { /* Already cancelled. */ }
+      };
+      const poll = async () => {
+        if (closed || polling) return;
+        polling = true;
+        try {
+          const state = await withRuntimeState(() => ensureLoaded(), false);
+          if (!closed) controller.enqueue(encoder.encode(`data: ${JSON.stringify(state)}\n\n`));
+        } catch { end(); }
+        finally { polling = false; }
+      };
+      if (req.signal.aborted) { end(); return; }
+      req.signal.addEventListener('abort', end, { once: true });
+      timer = setInterval(() => { void poll(); }, 2500);
+      deadline = setTimeout(end, 55000);
+      void poll();
+    },
+    cancel() { end(); },
+  });
+  return new Response(stream, { headers: {
+    'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-store, no-transform', Connection: 'keep-alive',
+  } });
 }

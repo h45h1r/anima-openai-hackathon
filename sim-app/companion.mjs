@@ -22,7 +22,15 @@ export function validateMember(input) {
   if (!Array.isArray(input.categories) || input.categories.some(id => !categories.some(c => c.id === id)) || new Set(input.categories).size !== input.categories.length) fail(400, 'Choose valid sharing categories.');
   return { name, relationship, email, categories: categories.filter(c => input.categories.includes(c.id)).map(c => c.id) };
 }
-async function body(req) { let data = ''; for await (const c of req) { data += c; if (Buffer.byteLength(data) > 16000) fail(413, 'Request too large.'); } try { return JSON.parse(data || '{}'); } catch { fail(400, 'Invalid JSON.'); } }
+async function body(req) {
+  if (req.body !== undefined) {
+    const size = Buffer.byteLength(typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    if (size > 16000) throw Object.assign(new Error('Request too large.'), { status: 413 });
+    try {
+      return typeof req.body === 'string' ? (req.headers['content-type']?.includes('application/x-www-form-urlencoded') ? Object.fromEntries(new URLSearchParams(req.body)) : JSON.parse(req.body || '{}')) : req.body;
+    } catch { throw Object.assign(new Error('Invalid JSON.'), { status: 400 }); }
+  }
+ let data = ''; for await (const c of req) { data += c; if (Buffer.byteLength(data) > 16000) fail(413, 'Request too large.'); } try { return JSON.parse(data || '{}'); } catch { fail(400, 'Invalid JSON.'); } }
 const labels = ids => ids.length ? categories.filter(c => ids.includes(c.id)).map(c => c.label.toLowerCase()).join(', ') : 'nothing';
 
 // Only these selected fields can leave the family API. Raw resource JSON and
@@ -159,8 +167,27 @@ export async function createCompanionHandler({ pool, worldId }) {
         if (!subscribers.has(patientId)) subscribers.set(patientId, new Set());
         const client = { res, role, tokenHash: s.token_hash, memberId: s.member_id };
         subscribers.get(patientId).add(client);
-        const timer = setInterval(() => { if (new Date(s.expires_at).getTime() <= Date.now()) { res.write('event: access-ended\ndata: {}\n\n'); res.end(); } else res.write(': heartbeat\n\n'); }, 20000);
-        req.on('close', () => { clearInterval(timer); subscribers.get(patientId)?.delete(client); if (!subscribers.get(patientId)?.size) subscribers.delete(patientId); });
+        let lastRevision = -1, polling = false;
+        const timer = setInterval(async () => {
+          if (polling || res.writableEnded) return;
+          polling = true;
+          try {
+            await session(req, role);
+            const { rows } = await pool.query('SELECT revision FROM companion.patients WHERE world_id=$1 AND patient_id=$2', [worldId, patientId]);
+            const revision = rows[0]?.revision || 0;
+            if (!res.writableEnded && revision !== lastRevision) {
+              lastRevision = revision;
+              res.write(`event: change\ndata: ${JSON.stringify({ revision })}\n\n`);
+            }
+          } catch (error) {
+            if (!res.writableEnded) {
+              if ([401, 403].includes(error.status)) res.write('event: access-ended\ndata: {}\n\n');
+              res.end();
+            }
+          } finally { polling = false; }
+        }, 2500);
+        const deadline = setTimeout(() => res.end(), 55000);
+        res.on('close', () => { clearInterval(timer); clearTimeout(deadline); subscribers.get(patientId)?.delete(client); if (!subscribers.get(patientId)?.size) subscribers.delete(patientId); });
         return true;
       }
       if (route === 'state' && req.method === 'GET') {

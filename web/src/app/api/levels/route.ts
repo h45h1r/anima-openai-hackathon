@@ -1,8 +1,9 @@
+import { withRuntimeState } from '@/lib/store';
 import { NextResponse } from "next/server";
 import { ensureLoaded, setLevelDefinition } from "@/lib/store";
 import type { Category, SharingLevel } from "@/lib/types";
 
-export async function PATCH(req: Request) {
+async function handlePATCH(req: Request) {
   try {
     const body = (await req.json()) as { level: SharingLevel; categories: Category[]; actorId?: string };
     const state = await ensureLoaded();
@@ -12,4 +13,8 @@ export async function PATCH(req: Request) {
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Level could not be saved." }, { status: (error as { status?: number }).status || 503 });
   }
+}
+
+export async function PATCH(req: Request) {
+  return withRuntimeState(() => handlePATCH(req));
 }

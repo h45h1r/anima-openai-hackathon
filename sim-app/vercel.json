@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["lhr1"],
+  "functions": {
+    "server.mjs": { "maxDuration": 60, "includeFiles": "{public/**,*.sql}" }
+  }
+}

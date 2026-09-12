@@ -6,6 +6,14 @@ function send(res, status, data) {
 }
 
 async function body(req) {
+  if (req.body !== undefined) {
+    const size = Buffer.byteLength(typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    if (size > 256000) throw Object.assign(new Error('Request too large.'), { status: 413 });
+    try {
+      return typeof req.body === 'string' ? (req.headers['content-type']?.includes('application/x-www-form-urlencoded') ? Object.fromEntries(new URLSearchParams(req.body)) : JSON.parse(req.body || '{}')) : req.body;
+    } catch { throw Object.assign(new Error('Invalid JSON.'), { status: 400 }); }
+  }
+
   let input = '';
   for await (const chunk of req) {
     input += chunk;
