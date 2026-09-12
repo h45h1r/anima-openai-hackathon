@@ -41,6 +41,28 @@ export default function App() {
         : null;
   const care = useCareClinical(state, kindredViewerId);
   const [running, setRunning] = useState(false);
+  const patientPrefApplied = useRef(false);
+
+  // Restore last demo patient pick after a full refresh (server memory resets).
+  useEffect(() => {
+    if (!state?.loaded || patientPrefApplied.current) return;
+    patientPrefApplied.current = true;
+    try {
+      const pref = localStorage.getItem("kindred.patientSimId");
+      if (pref && pref !== state.patient.simId) {
+        void actions.switchPatient(pref).catch(() => {
+          try {
+            localStorage.removeItem("kindred.patientSimId");
+          } catch {
+            /* ignore */
+          }
+        });
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [state, actions]);
+
   const [showAudit, setShowAudit] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -172,7 +194,26 @@ export default function App() {
             <button onClick={toggleAudit} className={`hidden h-9 w-9 items-center justify-center rounded-full border lg:flex ${showAudit ? "border-plum bg-plum-soft text-plum" : "border-line text-muted hover:bg-paper"}`} title={showAudit ? "Hide activity" : "Show activity"} aria-pressed={showAudit}>
               <ActivityIcon />
             </button>
-            <AccountMenu viewer={viewer} personas={personas} onSwitch={(id) => go({ as: id, tab: "home" })} onReload={() => actions.reset()} onActivity={() => go({ tab: "activity" })} onRunCheck={runCheck} running={running} status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }} />
+            <AccountMenu
+              viewer={viewer}
+              personas={personas}
+              patient={state.patient}
+              onSwitchPersona={(id) => go({ as: id, tab: "home" })}
+              onSwitchPatient={async (simId) => {
+                await actions.switchPatient(simId);
+                try {
+                  localStorage.setItem("kindred.patientSimId", simId);
+                } catch {
+                  /* ignore */
+                }
+                router.replace("?tab=home");
+              }}
+              onReload={() => actions.reset()}
+              onActivity={() => go({ tab: "activity" })}
+              onRunCheck={runCheck}
+              running={running}
+              status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }}
+            />
           </div>
         </div>
       </header>
@@ -317,9 +358,39 @@ function Screen({
   );
 }
 
-function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCheck, running, status }: { viewer: Person; personas: Person[]; onSwitch: (id: string) => void; onReload: () => void; onActivity: () => void; onRunCheck: () => void; running: boolean; status: { data: string; agent: string; world?: string } }) {
+type PatientPick = { simId: string; name: string; blurb: string; active?: boolean; demo?: boolean };
+
+function AccountMenu({
+  viewer,
+  personas,
+  patient,
+  onSwitchPersona,
+  onSwitchPatient,
+  onReload,
+  onActivity,
+  onRunCheck,
+  running,
+  status,
+}: {
+  viewer: Person;
+  personas: Person[];
+  patient: AppState["patient"];
+  onSwitchPersona: (id: string) => void;
+  onSwitchPatient: (simId: string) => Promise<void>;
+  onReload: () => void;
+  onActivity: () => void;
+  onRunCheck: () => void;
+  running: boolean;
+  status: { data: string; agent: string; world?: string };
+}) {
   const [open, setOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+  const [switchError, setSwitchError] = useState<string | null>(null);
+  const [patients, setPatients] = useState<PatientPick[]>([]);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
@@ -333,6 +404,46 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const t = setTimeout(() => {
+      setSearching(true);
+      const q = query.trim();
+      fetch(`/api/patient${q ? `?q=${encodeURIComponent(q)}` : ""}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (cancelled) return;
+          setPatients((data.items || []) as PatientPick[]);
+        })
+        .catch(() => {
+          if (!cancelled) setPatients([]);
+        })
+        .finally(() => {
+          if (!cancelled) setSearching(false);
+        });
+    }, qDebounce(query));
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [open, query]);
+
+  const choosePatient = async (simId: string) => {
+    if (simId === patient.simId || switching) return;
+    setSwitching(true);
+    setSwitchError(null);
+    try {
+      await onSwitchPatient(simId);
+      setOpen(false);
+    } catch (err) {
+      setSwitchError(err instanceof Error ? err.message : "Could not switch patient");
+    } finally {
+      setSwitching(false);
+    }
+  };
+
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen(!open)} className="flex items-center gap-2 rounded-full border border-line bg-card py-1 pl-1 pr-2 text-sm font-semibold hover:bg-paper" aria-haspopup="menu" aria-expanded={open}>
@@ -341,17 +452,18 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-muted"><path d="M6 9l6 6 6-6" /></svg>
       </button>
       {open && (
-        <div role="menu" className="rise absolute right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-line bg-card shadow-xl">
-          <div className="border-b border-line px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Signed in as · demo switch</div>
+        <div role="menu" className="rise absolute right-0 mt-2 w-[22rem] max-h-[min(80vh,36rem)] overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-card shadow-xl">
+          <div className="border-b border-line px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Signed in as · persona</div>
           {personas.map((p) => (
             <button
               key={p.id}
               role="menuitem"
+              disabled={switching}
               onClick={() => {
                 setOpen(false);
-                onSwitch(p.id);
+                onSwitchPersona(p.id);
               }}
-              className={`flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-paper ${p.id === viewer.id ? "bg-plum-soft/60" : ""}`}
+              className={`flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-paper disabled:opacity-50 ${p.id === viewer.id ? "bg-plum-soft/60" : ""}`}
             >
               <Avatar person={p} size={32} />
               <span className="min-w-0 flex-1">
@@ -361,11 +473,60 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
               {p.id === viewer.id && <span className="text-plum"><CheckIcon /></span>}
             </button>
           ))}
+
+          <div className="border-t border-line px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Patient record · switch</div>
+          <div className="px-3 pb-2 text-xs text-muted">
+            Whose clinical record Kindred is connected to. Persona (<code className="text-[10px]">?as=</code>) stays who you&apos;re viewing as.
+          </div>
+          <div className="px-3 pb-2">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search Amira, Eleanor, SIM-…"
+              aria-label="Search patients"
+              disabled={switching}
+              className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-plum"
+            />
+          </div>
+          {searching ? <div className="px-3 pb-2 text-xs text-muted">Searching…</div> : null}
+          {switchError ? <div className="mx-3 mb-2 rounded-xl bg-rust/10 px-3 py-2 text-xs text-rust">{switchError}</div> : null}
+          {switching ? <div className="px-3 pb-2 text-xs text-plum pulse-soft">Loading patient + synthetic family…</div> : null}
+          <div className="max-h-56 overflow-y-auto">
+            {patients.map((p) => {
+              const active = p.simId === patient.simId || p.active;
+              return (
+                <button
+                  key={p.simId}
+                  role="menuitem"
+                  disabled={switching}
+                  onClick={() => void choosePatient(p.simId)}
+                  className={`flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-paper disabled:opacity-50 ${active ? "bg-moss/10" : ""}`}
+                >
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss text-[11px] font-bold text-white">
+                    {p.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">{p.name}</span>
+                    <span className="block text-xs text-muted">
+                      {p.simId}
+                      {p.blurb ? ` · ${p.blurb}` : ""}
+                      {p.demo ? " · demo cohort" : ""}
+                    </span>
+                  </span>
+                  {active && <span className="text-moss"><CheckIcon /></span>}
+                </button>
+              );
+            })}
+            {!searching && patients.length === 0 ? (
+              <div className="px-3 pb-3 text-xs text-muted">No patients matched. Try Amira or SIM-000001.</div>
+            ) : null}
+          </div>
+
           <div className="border-t border-line p-2">
             <div className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Demo controls</div>
-            <button role="menuitem" disabled={running} onClick={() => { setOpen(false); onRunCheck(); }} title="Simulates Kindred's scheduled job: finds appointments in the next 7 days and tells the family" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ClockIcon /> {running ? "Running scheduled check…" : "Run scheduled check"}</button>
-            <button role="menuitem" onClick={() => { setOpen(false); onActivity(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper"><ActivityIcon /> Activity log</button>
-            <button role="menuitem" onClick={() => { setOpen(false); onReload(); }} className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted hover:bg-paper hover:text-ink">Reload record from NHS-SIM</button>
+            <button role="menuitem" disabled={running || switching} onClick={() => { setOpen(false); onRunCheck(); }} title="Simulates Kindred's scheduled job: finds appointments in the next 7 days and tells the family" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ClockIcon /> {running ? "Running scheduled check…" : "Run scheduled check"}</button>
+            <button role="menuitem" disabled={switching} onClick={() => { setOpen(false); onActivity(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ActivityIcon /> Activity log</button>
+            <button role="menuitem" disabled={switching} onClick={() => { setOpen(false); onReload(); }} className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted hover:bg-paper hover:text-ink disabled:opacity-50">Reload record from NHS-SIM</button>
           </div>
           <dl className="border-t border-line bg-paper/60 px-3 py-2 text-[11px] leading-relaxed text-muted">
             <div className="flex gap-2"><dt className="w-10 shrink-0 font-semibold uppercase tracking-wider">Data</dt><dd className="truncate">{status.data}{status.world ? ` · ${status.world}` : ""}</dd></div>
@@ -375,6 +536,10 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
       )}
     </div>
   );
+}
+
+function qDebounce(query: string) {
+  return query.trim() ? 280 : 0;
 }
 
 function HomeIcon() {

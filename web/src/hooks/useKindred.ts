@@ -53,6 +53,7 @@ export function useKindred() {
     sendChat: (threadId: string, actorId: string, text: string) => post("/api/chat", { threadId, actorId, text }),
     runProactive: () => post("/api/proactive"),
     reset: () => post("/api/reset"),
+    switchPatient: (patientId: string) => post("/api/patient", { patientId }),
     respondRequest: (requestId: string, approve: boolean) => post("/api/consent-request", { requestId, approve }),
   };
 

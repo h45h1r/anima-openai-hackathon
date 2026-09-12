@@ -3,8 +3,9 @@
 // clients so every open persona view updates at the same time.
 
 import { loadStateFromSim } from "./sim/mapper";
-import { simConfigured } from "./sim/client";
+import { simConfigured, sim } from "./sim/client";
 import { applyConsentSnapshot, consentRequest, getConsentSnapshot, toStoredCategory, type ConsentMember } from "./consent-store";
+import { DEMO_PATIENTS, DEFAULT_PATIENT_SIM_ID, circleFor } from "./data/circle";
 import type { AgentMode, AppState, AuditEntry, AuditKind, Category, ConsentCheck, Message } from "./types";
 import { canAccess, personById, CATEGORIES } from "./types";
 import { DEFAULT_LEVELS, LEVELS, categoryLabels, levelFor } from "./levels";
@@ -20,6 +21,8 @@ interface StoreShape {
   consentRefresh?: Promise<void>;
   consentCheckedAt?: number;
   consentQueue?: Promise<unknown>;
+  /** Currently loaded patient SIM id (survives HMR; switchable at demo time). */
+  activePatientSimId?: string;
 }
 
 declare global {
@@ -74,12 +77,49 @@ function emptyState(err?: string): AppState {
 
 function getStore(): StoreShape {
   if (!globalThis.__kindredStore) {
-    globalThis.__kindredStore = { state: emptyState(), loading: null, listeners: new Set(), broadcastTimer: null };
+    globalThis.__kindredStore = { state: emptyState(), loading: null, listeners: new Set(), broadcastTimer: null, activePatientSimId: DEFAULT_PATIENT_SIM_ID };
   }
   const s = globalThis.__kindredStore;
   // State created by an older module version (HMR) may predate newer fields.
   if (!s.state.levels) s.state = { ...s.state, levels: { ...DEFAULT_LEVELS } };
+  if (!s.activePatientSimId) s.activePatientSimId = DEFAULT_PATIENT_SIM_ID;
   return s;
+}
+
+export function getActivePatientSimId(): string {
+  return getStore().activePatientSimId || DEFAULT_PATIENT_SIM_ID;
+}
+
+/**
+ * Ensure Kindred's synthetic circle exists in the companion consent DB for this
+ * patient (members + default sharing categories). Idempotent via externalId.
+ */
+export async function ensureSyntheticCircle(state: AppState): Promise<{ seeded: string[] }> {
+  const circle = circleFor(state.patient.simId);
+  const familyPeople = state.people.filter((p) => p.role === "family" || p.role === "carer");
+  if (!familyPeople.length) return { seeded: [] };
+  const seeded: string[] = [];
+  try {
+    const snapshot = await getConsentSnapshot(state.patient.simId);
+    const byExternal = new Set(snapshot.members.map((m) => m.externalId).filter(Boolean));
+    const byName = new Set(snapshot.members.filter((m) => m.status === "active").map((m) => m.name.toLowerCase()));
+    for (const person of familyPeople) {
+      if (byExternal.has(person.id) || byName.has(person.name.toLowerCase())) continue;
+      const categories = CATEGORIES.filter((c) => state.consent[person.id]?.[c.id]).map((c) => toStoredCategory(c.id));
+      await consentRequest(state.patient.simId, "/members", "POST", {
+        name: person.name,
+        relationship: person.relation,
+        email: "",
+        externalId: person.id,
+        role: person.role,
+        categories,
+      });
+      seeded.push(person.name);
+    }
+  } catch {
+    // Companion optional: in-memory circle from mapper still works for the demo shell.
+  }
+  return { seeded };
 }
 
 /** Load (once) from the sim. Safe to call from every route handler. */
@@ -94,7 +134,25 @@ export async function ensureLoaded(): Promise<AppState> {
         return s.state;
       }
       try {
-        s.state = await loadStateFromSim(agentMode(), agentModel());
+        const patientSimId = getActivePatientSimId();
+        s.state = await loadStateFromSim(agentMode(), agentModel(), patientSimId);
+        const { seeded } = await ensureSyntheticCircle(s.state);
+        if (seeded.length) {
+          s.state = {
+            ...s.state,
+            audit: [
+              {
+                id: `a-circle-${Date.now()}`,
+                ts: new Date().toISOString(),
+                kind: "system",
+                actorId: s.state.agentId,
+                summary: `Seeded Kindred synthetic circle for ${s.state.patient.name}: ${seeded.join(", ")}.`,
+                ok: true,
+              },
+              ...s.state.audit,
+            ],
+          };
+        }
         await refreshConsent(true);
       } catch (e) {
         s.state = emptyState(`Could not load from NHS-SIM: ${e instanceof Error ? e.message : String(e)}`);
@@ -163,6 +221,65 @@ export async function resetState(): Promise<AppState> {
   s.state = { ...emptyState(), loaded: false };
   scheduleBroadcast();
   return ensureLoaded();
+}
+
+/** Switch the active Kindred patient record and rebuild their synthetic circle. */
+export async function switchPatient(patientSimId: string): Promise<AppState> {
+  const id = patientSimId.trim();
+  if (!/^SIM-\d+$/i.test(id)) {
+    throw Object.assign(new Error("Patient id must look like SIM-000001."), { status: 400 });
+  }
+  const s = getStore();
+  if (s.state.loaded && s.state.patient.simId === id) return s.state;
+  s.activePatientSimId = id.toUpperCase().replace(/^sim-/i, "SIM-");
+  // Abort any in-flight load for the previous patient.
+  s.loading = null;
+  s.state = { ...emptyState(), loaded: false };
+  scheduleBroadcast();
+  return ensureLoaded();
+}
+
+export function listDemoPatients(activeSimId?: string) {
+  const active = activeSimId || getActivePatientSimId();
+  return DEMO_PATIENTS.map((p) => ({
+    simId: p.simId,
+    name: p.name,
+    blurb: p.blurb,
+    familyCount: p.family.length,
+    active: p.simId === active,
+    demo: true as const,
+  }));
+}
+
+/** Search live sim directory for the patient picker (demo + live judging). */
+export async function searchPatientsForPicker(q: string) {
+  const query = q.trim();
+  if (!query) {
+    return { total: DEMO_PATIENTS.length, items: listDemoPatients() };
+  }
+  if (!simConfigured()) {
+    const lowered = query.toLowerCase();
+    const items = listDemoPatients().filter(
+      (p) => p.name.toLowerCase().includes(lowered) || p.simId.toLowerCase().includes(lowered),
+    );
+    return { total: items.length, items };
+  }
+  const res = await sim.searchPatients(query);
+  const demoById = new Map(DEMO_PATIENTS.map((p) => [p.simId, p]));
+  const active = getActivePatientSimId();
+  const items = (res.items || []).slice(0, 30).map((p) => {
+    const demo = demoById.get(p.id);
+    return {
+      simId: p.id,
+      name: p.name,
+      blurb: demo?.blurb ?? (p.conditions?.slice(0, 2).join(" · ") || "Live sim patient"),
+      familyCount: demo?.family.length ?? circleFor(p.id).family.length,
+      active: p.id === active,
+      birthDate: p.birthDate,
+      demo: Boolean(demo),
+    };
+  });
+  return { total: res.total ?? items.length, items };
 }
 
 // ---------- Audit ----------

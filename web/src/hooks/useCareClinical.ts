@@ -279,6 +279,28 @@ export function useCareClinical(kindred: AppState | null, kindredViewerId: strin
     void bootstrap(kindred);
   }, [kindred, bootstrap]);
 
+  // When Kindred switches the patient record, re-select clinical Ask/Care context.
+  const kindredPatientSimId = kindred?.loaded ? kindred.patient.simId : null;
+  useEffect(() => {
+    if (!kindred?.loaded || !kindredPatientSimId || !session?.sessionId) return;
+    if (status !== "ready" && status !== "error") return;
+    if (session.selectedPatientId === kindredPatientSimId) return;
+    const state = kindred;
+    void (async () => {
+      try {
+        setAskThread([]);
+        setLastAnswer(null);
+        setAskStreamText("");
+        levelsSynced.current = false;
+        threadScope.current = "";
+        await selectPatient(session.sessionId, kindredPatientSimId, state.patient.name, state);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not switch clinical patient");
+        setStatus("error");
+      }
+    })();
+  }, [kindred, kindredPatientSimId, session?.sessionId, session?.selectedPatientId, status, selectPatient]);
+
   // Re-sync Kindred levels into CareCircle Ask filter when Circle changes (patient only).
   useEffect(() => {
     if (!kindred?.loaded || !session?.sessionId || !session.selectedPatientId) return;
