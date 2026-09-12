@@ -7,7 +7,7 @@ import { careStore, careMemory, withCareRuntime } from "./store/runtime";
 import type { SessionState } from "./store/store";
 import { AnimaClient, AnimaClientError, normalisePatientSearchResponse } from "./anima/client";
 import { buildClinicalContext } from "./anima/normalise";
-import { runAgentQuestion, suggestionsForViewer } from "./agent/harness";
+import { runAgentQuestion, resolveAskModel, suggestionsForViewer } from "./agent/harness";
 import type { AskStreamEvent } from "./agent/events";
 import {
   clearResource,
@@ -263,7 +263,7 @@ async function executeAsk(input: {
     question: input.question,
     history,
     openaiApiKey: process.env.OPENAI_API_KEY,
-    openaiModel: process.env.OPENAI_MODEL,
+    openaiModel: resolveAskModel(process.env.OPENAI_MODEL),
     memory: careMemory(),
     onConsentUpdate: saveCanonicalPolicy,
     onEvent: input.onEvent,
@@ -305,8 +305,8 @@ async function handleCareApiInScope(req: Request, pathParts: string[]): Promise<
       ok: true,
       service: "kindred-care",
       openaiConfigured,
-      openaiModel: openaiConfigured ? process.env.OPENAI_MODEL || "gpt-4o-mini" : null,
-      animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY),
+      openaiModel: openaiConfigured ? resolveAskModel(process.env.OPENAI_MODEL) : null,
+      animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY || process.env.SIM_API_KEY),
       animaTeamNameConfigured: Boolean(process.env.ANIMA_TEAM_NAME),
       askTransport: ["sse", "rest"],
       ssePath: "/api/care/ask/stream",
@@ -584,7 +584,7 @@ async function dispatchJson(
         question,
         history,
         openaiApiKey: process.env.OPENAI_API_KEY,
-        openaiModel: process.env.OPENAI_MODEL,
+        openaiModel: resolveAskModel(process.env.OPENAI_MODEL),
         memory: careMemory(),
         onConsentUpdate: saveCanonicalPolicy,
       });

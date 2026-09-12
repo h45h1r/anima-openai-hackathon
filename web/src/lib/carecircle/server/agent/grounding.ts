@@ -196,7 +196,7 @@ export function buildPermittedPack(input: {
       evidenceId: e.evidenceId,
       title: e.title,
       status: e.status,
-      summary: truncate(humaniseEventSummary(e), 280),
+      summary: truncate(humaniseEventSummary(e), 480),
     })),
     allowedEvidenceIds: input.allowedEvidenceIds,
     filteredCount: input.filteredCount,
@@ -344,6 +344,7 @@ export function buildDeterministicAnswer(input: {
   memoriesHint?: string;
   history?: ChatTurn[];
   viewerIsPatient?: boolean;
+  addressName?: string;
 }): AgentAnswer {
   if (input.outcome === 'hold') {
     return {
@@ -397,7 +398,7 @@ export function buildDeterministicAnswer(input: {
       },
     ];
     return {
-      answer: proseFromFacts(facts, { short: true }),
+      answer: proseFromFacts(facts, { short: true, addressName: input.addressName }),
       facts,
       uncertainty: PATIENT_UNCERTAINTY,
       policyNotice: input.policyNotice || undefined,
@@ -566,7 +567,7 @@ export function buildDeterministicAnswer(input: {
       input.events.find((e) => /follow|task|action|review|plan/i.test(`${e.title} ${e.summary}`)) ||
       input.events.find((e) => /appoint/i.test(`${e.title} ${e.kind}`));
     if (next) {
-      const substance = extractEventSubstance(next) || truncate(humaniseEventSummary(next), 160);
+      const substance = extractEventSubstance(next) || truncate(humaniseEventSummary(next), 360);
       recordedNextStep = {
         text: substance
           ? `Recorded next step from ${friendlyDocTitle(next)}: ${substance}`
@@ -600,6 +601,7 @@ export function buildDeterministicAnswer(input: {
           memoriesHint: input.memoriesHint,
           recordedNextStep: recordedNextStep?.text,
           question: input.question,
+          addressName: input.addressName,
         });
 
   return {
@@ -614,7 +616,7 @@ export function buildDeterministicAnswer(input: {
   };
 }
 
-/** Deterministic patient-facing prose from structured facts only. */
+/** Deterministic patient-facing prose from structured facts only (Kindred-style paragraphs). */
 export function proseFromFacts(
   facts: { text: string; evidenceIds: string[] }[],
   opts?: {
@@ -625,11 +627,13 @@ export function proseFromFacts(
     memoriesHint?: string;
     recordedNextStep?: string;
     question?: string;
+    addressName?: string;
   },
 ): string {
   if (!facts.length) return 'I could not find permitted evidence for that question.';
   const short = opts?.short ?? false;
   const lines = facts.map((f) => f.text);
+  const you = opts?.addressName ? `${opts.addressName}, ` : '';
 
   if (opts?.labIntent) {
     const dateLine = lines.find((l) => /latest .+ results on record/i.test(l));
@@ -639,39 +643,32 @@ export function proseFromFacts(
     const ok = valueLines.filter((l) => !/outside illustrative range/i.test(l));
     const focused = /kidney|u&e|liver|full blood count|requested/i.test(dateLine || '');
 
-    const knowBits: string[] = [];
-    if (dateLine) knowBits.push(dateLine.replace(/\.$/, ''));
+    const lead = dateLine
+      ? `${you}${stripFactChrome(dateLine)}.`
+      : `${you}Here is what the shared record shows for those results.`;
     const valueBullets = [
-      ...flagged.slice(0, short ? 3 : 6).map((l) => `• ${stripFactChrome(l)}`),
-      ...ok.slice(0, short || focused ? 4 : 4).map((l) => `• ${stripFactChrome(l)}`),
+      ...flagged.slice(0, short ? 3 : 6).map((l) => `- ${stripFactChrome(l)}`),
+      ...ok.slice(0, short || focused ? 4 : 4).map((l) => `- ${stripFactChrome(l)}`),
     ];
-    if (prev && !short) knowBits.push(prev.replace(/\.$/, ''));
+    const meaning = flagged.length
+      ? short
+        ? `${flagged.length === 1 ? 'One value sits' : 'Some values sit'} outside the illustrative range shown on the record.`
+        : `${flagged.length === 1 ? 'One value sits' : `${flagged.length} values sit`} outside the illustrative range shown on the record — worth noting with the care team if it hasn’t been discussed.`
+      : ok.some(line => /illustrative range/i.test(line))
+        ? 'The values with a reference range shown are within that range.'
+        : '';
+    const change =
+      prev && !short ? `For context: ${stripFactChrome(prev)}.` : '';
+    const next =
+      short && !focused
+        ? 'Ask if you want the full panel, or take these figures to your next review.'
+        : 'Take these figures to your next review if you want them explained in context.';
 
-    const meaningBits: string[] = [];
-    if (flagged.length) {
-      meaningBits.push(
-        short
-          ? `${flagged.length === 1 ? 'One value sits' : 'Some values sit'} outside the illustrative range shown on the record.`
-          : `${flagged.length === 1 ? 'One value sits' : `${flagged.length} values sit`} outside the illustrative range shown on the record — worth noting with the care team if it hasn’t been discussed.`,
-      );
-    } else if (ok.some(line => /illustrative range/i.test(line))) {
-      meaningBits.push('The values with a reference range shown are within that range.');
-    }
-    if (prev && !short) {
-      meaningBits.push('A previous reading is included above so you can see the change over time.');
-    }
-
-    const nextBits = short && !focused
-      ? ['Ask if you want the full panel, or take these figures to your next review.']
-      : ['Take these figures to your next review if you want them explained in context.'];
-
-    const sections = [
-      `**What we know**\n${[...knowBits, ...valueBullets].join('\n')}`,
-      meaningBits.length ? `**What it means**\n${meaningBits.join('\n')}` : '',
-      `**What to do next**\n${nextBits.join('\n')}`,
-    ].filter(Boolean);
-
-    return sections.join('\n\n');
+    return formatAskProse(
+      [lead, valueBullets.length ? valueBullets.join('\n') : '', [meaning, change].filter(Boolean).join(' '), next].filter(
+        Boolean,
+      ),
+    );
   }
 
   if (opts?.docIntent || opts?.apptIntent) {
@@ -681,15 +678,15 @@ export function proseFromFacts(
       apptIntent: Boolean(opts.apptIntent),
       recordedNextStep: opts.recordedNextStep,
       question: opts.question,
+      addressName: opts.addressName,
     });
   }
 
   const cleaned = lines.map(stripFactChrome).filter((l) => l && !isWorkflowChrome(l));
   const lead = cleaned[0] || lines[0];
   const rest = cleaned.slice(1, short ? 3 : 4);
-  const knowBody = rest.length
-    ? `${lead}\n${rest.map((r) => `• ${r}`).join('\n')}`
-    : lead;
+  const open = `${you}${lead}${/[.!?]$/.test(lead) ? '' : '.'}`;
+  const body = rest.length ? rest.map((r) => `- ${r}`).join('\n') : '';
   const meaning = rest.length
     ? 'Taken together, this is what the shared record currently shows for that question.'
     : 'This is the clearest permitted detail in the record for that question.';
@@ -697,7 +694,7 @@ export function proseFromFacts(
     ? stripRecordedNextPrefix(opts.recordedNextStep)
     : 'If anything is unclear, check with the care team at your next contact.';
 
-  return `**What we know**\n${knowBody}\n\n**What it means**\n${meaning}\n\n**What to do next**\n${next}`;
+  return formatAskProse([open, body, meaning, next].filter(Boolean));
 }
 
 function proseFromEventFacts(
@@ -708,63 +705,72 @@ function proseFromEventFacts(
     apptIntent: boolean;
     recordedNextStep?: string;
     question?: string;
+    addressName?: string;
   },
 ): string {
   const cleaned = lines.map(stripFactChrome).filter((l) => l && !isWorkflowChrome(l));
   const actionLines = cleaned.filter((l) => looksLikeActionLine(l));
   const contextLines = cleaned.filter((l) => !looksLikeActionLine(l));
   const wantsNext = /next|do |follow|plan|should i/i.test(opts.question || '');
+  const you = opts.addressName ? `${opts.addressName}, ` : '';
 
-  const knowBits: string[] = [];
+  let lead = '';
+  let bullets: string[] = [];
   if (opts.docIntent && (actionLines.length || contextLines.length)) {
-    const intro = wantsNext
-      ? 'Your latest care notes include these follow-up points:'
-      : 'From the latest letters and care notes on record:';
-    knowBits.push(intro);
-    const bullets = (actionLines.length ? actionLines : contextLines).slice(0, opts.short ? 3 : 4);
-    for (const b of bullets) knowBits.push(`• ${b}`);
+    lead = opts.addressName
+      ? `${opts.addressName}, ${
+          wantsNext
+            ? 'your latest care notes include these follow-up points.'
+            : 'from the latest letters and care notes on record:'
+        }`
+      : wantsNext
+        ? 'Your latest care notes include these follow-up points.'
+        : 'From the latest letters and care notes on record:';
+    bullets = (actionLines.length ? actionLines : contextLines)
+      .slice(0, opts.short ? 3 : 5)
+      .map((b) => `- ${b}`);
   } else if (opts.apptIntent) {
     const intro = contextLines[0] || cleaned[0] || 'An appointment-related note is in the record.';
-    knowBits.push(intro);
-    for (const b of contextLines.slice(1, opts.short ? 2 : 3)) knowBits.push(`• ${b}`);
+    lead = `${you}${intro}${/[.!?]$/.test(intro) ? '' : '.'}`;
+    bullets = contextLines.slice(1, opts.short ? 2 : 3).map((b) => `- ${b}`);
   } else {
-    knowBits.push(cleaned[0] || lines[0]);
-    for (const b of cleaned.slice(1, 3)) knowBits.push(`• ${b}`);
+    lead = `${you}${cleaned[0] || lines[0]}`;
+    bullets = cleaned.slice(1, 3).map((b) => `- ${b}`);
   }
 
-  const meaningBits: string[] = [];
-  if (opts.docIntent && actionLines.length) {
-    meaningBits.push(
-      'These are actions already written into your record by the care team — Kindred is restating them, not adding new advice.',
-    );
-  } else if (opts.docIntent) {
-    meaningBits.push(
-      'The shared documents describe what was recorded at that visit; they do not add a new diagnosis from Kindred.',
-    );
-  } else if (opts.apptIntent) {
-    meaningBits.push(
-      'This reflects appointment status in the record only — a preference or open slot is not the same as a confirmed booking.',
-    );
-  } else {
-    meaningBits.push('This is what the permitted record shows for that question.');
-  }
+  const meaning = opts.docIntent && actionLines.length
+    ? 'These are actions already written into your record by the care team — Kindred is restating them, not adding new advice.'
+    : opts.docIntent
+      ? 'The shared documents describe what was recorded at that visit; they do not add a new diagnosis from Kindred.'
+      : opts.apptIntent
+        ? 'This reflects appointment status in the record only — a preference or open slot is not the same as a confirmed booking.'
+        : 'This is what the permitted record shows for that question.';
 
-  const nextBits: string[] = [];
-  if (opts.recordedNextStep) {
-    nextBits.push(stripRecordedNextPrefix(opts.recordedNextStep));
-  } else if (actionLines.length) {
-    nextBits.push('Follow the points above, and ask the care team if any step is unclear.');
-  } else if (opts.apptIntent) {
-    nextBits.push('Ask the care team to confirm the time if you are unsure whether it is booked.');
-  } else {
-    nextBits.push('Ask the care team if you want this explained in more detail.');
-  }
+  const next = opts.recordedNextStep
+    ? stripRecordedNextPrefix(opts.recordedNextStep)
+    : actionLines.length
+      ? 'Follow the points above, and ask the care team if any step is unclear.'
+      : opts.apptIntent
+        ? 'Ask the care team to confirm the time if you are unsure whether it is booked.'
+        : 'Ask the care team if you want this explained in more detail.';
 
-  return [
-    `**What we know**\n${knowBits.join('\n')}`,
-    `**What it means**\n${meaningBits.join('\n')}`,
-    `**What to do next**\n${nextBits.join('\n')}`,
-  ].join('\n\n');
+  return formatAskProse([lead, bullets.join('\n'), meaning, next].filter(Boolean));
+}
+
+/** Ensure blank-line paragraphs and markdown-ish bullets for Prose rendering. */
+export function formatAskProse(blocks: string[]): string {
+  return blocks
+    .map((b) =>
+      b
+        .replace(/\u2022/g, '-')
+        .replace(/^\s*\*\s+/gm, '- ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim(),
+    )
+    .filter(Boolean)
+    .join('\n\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function stripFactChrome(line: string): string {
@@ -800,8 +806,8 @@ function pushDocumentFacts(
   facts: { text: string; evidenceIds: string[] }[],
   cite: (title: string, evidenceId: string, resourceId: string, service: string, kind: string, date?: string) => void,
 ) {
-  const docs = events.filter(isDocumentLikeEvent).slice(0, 3);
-  const pool = docs.length ? docs : events.slice(0, 3);
+  const docs = events.filter(isDocumentLikeEvent).slice(0, 4);
+  const pool = docs.length ? docs : events.slice(0, 4);
   for (const ev of pool) {
     const actions = extractActionLines(ev);
     const substance = extractEventSubstance(ev);
@@ -810,8 +816,15 @@ function pushDocumentFacts(
         text: `From ${friendlyDocTitle(ev)} (${formatDate(ev.at)}):`,
         evidenceIds: [ev.evidenceId],
       });
-      for (const a of actions.slice(0, 4)) {
+      for (const a of actions.slice(0, 6)) {
         facts.push({ text: a, evidenceIds: [ev.evidenceId] });
+      }
+      // Keep letter body alongside actions so next-step asks have plan text.
+      if (substance && substance.length > 40) {
+        facts.push({
+          text: `Plan detail: ${substance}`,
+          evidenceIds: [ev.evidenceId],
+        });
       }
     } else if (substance) {
       facts.push({
@@ -848,7 +861,7 @@ function extractActionLines(ev: NormalisedEvent): string[] {
     .split(/(?:;\s+|\.\s+(?=[A-Z])|\n+|•\s+)/)
     .map((c) => stripFactChrome(c))
     .filter((c) => c.length > 12 && looksLikeActionLine(c));
-  return [...new Set(chunks)].slice(0, 4);
+  return [...new Set(chunks)].slice(0, 6);
 }
 
 function extractEventSubstance(ev: NormalisedEvent): string {
@@ -860,7 +873,7 @@ function extractEventSubstance(ev: NormalisedEvent): string {
     .replace(/\bfor document workflow practice[^.]*\.?/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
-  return truncate(cleaned, 220);
+  return truncate(cleaned, 420);
 }
 
 export function formatEventFact(ev: NormalisedEvent): string {
@@ -905,18 +918,18 @@ export function humaniseJsonBlob(raw: string): string {
       .replace(/[,:]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
-      .slice(0, 220);
+      .slice(0, 420);
   }
 }
 
 function summariseUnknown(value: unknown, depth: number): string {
   if (value == null) return '';
-  if (typeof value === 'string') return value.slice(0, 240);
+  if (typeof value === 'string') return value.slice(0, 420);
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   if (depth > 3) return '';
   if (Array.isArray(value)) {
     return value
-      .slice(0, 4)
+      .slice(0, 6)
       .map((v) => summariseUnknown(v, depth + 1))
       .filter(Boolean)
       .join('. ');
@@ -927,7 +940,7 @@ function summariseUnknown(value: unknown, depth: number): string {
     if (o.analytes && Array.isArray(o.analytes)) {
       const panel = (o.panel as { name?: string } | undefined)?.name || (o.kind as string) || 'Panel';
       const bits = (o.analytes as Record<string, unknown>[])
-        .slice(0, 6)
+        .slice(0, 8)
         .map((a) => {
           const name = String(a.name || a.id || 'result');
           const v = a.value;
@@ -940,16 +953,16 @@ function summariseUnknown(value: unknown, depth: number): string {
       const bodies = (o.entries as Record<string, unknown>[])
         .map((e) => asText(e.body) || asText(e.text))
         .filter(Boolean)
-        .slice(0, 2);
+        .slice(0, 4);
       if (bodies.length) return bodies.join(' ');
     }
     if (o.sections && typeof o.sections === 'object') {
       const secs = o.sections as Record<string, unknown>;
-      const preferred = ['reason', 'course', 'plan', 'actions', 'followUp'];
+      const preferred = ['reason', 'course', 'plan', 'actions', 'followUp', 'gpActions'];
       const parts: string[] = [];
       for (const k of preferred) {
         const t = asText(secs[k]);
-        if (t) parts.push(t.slice(0, 120));
+        if (t) parts.push(t.slice(0, 220));
       }
       if (parts.length) {
         const who = asText(o.sentBy);
@@ -957,16 +970,16 @@ function summariseUnknown(value: unknown, depth: number): string {
         return [head, parts.join(' ')].filter(Boolean).join('. ');
       }
     }
-    const preferredKeys = ['text', 'body', 'summary', 'notes', 'reason', 'message', 'notice', 'statusText', 'followUp'];
+    const preferredKeys = ['text', 'body', 'summary', 'notes', 'reason', 'message', 'notice', 'statusText', 'followUp', 'gpActions', 'clinicalDetails'];
     for (const k of preferredKeys) {
       const t = asText(o[k]);
-      if (t) return t.slice(0, 240);
+      if (t) return t.slice(0, 420);
     }
     const stage = asText(o.stage);
     const status = asText(o.status);
     if (stage || status) return `Status: ${humanStatus(stage || status || '')}`;
     return Object.entries(o)
-      .slice(0, 4)
+      .slice(0, 6)
       .map(([k, v]) => {
         if (v && typeof v === 'object') return '';
         const label = k.replace(/_/g, ' ');
@@ -974,7 +987,7 @@ function summariseUnknown(value: unknown, depth: number): string {
       })
       .filter(Boolean)
       .join('. ')
-      .slice(0, 220);
+      .slice(0, 420);
   }
   return '';
 }
@@ -1041,7 +1054,8 @@ function formatNum(n: number): string {
 }
 
 /**
- * Reject model prose that introduces numbers not present in structured facts / known measurements.
+ * Reject model prose that invents clinical numbers not present in structured facts.
+ * Conversational counts ("2 weeks", "a couple of days", "3 points") are allowed.
  * Years and calendar day-of-month near month names are ignored.
  */
 export function proseMatchesFacts(
@@ -1049,6 +1063,17 @@ export function proseMatchesFacts(
   facts: { text: string }[],
   measurements: Measurement[] = [],
 ): boolean {
+  const allowed = collectAllowedNumbers(facts, measurements);
+  for (const hit of extractClinicalNumberHits(prose)) {
+    if (!numberAllowed(hit.value, allowed)) return false;
+  }
+  return true;
+}
+
+function collectAllowedNumbers(
+  facts: { text: string }[],
+  measurements: Measurement[] = [],
+): Set<number> {
   const allowed = new Set<number>();
   const absorb = (text: string) => {
     for (const n of extractNumbers(text)) allowed.add(n);
@@ -1059,21 +1084,128 @@ export function proseMatchesFacts(
     if (m.referenceLow !== undefined) allowed.add(m.referenceLow);
     if (m.referenceHigh !== undefined) allowed.add(m.referenceHigh);
   }
+  return allowed;
+}
 
-  const cleaned = prose
-    .replace(/\b(19|20)\d{2}\b/g, ' ') // years
-    .replace(
-      /\b([0-3]?\d)\s+(January|February|March|April|May|June|July|August|September|October|November|December)\b/gi,
-      ' ',
-    )
-    .replace(/×\s*10\s*[⁹9]/gi, ' ')
-    .replace(/\b10[⁹9]\b/g, ' ');
-
-  for (const n of extractNumbers(cleaned)) {
-    if (n >= 1 && n <= 31) continue; // residual day/month fragments
-    if (!allowed.has(n)) return false;
+function numberAllowed(n: number, allowed: Set<number>): boolean {
+  if (allowed.has(n)) return true;
+  // Tolerate tiny float formatting drift (e.g. 4.50 vs 4.5).
+  for (const a of allowed) {
+    if (Math.abs(a - n) < 1e-6) return true;
   }
-  return true;
+  return false;
+}
+
+type NumberHit = { value: number; index: number; raw: string };
+
+/** Numbers that look clinical — not conversational time/count phrasing. Indices are in `prose`. */
+function extractClinicalNumberHits(prose: string): NumberHit[] {
+  const hits: NumberHit[] = [];
+  for (const m of prose.matchAll(/\d+(?:\.\d+)?/g)) {
+    const raw = m[0];
+    const n = Number(raw);
+    if (!Number.isFinite(n)) continue;
+    const index = m.index ?? 0;
+    if (isConversationalNumber(prose, index, raw, n)) continue;
+    hits.push({ value: n, index, raw });
+  }
+  return hits;
+}
+
+function isConversationalNumber(prose: string, index: number, raw: string, n: number): boolean {
+  const before = prose.slice(Math.max(0, index - 24), index);
+  const after = prose.slice(index + raw.length, index + raw.length + 24);
+
+  // Years
+  if (/^(19|20)\d{2}$/.test(raw)) return true;
+  // Day before month name
+  if (
+    n >= 1 &&
+    n <= 31 &&
+    !raw.includes('.') &&
+    /^\s+(January|February|March|April|May|June|July|August|September|October|November|December)\b/i.test(
+      after,
+    )
+  ) {
+    return true;
+  }
+  // Scientific notation residue
+  if (/×\s*$/i.test(before) && /^9\b/.test(raw)) return true;
+  if (/10\s*$/i.test(before) && /^[⁹9]/.test(raw)) return true;
+  // Durations
+  if (/^\s*(weeks?|days?|months?|years?|hours?|minutes?|mins?|secs?|seconds?)\b/i.test(after)) {
+    return true;
+  }
+  // Count nouns
+  if (/^\s*(values?|points?|things?|steps?|items?|results?|readings?|notes?|actions?|bullets?)\b/i.test(after)) {
+    return true;
+  }
+  // "a couple of 2" style already rare; small bare ints without clinical units
+  if (!raw.includes('.') && n >= 1 && n <= 12) {
+    if (!/^\s*(mmol|mg\/|mg\b|g\/|%|mmHg|bpm|kg|cm|ml|µ|u\/|×|x\b|\/|IU)/i.test(after)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Keep refined human prose when possible: surgically fix drifted clinical numbers,
+ * then normalise formatting. Returns null only if repair is unsafe.
+ */
+export function reconcileRefinedProse(
+  prose: string,
+  facts: { text: string }[],
+  measurements: Measurement[] = [],
+): string | null {
+  const trimmed = formatAskProse([
+    prose
+      .replace(/\*\*What we know\*\*/gi, '')
+      .replace(/\*\*What it means\*\*/gi, '')
+      .replace(/\*\*What to do next\*\*/gi, '')
+      .replace(/^\s*What we know\s*$/gim, '')
+      .replace(/^\s*What it means\s*$/gim, '')
+      .replace(/^\s*What to do next\s*$/gim, '')
+      .replace(/\u2022/g, '-')
+      .trim(),
+  ]);
+  if (!trimmed) return null;
+  if (proseMatchesFacts(trimmed, facts, measurements)) return trimmed;
+
+  const allowed = collectAllowedNumbers(facts, measurements);
+  let repaired = trimmed;
+
+  // Prefer measurement values when the analyte name is mentioned nearby.
+  const byName = [...measurements].sort((a, b) => b.displayName.length - a.displayName.length);
+  for (const m of byName) {
+    if (!m.displayName || m.displayName.length < 3) continue;
+    const esc = m.displayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(${esc}[^0-9]{0,24})(\\d+(?:\\.\\d+)?)`, 'ig');
+    repaired = repaired.replace(re, `$1${formatNum(m.value)}`);
+  }
+
+  // Replace remaining unauthorized clinical hits with the closest allowed fact number.
+  const allowedList = [...allowed];
+  if (allowedList.length) {
+    const hits = extractClinicalNumberHits(repaired).filter((h) => !numberAllowed(h.value, allowed));
+    for (const hit of [...hits].sort((a, b) => b.index - a.index)) {
+      let best = allowedList[0];
+      let bestDist = Math.abs(best - hit.value);
+      for (const a of allowedList) {
+        const d = Math.abs(a - hit.value);
+        if (d < bestDist) {
+          best = a;
+          bestDist = d;
+        }
+      }
+      repaired =
+        repaired.slice(0, hit.index) + formatNum(best) + repaired.slice(hit.index + hit.raw.length);
+    }
+  }
+
+  repaired = formatAskProse([repaired]);
+  if (proseMatchesFacts(repaired, facts, measurements)) return repaired;
+  return null;
 }
 
 function extractNumbers(text: string): number[] {

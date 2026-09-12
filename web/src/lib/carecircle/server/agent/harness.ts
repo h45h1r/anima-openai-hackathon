@@ -56,6 +56,8 @@ import {
   prefersShortPlain,
   proseFromFacts,
   proseMatchesFacts,
+  reconcileRefinedProse,
+  formatAskProse,
   sanitizeAnswerCitations,
   selectLabMeasurements,
   type ChatTurn,
@@ -68,6 +70,15 @@ import {
 } from './memoryStore';
 import { PROMPT_VERSION, REFINE_STYLE_INSTRUCTIONS } from './prompts';
 import { buildUserFacingPolicyNotice, patientFirstName } from '../consent/messages';
+
+/** Align Ask refine with Kindred companion model when possible. */
+export function resolveAskModel(explicit?: string | null): string {
+  const askOverride = (explicit && explicit.trim()) || process.env.OPENAI_MODEL?.trim() || '';
+  const companion = process.env.AGENT_MODEL?.trim() || '';
+  // Legacy Ask default was gpt-4o-mini — treat it as unset so Ask tracks Kindred AGENT_MODEL.
+  if (askOverride && askOverride !== 'gpt-4o-mini') return askOverride;
+  return companion || askOverride || 'gpt-5.6-sol';
+}
 
 export type RunAgentInput = {
   client: AnimaClient;
@@ -90,7 +101,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
   const queryId = nanoid(10);
   const runId = nanoid(10);
   const emit = input.onEvent || (() => undefined);
-  const modelName = input.openaiModel || 'gpt-4o-mini';
+  const modelName = resolveAskModel(input.openaiModel);
   /** True once any token has been sent for this ask (so we can clear before a replacement). */
   let tokensEmitted = false;
 
@@ -147,6 +158,18 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
 
   const viewer = bag.policy.viewers.find((v) => v.viewerId === input.viewerId);
   const viewerRole = viewer?.relationship || 'family_member';
+  const selfViewer = bag.policy.viewers.find((v) => v.relationship === 'self');
+  const addressName = patientFirstName(
+    viewerRole === 'self' || input.viewerId === 'patient'
+      ? selfViewer?.displayName || viewer?.displayName
+      : viewer?.displayName,
+  );
+  const patientBrief = buildAskPatientBrief({
+    patientId: input.context.patientId,
+    patientDisplayName: selfViewer?.displayName,
+    addressName,
+    viewerRole,
+  });
 
   // --- Slim model skills (not observability micro-tools) ---
   const getPermittedEvidenceTool = app.tool({
@@ -399,7 +422,6 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         detail: `intent=${intent}`,
       });
 
-      const selfViewer = bag.policy.viewers.find((v) => v.relationship === 'self');
       const policyNotice = buildUserFacingPolicyNotice({
         outcome: decision.outcome,
         reasonCodes: decision.reasonCodes,
@@ -476,6 +498,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         memoriesHint: intent === 'appointment' || intent === 'lab' ? memoryPref || undefined : undefined,
         history: input.history,
         viewerIsPatient: input.viewerId === 'patient' || viewerRole === 'self',
+        addressName: addressName || undefined,
       });
 
       ctx.state.update({
@@ -558,11 +581,13 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         const prompt = [
           `Authenticated viewer: ${input.viewerId} (${viewerRole}).`,
           `Patient: ${input.context.patientId}.`,
+          patientBrief ? `PATIENT_BRIEF: ${patientBrief}` : '',
+          addressName ? `Address the viewer as ${addressName}.` : '',
           `Memories: ${JSON.stringify(bag.memoriesUsed.map((m) => ({ kind: m.metadata.kind, text: m.content })))}.`,
           recentHistory.length
             ? `RECENT_TURNS (same patient+viewer; follow-ups refer to these):\n${JSON.stringify(recentHistory)}`
             : `RECENT_TURNS: []`,
-          `STRUCTURED_FACTS (authoritative — every number in your answer must appear here):`,
+          `STRUCTURED_FACTS (authoritative — clinical numbers/dates in your answer must match these):`,
           JSON.stringify(facts),
           `Draft answer (fallback): ${bag.answer?.answer || ''}`,
           `Question: ${input.question}`,
@@ -570,9 +595,11 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           followUp || labFocus.focused
             ? `Focus: answer THIS question only. If it is a follow-up, do not repeat the full prior panel — focus on the asked analytes/topic (${labFocus.topicIds.join(', ') || 'as asked'}).`
             : short
-              ? `Focus: short plain language, keep the three beats brief. No full panel dump.`
+              ? `Focus: short plain language in warm paragraphs. No full panel dump.`
               : `Focus: concise highlights over a full dump unless asked.`,
-        ].join('\n');
+        ]
+          .filter(Boolean)
+          .join('\n');
 
         // Fresh session so nested agent state does not collide with the pipeline session.
         const askSession = await app.sessions.create();
@@ -625,80 +652,61 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         if (!prose || looksLikeJsonProse(prose)) {
           prose = bag.answer?.answer || '';
         }
-        const grounded =
-          Boolean(prose) &&
-          proseMatchesFacts(prose!, facts, bag.allowedMeasurements.filter((m) =>
-            facts.some((f) => f.evidenceIds.includes(m.evidenceId)),
-          ));
+        const factMeasurements = bag.allowedMeasurements.filter((m) =>
+          facts.some((f) => f.evidenceIds.includes(m.evidenceId)),
+        );
+        const stuck = stickRefinedProse({
+          prose,
+          facts,
+          measurements: factMeasurements,
+          question: input.question,
+          history: input.history,
+          memoriesHint: bag.memoriesUsed.map((m) => m.content).join(' '),
+          recordedNextStep: bag.answer?.recordedNextStep?.text,
+          addressName: addressName || undefined,
+        });
 
-        if (prose && bag.answer && grounded) {
+        if (stuck.answer && bag.answer) {
           bag.answer = {
             ...bag.answer,
-            answer: prose,
+            answer: stuck.answer,
             uncertainty: parsed.uncertainty || bag.answer.uncertainty,
             appointmentAssist: bag.appointmentAssist || bag.answer.appointmentAssist,
           };
           // Stream only the grounded final prose — never the raw buffer / tool pack.
-          emitAnswerTokens(prose);
+          emitAnswerTokens(stuck.answer);
 
           // Auto-remember short preference phrases the model flagged
-          for (const rem of parsed.remembered || []) {
-            const saved = await input.memory.remember({
-              patientId: input.context.patientId,
-              viewerId: input.viewerId,
-              kind: rem.kind,
-              text: rem.text,
-            });
-            if (saved) bag.memoriesWritten.push(saved);
+          if (stuck.keptModelVoice) {
+            for (const rem of parsed.remembered || []) {
+              const saved = await input.memory.remember({
+                patientId: input.context.patientId,
+                viewerId: input.viewerId,
+                kind: rem.kind,
+                text: rem.text,
+              });
+              if (saved) bag.memoriesWritten.push(saved);
+            }
           }
 
           ctx.state.update({
             answerJson: JSON.stringify(bag.answer),
-            modelLabel: `openai-responses:${modelName}`,
+            modelLabel:
+              stuck.mode === 'fallback'
+                ? 'deterministic-grounded-after-drift'
+                : `openai-responses:${modelName}`,
           });
           appendTrace(ctx, {
             tool: 'answer.refine',
             status: 'ok',
             latencyMs: Date.now() - t0,
-            detail: 'adk openai responses + slim skills',
+            detail: stuck.detail,
           });
           emit({
             type: 'tool',
             tool: 'answer.refine',
             status: 'ok',
-            detail: 'responses_api',
-          });
-        } else if (prose && bag.answer && !grounded) {
-          // Model drifted (wrong numbers) — keep deterministic prose from facts.
-          const fallback = proseFromFacts(facts, {
-            short: prefersShortPlain(
-              bag.memoriesUsed.map((m) => m.content).join(' '),
-              input.question,
-            ),
-            labIntent: isLabIntent(input.question, input.history),
-            docIntent: isDocumentIntent(input.question),
-            apptIntent: isAppointmentIntent(input.question),
-            memoriesHint: bag.memoriesUsed.map((m) => m.content).join(' '),
-            recordedNextStep: bag.answer?.recordedNextStep?.text,
-            question: input.question,
-          });
-          bag.answer = { ...bag.answer, answer: fallback };
-          emitAnswerTokens(fallback);
-          ctx.state.update({
-            answerJson: JSON.stringify(bag.answer),
-            modelLabel: 'deterministic-grounded-after-drift',
-          });
-          appendTrace(ctx, {
-            tool: 'answer.refine',
-            status: 'ok',
-            latencyMs: Date.now() - t0,
-            detail: 'numeric_drift_fallback',
-          });
-          emit({
-            type: 'tool',
-            tool: 'answer.refine',
-            status: 'ok',
-            detail: 'numeric_drift_fallback',
+            detail: stuck.detail,
           });
         } else {
           throw new Error('empty_model_output');
@@ -714,6 +722,8 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             viewerId: input.viewerId,
             viewerRole,
             patientId: input.context.patientId,
+            patientBrief,
+            addressName: addressName || undefined,
             draft: bag.answer!,
             memories: bag.memoriesUsed,
             history: input.history,
@@ -723,43 +733,35 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             const facts = bag.answer.facts || [];
             const cleaned = finalizeVisibleProse(refined.answer) || refined.answer;
             const candidate = looksLikeJsonProse(cleaned) ? '' : cleaned;
-            const ok =
-              Boolean(candidate) &&
-              proseMatchesFacts(
-                candidate,
-                facts,
-                bag.allowedMeasurements.filter((m) => facts.some((f) => f.evidenceIds.includes(m.evidenceId))),
-              );
-            const answer = ok
-              ? candidate
-              : proseFromFacts(facts, {
-                  short: prefersShortPlain(
-                    bag.memoriesUsed.map((m) => m.content).join(' '),
-                    input.question,
-                  ),
-                  labIntent: isLabIntent(input.question, input.history),
-                  docIntent: isDocumentIntent(input.question),
-                  apptIntent: isAppointmentIntent(input.question),
-                  recordedNextStep: bag.answer?.recordedNextStep?.text,
-                  question: input.question,
-                });
+            const stuck = stickRefinedProse({
+              prose: candidate,
+              facts,
+              measurements: bag.allowedMeasurements.filter((m) =>
+                facts.some((f) => f.evidenceIds.includes(m.evidenceId)),
+              ),
+              question: input.question,
+              history: input.history,
+              recordedNextStep: bag.answer?.recordedNextStep?.text,
+              addressName: addressName || undefined,
+            });
             bag.answer = {
               ...bag.answer,
-              answer,
+              answer: stuck.answer,
               uncertainty: refined.uncertainty || bag.answer.uncertainty,
             };
-            emitAnswerTokens(answer);
+            emitAnswerTokens(stuck.answer);
             ctx.state.update({
               answerJson: JSON.stringify(bag.answer),
-              modelLabel: ok
-                ? `openai-responses:${modelName}`
-                : 'deterministic-grounded-after-drift',
+              modelLabel:
+                stuck.mode === 'fallback'
+                  ? 'deterministic-grounded-after-drift'
+                  : `openai-responses:${modelName}`,
             });
             appendTrace(ctx, {
               tool: 'answer.refine',
               status: 'ok',
               latencyMs: Date.now() - t0,
-              detail: ok ? 'responses api direct fallback' : 'numeric_drift_fallback',
+              detail: stuck.detail === 'responses_api' ? 'responses api direct fallback' : stuck.detail,
             });
           } else {
             appendTrace(ctx, {
@@ -1000,6 +1002,8 @@ async function refineWithResponsesApi(input: {
   viewerId: string;
   viewerRole: string;
   patientId: string;
+  patientBrief?: string;
+  addressName?: string;
   draft: AgentAnswer;
   memories: CareCircleMemoryItem[];
   history?: ChatTurn[];
@@ -1014,8 +1018,8 @@ async function refineWithResponsesApi(input: {
     body: JSON.stringify({
       model: input.model,
       store: false,
-      temperature: 0.1,
-      max_output_tokens: 450,
+      temperature: 0.35,
+      max_output_tokens: 700,
       // Stable prefix first for prompt-cache friendliness; dynamic pack last.
       input: [
         {
@@ -1028,6 +1032,8 @@ async function refineWithResponsesApi(input: {
             viewerId: input.viewerId,
             viewerRole: input.viewerRole,
             patientId: input.patientId,
+            patientBrief: input.patientBrief || undefined,
+            addressAs: input.addressName || undefined,
             memories: input.memories.map((m) => ({ kind: m.metadata.kind, text: m.content })),
             recentTurns: (input.history || []).slice(-6),
             facts: input.draft.facts,
@@ -1068,6 +1074,129 @@ async function refineWithResponsesApi(input: {
   const prose = finalizeVisibleProse(content, extras.answer);
   if (!prose) return null;
   return { answer: prose, uncertainty: extras.uncertainty };
+}
+
+/** Prefer refined companion prose; repair numbers; only then soft deterministic fallback. */
+function stickRefinedProse(input: {
+  prose: string;
+  facts: { text: string; evidenceIds: string[] }[];
+  measurements: Measurement[];
+  question: string;
+  history?: ChatTurn[];
+  memoriesHint?: string;
+  recordedNextStep?: string;
+  addressName?: string;
+}): { answer: string; detail: string; mode: 'ok' | 'repaired' | 'fallback'; keptModelVoice: boolean } {
+  const raw = String(input.prose || '').trim();
+  if (!raw) {
+    return {
+      answer: formatAskProse([
+        proseFromFacts(input.facts, {
+          short: prefersShortPlain(input.memoriesHint || '', input.question),
+          labIntent: isLabIntent(input.question, input.history),
+          docIntent: isDocumentIntent(input.question),
+          apptIntent: isAppointmentIntent(input.question),
+          memoriesHint: input.memoriesHint,
+          recordedNextStep: input.recordedNextStep,
+          question: input.question,
+          addressName: input.addressName,
+        }),
+      ]),
+      detail: 'empty_model_fallback',
+      mode: 'fallback',
+      keptModelVoice: false,
+    };
+  }
+
+  if (proseMatchesFacts(raw, input.facts, input.measurements)) {
+    return {
+      answer: formatAskProse([raw]),
+      detail: 'adk openai responses + slim skills',
+      mode: 'ok',
+      keptModelVoice: true,
+    };
+  }
+
+  const repaired = reconcileRefinedProse(raw, input.facts, input.measurements);
+  if (repaired) {
+    return {
+      answer: repaired,
+      detail: 'numeric_repair_kept_prose',
+      mode: 'repaired',
+      keptModelVoice: true,
+    };
+  }
+
+  return {
+    answer: formatAskProse([
+      proseFromFacts(input.facts, {
+        short: prefersShortPlain(input.memoriesHint || '', input.question),
+        labIntent: isLabIntent(input.question, input.history),
+        docIntent: isDocumentIntent(input.question),
+        apptIntent: isAppointmentIntent(input.question),
+        memoriesHint: input.memoriesHint,
+        recordedNextStep: input.recordedNextStep,
+        question: input.question,
+        addressName: input.addressName,
+      }),
+    ]),
+    detail: 'numeric_drift_fallback',
+    mode: 'fallback',
+    keptModelVoice: false,
+  };
+}
+
+/** Light patient brief (name + optional Kindred needs/goals) for Ask refine context. */
+function buildAskPatientBrief(input: {
+  patientId: string;
+  patientDisplayName?: string;
+  addressName?: string;
+  viewerRole: string;
+}): string {
+  const first =
+    input.addressName ||
+    patientFirstName(input.patientDisplayName) ||
+    '';
+  const bits: string[] = [];
+  if (input.patientDisplayName) {
+    bits.push(`${input.patientDisplayName} (record id ${input.patientId})`);
+  } else if (first) {
+    bits.push(`${first} (record id ${input.patientId})`);
+  } else {
+    bits.push(`Patient ${input.patientId}`);
+  }
+  bits.push(`Viewer role: ${input.viewerRole}.`);
+
+  try {
+    // Optional soft context from Kindred companion when the same patient is loaded.
+    // Relative require avoids pulling the store into the Ask module graph at build time.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const kindredStore = require('../../../store') as {
+      getState: () => {
+        patientId?: string;
+        patient?: { name?: string; needs?: string[]; goals?: string[]; context?: string };
+        conditions?: { name: string }[];
+      };
+    };
+    const state = kindredStore.getState();
+    const p = state?.patient;
+    const same =
+      state?.patientId === input.patientId ||
+      (p?.name &&
+        input.patientDisplayName &&
+        p.name.toLowerCase().includes(String(input.patientDisplayName).split(' ')[0].toLowerCase()));
+    if (same && p) {
+      const conditions = (state?.conditions || []).map((c) => c.name).filter(Boolean).slice(0, 6);
+      if (conditions.length) bits.push(`Active problems on the GP record: ${conditions.join(', ')}.`);
+      if (p.needs?.length) bits.push(`Recorded needs: ${p.needs.join(', ')}.`);
+      if (p.goals?.length) bits.push(`What matters: ${p.goals.join('; ')}.`);
+      if (p.context) bits.push(`Personal context: ${p.context.replace(/\s+/g, ' ').trim().slice(0, 220)}`);
+    }
+  } catch {
+    /* companion store unavailable in this runtime — name-only brief is fine */
+  }
+
+  return bits.join(' ');
 }
 
 export function suggestionsForViewer(ctx: ClinicalContext, policy: ConsentPolicyState, viewerId: string) {

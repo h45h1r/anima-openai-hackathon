@@ -158,34 +158,19 @@ export function cacheFriendlyContext(app: CareCircleAdkApp) {
   });
 }
 
-/** Ask agent — OpenAI Responses via ADK; explicit prompt cache on stable prefix. */
+/** Ask agent — OpenAI Responses via ADK with a stable system prefix. */
 export function createAskAgent(
   app: CareCircleAdkApp,
   modelName: string,
   tools: ReturnType<CareCircleAdkApp['tool']>[],
 ) {
-  // Explicit prompt_cache_breakpoint is not supported on gpt-4o-mini.
-  // Keep a stable static prefix anyway (automatic caching on supported models).
-  const explicitCache =
-    process.env.OPENAI_PROMPT_CACHE === '1' ||
-    /gpt-4\.1|gpt-5|o[0-9]/i.test(modelName);
-  const cacheKey = `carecircle-v3-${modelName}`.slice(0, 64);
+  const reasoningModel = /^(gpt-5|gpt-6|o[0-9])/i.test(modelName);
+  const rewriteOpts = reasoningModel
+    ? { reasoning: { effort: 'medium' as const }, maxTokens: 4096 }
+    : { temperature: 0.35, maxTokens: 700 };
   return app.agent({
     name: 'carecircle_ask',
-    model: openai(
-      modelName,
-      explicitCache
-        ? {
-            temperature: 0.1,
-            maxTokens: 450,
-            promptCache: {
-              key: cacheKey,
-              mode: 'explicit',
-              ttl: '30m',
-            },
-          }
-        : { temperature: 0.1, maxTokens: 450 },
-    ),
+    model: openai(modelName, rewriteOpts),
     maxSteps: 4,
     tools,
     toolChoice: 'auto',
