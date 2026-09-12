@@ -4,6 +4,7 @@ import type { AppState, Category } from "@/lib/types";
 import { CATEGORIES, canAccess, personById } from "@/lib/types";
 import type { KindredActions } from "@/hooks/useKindred";
 import { Card, LockIcon, Pill, fmtClock, fmtLongDay } from "../ui";
+import BodyView from "../body/BodyView";
 
 export default function FamilyHome({ state, viewerId, onAsk }: { state: AppState; viewerId: string; actions: KindredActions; onAsk: (q: string) => void }) {
   const patient = personById(state, state.patientId);
@@ -39,6 +40,8 @@ export default function FamilyHome({ state, viewerId, onAsk }: { state: AppState
       ) : (
         <LockedCard label="Appointments" patient={patient.shortName} />
       )}
+
+      <BodyView state={state} viewerId={viewerId} embedded onAsk={onAsk} />
 
       <div className="grid grid-cols-2 gap-3 md:gap-4">
         {can("lab_results") ? (

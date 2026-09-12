@@ -86,11 +86,19 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* Subtle paper grain so the page isn't a flat grey */
+/* Subtle paper tint so the page isn't a flat grey. Anchored to the viewport
+   and never repeated: a tiling gradient shows a hard seam one screen down. */
 .paper-grain {
+  background-color: var(--paper);
   background-image:
     radial-gradient(at 20% 0%, rgba(47, 107, 79, 0.06), transparent 50%),
     radial-gradient(at 100% 100%, rgba(109, 46, 91, 0.05), transparent 45%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+}
+html {
+  background: var(--paper);
 }
 
 .scroll-thin {

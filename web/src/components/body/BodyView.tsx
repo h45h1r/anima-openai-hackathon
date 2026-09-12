@@ -12,7 +12,7 @@ const BodyScene = dynamic(() => import("./BodyScene"), { ssr: false, loading: ()
 const STATE_HEX: Record<SystemState, string> = { out: "#c2572f", watch: "#c98a1e", ok: "#2f6b4f", none: "#9aa8a1", locked: "#6d2e5b" };
 const STATE_CLASS: Record<SystemState, string> = { out: "bg-rust", watch: "bg-amber", ok: "bg-moss", none: "bg-line", locked: "bg-plum" };
 
-export default function BodyView({ state, viewerId, onAsk }: { state: AppState; viewerId: string; onAsk: (q: string) => void }) {
+export default function BodyView({ state, viewerId, onAsk, embedded = false }: { state: AppState; viewerId: string; onAsk: (q: string) => void; embedded?: boolean }) {
   const patient = personById(state, state.patientId);
   const isPatient = viewerId === state.patientId;
   const systems = useMemo(() => computeSystems(state, viewerId), [state, viewerId]);
@@ -44,6 +44,12 @@ export default function BodyView({ state, viewerId, onAsk }: { state: AppState; 
 
   return (
     <div className="space-y-4">
+      {embedded ? (
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <div className="font-display text-lg font-bold">{poss} body</div>
+          <span className="text-sm text-muted">{outCount ? `${outCount} of ${systems.filter((s) => s.state !== "none" && s.state !== "locked").length} systems have something outside the usual range` : "Everything measured is in its usual range"} · tap a part to see what is behind it</span>
+        </div>
+      ) : (
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-[26px] font-bold leading-tight sm:text-3xl">{poss} body, right now</h1>
@@ -58,10 +64,11 @@ export default function BodyView({ state, viewerId, onAsk }: { state: AppState; 
           <Meta k="Source" v="NHS-SIM · live" tone="moss" />
         </dl>
       </div>
+      )}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
-        <div className="relative h-[62vh] min-h-[440px] overflow-hidden rounded-3xl border border-line bg-[radial-gradient(ellipse_at_50%_35%,#ffffff_0%,#eef4f6_45%,#e3ecf0_100%)]">
-          <BodyScene focus={focus} tint={tint} onPick={(id) => setFocus((f) => (f === id ? null : id))} reducedMotion={reduced} />
+      <div className={`grid gap-4 ${embedded ? "lg:grid-cols-[minmax(0,1fr)_360px]" : "lg:grid-cols-[minmax(0,1fr)_400px]"}`}>
+        <div className={`relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(ellipse_at_50%_35%,#ffffff_0%,#eef4f6_45%,#e3ecf0_100%)] ${embedded ? "h-[74vh] min-h-[560px]" : "h-[62vh] min-h-[440px]"}`}>
+          <BodyScene focus={focus} tint={tint} onPick={(id) => setFocus((f) => (f === id ? null : id))} reducedMotion={reduced} allowZoom={!embedded} />
           <div className="pointer-events-none absolute left-4 top-4 font-mono text-[10.5px] uppercase tracking-wider text-muted">
             <div>{patient.name} · {state.patient.age}</div>
             <div className="mt-0.5">{outCount} outside range · {watchCount} to watch</div>

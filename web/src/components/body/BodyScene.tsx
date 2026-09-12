@@ -18,6 +18,7 @@ export interface BodySceneProps {
   tint: Partial<Record<SystemId, string>>; // hex per system for the focused tint
   onPick?: (id: SystemId) => void;
   reducedMotion?: boolean;
+  allowZoom?: boolean; // false when embedded in a scrolling page
 }
 
 interface Section {
@@ -199,7 +200,7 @@ const MARKER_RING = 0.075;
 const BASE = new THREE.Color("#6fa6cf");
 const BASE_DIM = new THREE.Color("#a9c8dd");
 
-export default function BodyScene({ focus, tint, onPick, reducedMotion = false }: BodySceneProps) {
+export default function BodyScene({ focus, tint, onPick, reducedMotion = false, allowZoom = true }: BodySceneProps) {
   const host = useRef<HTMLDivElement>(null);
   const api = useRef<{ setFocus: (id: SystemId | null, tintHex?: string) => void; setTints: (t: Partial<Record<SystemId, string>>) => void } | null>(null);
 
@@ -352,6 +353,7 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
+    controls.enableZoom = allowZoom;
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.minDistance = 1.4;
@@ -536,7 +538,7 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       api.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reducedMotion]);
+  }, [reducedMotion, allowZoom]);
 
   useEffect(() => {
     api.current?.setTints(tint);
