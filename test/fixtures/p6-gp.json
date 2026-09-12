@@ -1,0 +1,1980 @@
+{
+ "now": 1789200000000,
+ "resources": [
+  {
+   "id": "r-3690",
+   "data": {
+    "mode": "in-person",
+    "startsAt": 1789201800000,
+    "clinician": "Nurse Alex Morgan",
+    "synthetic": true,
+    "provenance": "authored-synthetic-v1",
+    "storyVersion": "patient-stories-v1",
+    "durationMinutes": 15,
+    "capacityReserved": false
+   },
+   "kind": "appointment",
+   "dueAt": 1789201800000,
+   "owner": "gp",
+   "title": "Practice follow-up",
+   "status": "booked",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789200000000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "gp"
+   ]
+  },
+  {
+   "id": "document-batch-2-006",
+   "data": {
+    "stage": "sent",
+    "sentAt": 1788598800000,
+    "sentBy": "Dr Taylor Brook",
+    "assignee": "Practice document team",
+    "sections": {
+     "course": "The clinic attendance is complete. The appointment outcome was entered in the hospital record. The discharge coordinator recorded the handover for Eleanor Chen.",
+     "reason": "Attendance for a planned renal clinic review. This is a fictional episode for document workflow practice.",
+     "results": "An existing simulated laboratory panel is referenced without new values in this letter.",
+     "followUp": "The clinic secretary will confirm the next appointment through a separate booking letter.",
+     "diagnoses": "No new coded diagnosis is asserted by this training letter. Check the simulated patient record when classifying the correspondence.",
+     "gpActions": "Match the referenced panel to the patient record and request the outstanding medicines note before closing the document task.",
+     "medicationChanges": "The letter does not request a prescription. A medicines reconciliation note is still expected."
+    }
+   },
+   "kind": "discharge-summary",
+   "owner": "hospital",
+   "title": "Renal · Clinic discharge correspondence",
+   "status": "sent",
+   "version": 2,
+   "priority": "routine",
+   "createdAt": 1788595200000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "hospital",
+    "gp"
+   ]
+  },
+  {
+   "id": "blood-v1-SIM-000006-fbc-0",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Full blood count (FBC) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1757667600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "fbc",
+     "name": "Full blood count (FBC)"
+    },
+    "collectedAt": 1757664000000,
+    "analytes": [
+     {
+      "id": "haemoglobin",
+      "name": "Haemoglobin",
+      "unit": "g/L",
+      "referenceLow": 115,
+      "referenceHigh": 165,
+      "value": 156
+     },
+     {
+      "id": "white-cell-count",
+      "name": "White cell count",
+      "unit": "×10⁹/L",
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "value": 4.7
+     },
+     {
+      "id": "platelets",
+      "name": "Platelets",
+      "unit": "×10⁹/L",
+      "referenceLow": 150,
+      "referenceHigh": 400,
+      "value": 341
+     },
+     {
+      "id": "mcv",
+      "name": "Mean cell volume",
+      "unit": "fL",
+      "referenceLow": 80,
+      "referenceHigh": 100,
+      "value": 90.7
+     },
+     {
+      "id": "neutrophils",
+      "name": "Neutrophils",
+      "unit": "×10⁹/L",
+      "referenceLow": 2,
+      "referenceHigh": 7.5,
+      "value": 3.5
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-fbc-1",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Full blood count (FBC) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1768467600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "fbc",
+     "name": "Full blood count (FBC)"
+    },
+    "collectedAt": 1768464000000,
+    "analytes": [
+     {
+      "id": "haemoglobin",
+      "name": "Haemoglobin",
+      "unit": "g/L",
+      "referenceLow": 115,
+      "referenceHigh": 165,
+      "value": 153
+     },
+     {
+      "id": "white-cell-count",
+      "name": "White cell count",
+      "unit": "×10⁹/L",
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "value": 4
+     },
+     {
+      "id": "platelets",
+      "name": "Platelets",
+      "unit": "×10⁹/L",
+      "referenceLow": 150,
+      "referenceHigh": 400,
+      "value": 322
+     },
+     {
+      "id": "mcv",
+      "name": "Mean cell volume",
+      "unit": "fL",
+      "referenceLow": 80,
+      "referenceHigh": 100,
+      "value": 89
+     },
+     {
+      "id": "neutrophils",
+      "name": "Neutrophils",
+      "unit": "×10⁹/L",
+      "referenceLow": 2,
+      "referenceHigh": 7.5,
+      "value": 3
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-fbc-2",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Full blood count (FBC) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1778835600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "fbc",
+     "name": "Full blood count (FBC)"
+    },
+    "collectedAt": 1778832000000,
+    "analytes": [
+     {
+      "id": "haemoglobin",
+      "name": "Haemoglobin",
+      "unit": "g/L",
+      "referenceLow": 115,
+      "referenceHigh": 165,
+      "value": 147
+     },
+     {
+      "id": "white-cell-count",
+      "name": "White cell count",
+      "unit": "×10⁹/L",
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "value": 2.7
+     },
+     {
+      "id": "platelets",
+      "name": "Platelets",
+      "unit": "×10⁹/L",
+      "referenceLow": 150,
+      "referenceHigh": 400,
+      "value": 286
+     },
+     {
+      "id": "mcv",
+      "name": "Mean cell volume",
+      "unit": "fL",
+      "referenceLow": 80,
+      "referenceHigh": 100,
+      "value": 85.8
+     },
+     {
+      "id": "neutrophils",
+      "name": "Neutrophils",
+      "unit": "×10⁹/L",
+      "referenceLow": 2,
+      "referenceHigh": 7.5,
+      "value": 2
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-fbc-3",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Full blood count (FBC) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1784019600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "fbc",
+     "name": "Full blood count (FBC)"
+    },
+    "collectedAt": 1784016000000,
+    "analytes": [
+     {
+      "id": "haemoglobin",
+      "name": "Haemoglobin",
+      "unit": "g/L",
+      "referenceLow": 115,
+      "referenceHigh": 165,
+      "value": 141
+     },
+     {
+      "id": "white-cell-count",
+      "name": "White cell count",
+      "unit": "×10⁹/L",
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "value": 1.6
+     },
+     {
+      "id": "platelets",
+      "name": "Platelets",
+      "unit": "×10⁹/L",
+      "referenceLow": 150,
+      "referenceHigh": 400,
+      "value": 256
+     },
+     {
+      "id": "mcv",
+      "name": "Mean cell volume",
+      "unit": "fL",
+      "referenceLow": 80,
+      "referenceHigh": 100,
+      "value": 83
+     },
+     {
+      "id": "neutrophils",
+      "name": "Neutrophils",
+      "unit": "×10⁹/L",
+      "referenceLow": 2,
+      "referenceHigh": 7.5,
+      "value": 1.2
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-fbc-4",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Full blood count (FBC) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1787994000000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "fbc",
+     "name": "Full blood count (FBC)"
+    },
+    "collectedAt": 1787990400000,
+    "analytes": [
+     {
+      "id": "haemoglobin",
+      "name": "Haemoglobin",
+      "unit": "g/L",
+      "referenceLow": 115,
+      "referenceHigh": 165,
+      "value": 140
+     },
+     {
+      "id": "white-cell-count",
+      "name": "White cell count",
+      "unit": "×10⁹/L",
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "value": 1.3
+     },
+     {
+      "id": "platelets",
+      "name": "Platelets",
+      "unit": "×10⁹/L",
+      "referenceLow": 150,
+      "referenceHigh": 400,
+      "value": 248
+     },
+     {
+      "id": "mcv",
+      "name": "Mean cell volume",
+      "unit": "fL",
+      "referenceLow": 80,
+      "referenceHigh": 100,
+      "value": 82.4
+     },
+     {
+      "id": "neutrophils",
+      "name": "Neutrophils",
+      "unit": "×10⁹/L",
+      "referenceLow": 2,
+      "referenceHigh": 7.5,
+      "value": 1
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-fbc-5",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Full blood count (FBC) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1789117200000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "fbc",
+     "name": "Full blood count (FBC)"
+    },
+    "collectedAt": 1789113600000,
+    "analytes": [
+     {
+      "id": "haemoglobin",
+      "name": "Haemoglobin",
+      "unit": "g/L",
+      "referenceLow": 115,
+      "referenceHigh": 165,
+      "value": 144
+     },
+     {
+      "id": "white-cell-count",
+      "name": "White cell count",
+      "unit": "×10⁹/L",
+      "referenceLow": 4,
+      "referenceHigh": 11,
+      "value": 2.1
+     },
+     {
+      "id": "platelets",
+      "name": "Platelets",
+      "unit": "×10⁹/L",
+      "referenceLow": 150,
+      "referenceHigh": 400,
+      "value": 269
+     },
+     {
+      "id": "mcv",
+      "name": "Mean cell volume",
+      "unit": "fL",
+      "referenceLow": 80,
+      "referenceHigh": 100,
+      "value": 84.3
+     },
+     {
+      "id": "neutrophils",
+      "name": "Neutrophils",
+      "unit": "×10⁹/L",
+      "referenceLow": 2,
+      "referenceHigh": 7.5,
+      "value": 1.6
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-ue-0",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Urea & electrolytes (U&E) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1757667600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "ue",
+     "name": "Urea & electrolytes (U&E)"
+    },
+    "collectedAt": 1757664000000,
+    "analytes": [
+     {
+      "id": "sodium",
+      "name": "Sodium",
+      "unit": "mmol/L",
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "value": 136
+     },
+     {
+      "id": "potassium",
+      "name": "Potassium",
+      "unit": "mmol/L",
+      "referenceLow": 3.5,
+      "referenceHigh": 5.3,
+      "value": 3.5
+     },
+     {
+      "id": "urea",
+      "name": "Urea",
+      "unit": "mmol/L",
+      "referenceLow": 2.5,
+      "referenceHigh": 7.8,
+      "value": 4.6
+     },
+     {
+      "id": "creatinine",
+      "name": "Creatinine",
+      "unit": "µmol/L",
+      "referenceLow": 45,
+      "referenceHigh": 110,
+      "value": 42
+     },
+     {
+      "id": "egfr",
+      "name": "eGFR",
+      "unit": "mL/min/1.73m²",
+      "referenceLow": 60,
+      "referenceHigh": 120,
+      "value": 77
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-ue-1",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Urea & electrolytes (U&E) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1768467600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "ue",
+     "name": "Urea & electrolytes (U&E)"
+    },
+    "collectedAt": 1768464000000,
+    "analytes": [
+     {
+      "id": "sodium",
+      "name": "Sodium",
+      "unit": "mmol/L",
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "value": 134
+     },
+     {
+      "id": "potassium",
+      "name": "Potassium",
+      "unit": "mmol/L",
+      "referenceLow": 3.5,
+      "referenceHigh": 5.3,
+      "value": 3.2
+     },
+     {
+      "id": "urea",
+      "name": "Urea",
+      "unit": "mmol/L",
+      "referenceLow": 2.5,
+      "referenceHigh": 7.8,
+      "value": 3.3
+     },
+     {
+      "id": "creatinine",
+      "name": "Creatinine",
+      "unit": "µmol/L",
+      "referenceLow": 45,
+      "referenceHigh": 110,
+      "value": 26
+     },
+     {
+      "id": "egfr",
+      "name": "eGFR",
+      "unit": "mL/min/1.73m²",
+      "referenceLow": 60,
+      "referenceHigh": 120,
+      "value": 67
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-ue-2",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Urea & electrolytes (U&E) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1778835600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "ue",
+     "name": "Urea & electrolytes (U&E)"
+    },
+    "collectedAt": 1778832000000,
+    "analytes": [
+     {
+      "id": "sodium",
+      "name": "Sodium",
+      "unit": "mmol/L",
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "value": 133
+     },
+     {
+      "id": "potassium",
+      "name": "Potassium",
+      "unit": "mmol/L",
+      "referenceLow": 3.5,
+      "referenceHigh": 5.3,
+      "value": 3
+     },
+     {
+      "id": "urea",
+      "name": "Urea",
+      "unit": "mmol/L",
+      "referenceLow": 2.5,
+      "referenceHigh": 7.8,
+      "value": 2.7
+     },
+     {
+      "id": "creatinine",
+      "name": "Creatinine",
+      "unit": "µmol/L",
+      "referenceLow": 45,
+      "referenceHigh": 110,
+      "value": 18
+     },
+     {
+      "id": "egfr",
+      "name": "eGFR",
+      "unit": "mL/min/1.73m²",
+      "referenceLow": 60,
+      "referenceHigh": 120,
+      "value": 62
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-ue-3",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Urea & electrolytes (U&E) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1784019600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "ue",
+     "name": "Urea & electrolytes (U&E)"
+    },
+    "collectedAt": 1784016000000,
+    "analytes": [
+     {
+      "id": "sodium",
+      "name": "Sodium",
+      "unit": "mmol/L",
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "value": 134
+     },
+     {
+      "id": "potassium",
+      "name": "Potassium",
+      "unit": "mmol/L",
+      "referenceLow": 3.5,
+      "referenceHigh": 5.3,
+      "value": 3.1
+     },
+     {
+      "id": "urea",
+      "name": "Urea",
+      "unit": "mmol/L",
+      "referenceLow": 2.5,
+      "referenceHigh": 7.8,
+      "value": 3
+     },
+     {
+      "id": "creatinine",
+      "name": "Creatinine",
+      "unit": "µmol/L",
+      "referenceLow": 45,
+      "referenceHigh": 110,
+      "value": 23
+     },
+     {
+      "id": "egfr",
+      "name": "eGFR",
+      "unit": "mL/min/1.73m²",
+      "referenceLow": 60,
+      "referenceHigh": 120,
+      "value": 65
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-ue-4",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Urea & electrolytes (U&E) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1787994000000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "ue",
+     "name": "Urea & electrolytes (U&E)"
+    },
+    "collectedAt": 1787990400000,
+    "analytes": [
+     {
+      "id": "sodium",
+      "name": "Sodium",
+      "unit": "mmol/L",
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "value": 136
+     },
+     {
+      "id": "potassium",
+      "name": "Potassium",
+      "unit": "mmol/L",
+      "referenceLow": 3.5,
+      "referenceHigh": 5.3,
+      "value": 3.4
+     },
+     {
+      "id": "urea",
+      "name": "Urea",
+      "unit": "mmol/L",
+      "referenceLow": 2.5,
+      "referenceHigh": 7.8,
+      "value": 4.3
+     },
+     {
+      "id": "creatinine",
+      "name": "Creatinine",
+      "unit": "µmol/L",
+      "referenceLow": 45,
+      "referenceHigh": 110,
+      "value": 37
+     },
+     {
+      "id": "egfr",
+      "name": "eGFR",
+      "unit": "mL/min/1.73m²",
+      "referenceLow": 60,
+      "referenceHigh": 120,
+      "value": 74
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-ue-5",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Urea & electrolytes (U&E) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1789117200000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "ue",
+     "name": "Urea & electrolytes (U&E)"
+    },
+    "collectedAt": 1789113600000,
+    "analytes": [
+     {
+      "id": "sodium",
+      "name": "Sodium",
+      "unit": "mmol/L",
+      "referenceLow": 133,
+      "referenceHigh": 146,
+      "value": 138
+     },
+     {
+      "id": "potassium",
+      "name": "Potassium",
+      "unit": "mmol/L",
+      "referenceLow": 3.5,
+      "referenceHigh": 5.3,
+      "value": 3.7
+     },
+     {
+      "id": "urea",
+      "name": "Urea",
+      "unit": "mmol/L",
+      "referenceLow": 2.5,
+      "referenceHigh": 7.8,
+      "value": 5.5
+     },
+     {
+      "id": "creatinine",
+      "name": "Creatinine",
+      "unit": "µmol/L",
+      "referenceLow": 45,
+      "referenceHigh": 110,
+      "value": 53
+     },
+     {
+      "id": "egfr",
+      "name": "eGFR",
+      "unit": "mL/min/1.73m²",
+      "referenceLow": 60,
+      "referenceHigh": 120,
+      "value": 84
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-hba1c-0",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "HbA1c · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1757667600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "hba1c",
+     "name": "HbA1c"
+    },
+    "collectedAt": 1757664000000,
+    "analytes": [
+     {
+      "id": "hba1c",
+      "name": "HbA1c",
+      "unit": "mmol/mol",
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "value": 51
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-hba1c-1",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "HbA1c · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1768467600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "hba1c",
+     "name": "HbA1c"
+    },
+    "collectedAt": 1768464000000,
+    "analytes": [
+     {
+      "id": "hba1c",
+      "name": "HbA1c",
+      "unit": "mmol/mol",
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "value": 57
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-hba1c-2",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "HbA1c · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1778835600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "hba1c",
+     "name": "HbA1c"
+    },
+    "collectedAt": 1778832000000,
+    "analytes": [
+     {
+      "id": "hba1c",
+      "name": "HbA1c",
+      "unit": "mmol/mol",
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "value": 61
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-hba1c-3",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "HbA1c · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1784019600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "hba1c",
+     "name": "HbA1c"
+    },
+    "collectedAt": 1784016000000,
+    "analytes": [
+     {
+      "id": "hba1c",
+      "name": "HbA1c",
+      "unit": "mmol/mol",
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "value": 60
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-hba1c-4",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "HbA1c · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1787994000000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "hba1c",
+     "name": "HbA1c"
+    },
+    "collectedAt": 1787990400000,
+    "analytes": [
+     {
+      "id": "hba1c",
+      "name": "HbA1c",
+      "unit": "mmol/mol",
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "value": 55
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-hba1c-5",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "HbA1c · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1789117200000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "hba1c",
+     "name": "HbA1c"
+    },
+    "collectedAt": 1789113600000,
+    "analytes": [
+     {
+      "id": "hba1c",
+      "name": "HbA1c",
+      "unit": "mmol/mol",
+      "referenceLow": 20,
+      "referenceHigh": 41,
+      "value": 49
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lft-0",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Liver function tests (LFT) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1757667600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lft",
+     "name": "Liver function tests (LFT)"
+    },
+    "collectedAt": 1757664000000,
+    "analytes": [
+     {
+      "id": "alt",
+      "name": "ALT",
+      "unit": "U/L",
+      "referenceLow": 0,
+      "referenceHigh": 40,
+      "value": 11
+     },
+     {
+      "id": "alp",
+      "name": "Alkaline phosphatase",
+      "unit": "U/L",
+      "referenceLow": 30,
+      "referenceHigh": 130,
+      "value": 55
+     },
+     {
+      "id": "bilirubin",
+      "name": "Bilirubin",
+      "unit": "µmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "value": 25
+     },
+     {
+      "id": "albumin",
+      "name": "Albumin",
+      "unit": "g/L",
+      "referenceLow": 35,
+      "referenceHigh": 50,
+      "value": 35
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lft-1",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Liver function tests (LFT) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1768467600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lft",
+     "name": "Liver function tests (LFT)"
+    },
+    "collectedAt": 1768464000000,
+    "analytes": [
+     {
+      "id": "alt",
+      "name": "ALT",
+      "unit": "U/L",
+      "referenceLow": 0,
+      "referenceHigh": 40,
+      "value": 3
+     },
+     {
+      "id": "alp",
+      "name": "Alkaline phosphatase",
+      "unit": "U/L",
+      "referenceLow": 30,
+      "referenceHigh": 130,
+      "value": 39
+     },
+     {
+      "id": "bilirubin",
+      "name": "Bilirubin",
+      "unit": "µmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "value": 22
+     },
+     {
+      "id": "albumin",
+      "name": "Albumin",
+      "unit": "g/L",
+      "referenceLow": 35,
+      "referenceHigh": 50,
+      "value": 33
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lft-2",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Liver function tests (LFT) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1778835600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lft",
+     "name": "Liver function tests (LFT)"
+    },
+    "collectedAt": 1778832000000,
+    "analytes": [
+     {
+      "id": "alt",
+      "name": "ALT",
+      "unit": "U/L",
+      "referenceLow": 0,
+      "referenceHigh": 40,
+      "value": 0
+     },
+     {
+      "id": "alp",
+      "name": "Alkaline phosphatase",
+      "unit": "U/L",
+      "referenceLow": 30,
+      "referenceHigh": 130,
+      "value": 27
+     },
+     {
+      "id": "bilirubin",
+      "name": "Bilirubin",
+      "unit": "µmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "value": 19
+     },
+     {
+      "id": "albumin",
+      "name": "Albumin",
+      "unit": "g/L",
+      "referenceLow": 35,
+      "referenceHigh": 50,
+      "value": 31
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lft-3",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Liver function tests (LFT) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1784019600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lft",
+     "name": "Liver function tests (LFT)"
+    },
+    "collectedAt": 1784016000000,
+    "analytes": [
+     {
+      "id": "alt",
+      "name": "ALT",
+      "unit": "U/L",
+      "referenceLow": 0,
+      "referenceHigh": 40,
+      "value": 0
+     },
+     {
+      "id": "alp",
+      "name": "Alkaline phosphatase",
+      "unit": "U/L",
+      "referenceLow": 30,
+      "referenceHigh": 130,
+      "value": 27
+     },
+     {
+      "id": "bilirubin",
+      "name": "Bilirubin",
+      "unit": "µmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "value": 19
+     },
+     {
+      "id": "albumin",
+      "name": "Albumin",
+      "unit": "g/L",
+      "referenceLow": 35,
+      "referenceHigh": 50,
+      "value": 31
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lft-4",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Liver function tests (LFT) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1787994000000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lft",
+     "name": "Liver function tests (LFT)"
+    },
+    "collectedAt": 1787990400000,
+    "analytes": [
+     {
+      "id": "alt",
+      "name": "ALT",
+      "unit": "U/L",
+      "referenceLow": 0,
+      "referenceHigh": 40,
+      "value": 3
+     },
+     {
+      "id": "alp",
+      "name": "Alkaline phosphatase",
+      "unit": "U/L",
+      "referenceLow": 30,
+      "referenceHigh": 130,
+      "value": 39
+     },
+     {
+      "id": "bilirubin",
+      "name": "Bilirubin",
+      "unit": "µmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "value": 22
+     },
+     {
+      "id": "albumin",
+      "name": "Albumin",
+      "unit": "g/L",
+      "referenceLow": 35,
+      "referenceHigh": 50,
+      "value": 33
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lft-5",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Liver function tests (LFT) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1789117200000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lft",
+     "name": "Liver function tests (LFT)"
+    },
+    "collectedAt": 1789113600000,
+    "analytes": [
+     {
+      "id": "alt",
+      "name": "ALT",
+      "unit": "U/L",
+      "referenceLow": 0,
+      "referenceHigh": 40,
+      "value": 11
+     },
+     {
+      "id": "alp",
+      "name": "Alkaline phosphatase",
+      "unit": "U/L",
+      "referenceLow": 30,
+      "referenceHigh": 130,
+      "value": 55
+     },
+     {
+      "id": "bilirubin",
+      "name": "Bilirubin",
+      "unit": "µmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 21,
+      "value": 25
+     },
+     {
+      "id": "albumin",
+      "name": "Albumin",
+      "unit": "g/L",
+      "referenceLow": 35,
+      "referenceHigh": 50,
+      "value": 35
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-crp-0",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "C-reactive protein (CRP) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1757667600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "crp",
+     "name": "C-reactive protein (CRP)"
+    },
+    "collectedAt": 1757664000000,
+    "analytes": [
+     {
+      "id": "crp",
+      "name": "C-reactive protein",
+      "unit": "mg/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 5.9
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-crp-1",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "C-reactive protein (CRP) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1768467600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "crp",
+     "name": "C-reactive protein (CRP)"
+    },
+    "collectedAt": 1768464000000,
+    "analytes": [
+     {
+      "id": "crp",
+      "name": "C-reactive protein",
+      "unit": "mg/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 7.4
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-crp-2",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "C-reactive protein (CRP) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1778835600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "crp",
+     "name": "C-reactive protein (CRP)"
+    },
+    "collectedAt": 1778832000000,
+    "analytes": [
+     {
+      "id": "crp",
+      "name": "C-reactive protein",
+      "unit": "mg/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 8
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-crp-3",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "C-reactive protein (CRP) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1784019600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "crp",
+     "name": "C-reactive protein (CRP)"
+    },
+    "collectedAt": 1784016000000,
+    "analytes": [
+     {
+      "id": "crp",
+      "name": "C-reactive protein",
+      "unit": "mg/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 7.3
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-crp-4",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "C-reactive protein (CRP) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1787994000000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "crp",
+     "name": "C-reactive protein (CRP)"
+    },
+    "collectedAt": 1787990400000,
+    "analytes": [
+     {
+      "id": "crp",
+      "name": "C-reactive protein",
+      "unit": "mg/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 5.8
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-crp-5",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "C-reactive protein (CRP) · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1789117200000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "crp",
+     "name": "C-reactive protein (CRP)"
+    },
+    "collectedAt": 1789113600000,
+    "analytes": [
+     {
+      "id": "crp",
+      "name": "C-reactive protein",
+      "unit": "mg/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 4.3
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lipids-0",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Lipid profile · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1757667600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lipids",
+     "name": "Lipid profile"
+    },
+    "collectedAt": 1757664000000,
+    "analytes": [
+     {
+      "id": "total-cholesterol",
+      "name": "Total cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 3.8
+     },
+     {
+      "id": "hdl",
+      "name": "HDL cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 1,
+      "referenceHigh": 2.5,
+      "value": 1.8
+     },
+     {
+      "id": "triglycerides",
+      "name": "Triglycerides",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "value": 1.8
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lipids-1",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Lipid profile · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1768467600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lipids",
+     "name": "Lipid profile"
+    },
+    "collectedAt": 1768464000000,
+    "analytes": [
+     {
+      "id": "total-cholesterol",
+      "name": "Total cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 4.3
+     },
+     {
+      "id": "hdl",
+      "name": "HDL cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 1,
+      "referenceHigh": 2.5,
+      "value": 1.9
+     },
+     {
+      "id": "triglycerides",
+      "name": "Triglycerides",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "value": 2
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lipids-2",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Lipid profile · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1778835600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lipids",
+     "name": "Lipid profile"
+    },
+    "collectedAt": 1778832000000,
+    "analytes": [
+     {
+      "id": "total-cholesterol",
+      "name": "Total cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 4.4
+     },
+     {
+      "id": "hdl",
+      "name": "HDL cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 1,
+      "referenceHigh": 2.5,
+      "value": 2
+     },
+     {
+      "id": "triglycerides",
+      "name": "Triglycerides",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "value": 2.1
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lipids-3",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Lipid profile · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1784019600000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lipids",
+     "name": "Lipid profile"
+    },
+    "collectedAt": 1784016000000,
+    "analytes": [
+     {
+      "id": "total-cholesterol",
+      "name": "Total cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 4.2
+     },
+     {
+      "id": "hdl",
+      "name": "HDL cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 1,
+      "referenceHigh": 2.5,
+      "value": 1.9
+     },
+     {
+      "id": "triglycerides",
+      "name": "Triglycerides",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "value": 2
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lipids-4",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Lipid profile · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1787994000000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lipids",
+     "name": "Lipid profile"
+    },
+    "collectedAt": 1787990400000,
+    "analytes": [
+     {
+      "id": "total-cholesterol",
+      "name": "Total cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 3.8
+     },
+     {
+      "id": "hdl",
+      "name": "HDL cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 1,
+      "referenceHigh": 2.5,
+      "value": 1.8
+     },
+     {
+      "id": "triglycerides",
+      "name": "Triglycerides",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "value": 1.7
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  },
+  {
+   "id": "blood-v1-SIM-000006-lipids-5",
+   "patientId": "SIM-000006",
+   "kind": "report",
+   "title": "Lipid profile · synthetic blood results",
+   "owner": "diagnostics",
+   "visibleTo": [
+    "gp",
+    "hospital",
+    "diagnostics"
+   ],
+   "status": "available",
+   "priority": "routine",
+   "createdAt": 1789117200000,
+   "version": 1,
+   "data": {
+    "kind": "blood-result",
+    "panel": {
+     "id": "lipids",
+     "name": "Lipid profile"
+    },
+    "collectedAt": 1789113600000,
+    "analytes": [
+     {
+      "id": "total-cholesterol",
+      "name": "Total cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 5,
+      "value": 3.4
+     },
+     {
+      "id": "hdl",
+      "name": "HDL cholesterol",
+      "unit": "mmol/L",
+      "referenceLow": 1,
+      "referenceHigh": 2.5,
+      "value": 1.6
+     },
+     {
+      "id": "triglycerides",
+      "name": "Triglycerides",
+      "unit": "mmol/L",
+      "referenceLow": 0,
+      "referenceHigh": 1.7,
+      "value": 1.5
+     }
+    ],
+    "laboratory": "Northbank training laboratory",
+    "synthetic": true
+   }
+  }
+ ]
+}
