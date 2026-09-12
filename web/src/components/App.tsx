@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useKindred } from "@/hooks/useKindred";
 import type { AppState, Person } from "@/lib/types";
-import { personById, visibleMessages } from "@/lib/types";
+import { personById } from "@/lib/types";
 import { Avatar, Button, KindredMark, LockIcon, Pill } from "./ui";
 import AuditRail from "./AuditRail";
 import Chat from "./Chat";
@@ -16,7 +16,7 @@ import BodyView from "./body/BodyView";
 import FamilyHome from "./family/FamilyHome";
 import EhrView from "./clinician/EhrView";
 
-type Tab = "home" | "body" | "circle" | "family" | "kindred" | "activity" | "levels";
+type Tab = "home" | "body" | "circle" | "kindred" | "activity" | "levels";
 
 interface TabDef {
   id: Tab;
@@ -82,7 +82,6 @@ export default function App() {
   const primaryClinician = clinicians.find((p) => p.relation === "GP") ?? clinicians[0];
   const personas = [...state.people.filter((p) => p.accessStatus !== 'revoked' && (p.role === "patient" || p.role === "family" || p.role === "carer")), ...(primaryClinician ? [primaryClinician] : [])];
 
-  const familyUnread = visibleMessages(state, "family-group", viewerId).filter((m) => m.kind === "notification").length;
   const pending = isPatient ? state.consentRequests.filter((r) => r.status === "pending").length : 0;
   const tabs: TabDef[] = isClinician
     ? [{ id: "home", label: "Record", icon: <RecordIcon /> }]
@@ -92,13 +91,11 @@ export default function App() {
           { id: "body", label: "Body", icon: <BodyIcon /> },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
           { id: "circle", label: "Circle", icon: <LockIcon size={20} /> },
-          { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
         ]
       : [
           { id: "home", label: patient.shortName, icon: <HomeIcon /> },
           { id: "body", label: "Body", icon: <BodyIcon /> },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
-          { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
         ];
   const tabParam = params.get("tab") as Tab | null;
   const tab: Tab = tabParam && (tabs.some((t) => t.id === tabParam) || tabParam === "activity" || (tabParam === "levels" && isPatient)) ? tabParam : "home";
@@ -239,15 +236,6 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
       </div>
     );
   }
-  if (tab === "family") {
-    return (
-      <div className="app-main-h">
-        <div className="mx-auto h-full w-full max-w-3xl lg:py-4">
-          <Chat state={state} actions={actions} threadId="family-group" viewerId={viewer.id} big={isPatient} canCompose={false} />
-        </div>
-      </div>
-    );
-  }
   if (!dm) return null;
   const suggestions = isPatient
     ? [firstFamily ? `Let ${firstFamily.shortName} see my test results` : "Who can see what?", "Who can see what?", "What's coming up this week?", "Explain my latest blood tests"]
@@ -326,9 +314,6 @@ function BodyIcon() {
 }
 function HomeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z" /></svg>;
-}
-function PeopleIcon() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.5" /><circle cx="17" cy="10" r="2.5" /><path d="M3 20a6 6 0 0 1 12 0M15 20a4 4 0 0 1 6 0" /></svg>;
 }
 function RecordIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" /><path d="M14 3v6h6M9 13h6M9 17h6" /></svg>;
