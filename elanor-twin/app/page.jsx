@@ -3,60 +3,89 @@
 import { useMemo, useState } from "react";
 import TwinCanvas from "../components/TwinCanvas";
 
+const patient = {
+  id: "SIM-000006",
+  name: "Eleanor Chen",
+  age: 83,
+  gender: "female",
+  access: "Step-free",
+  contact: "Telephone",
+};
+
+function rangeDeviation(value, low, high) {
+  if (value < low) return (low - value) / low;
+  if (value > high) return (value - high) / high;
+  return 0;
+}
+
+function severityFor(deviation) {
+  if (deviation >= 0.25) return "high";
+  if (deviation > 0) return "moderate";
+  return "within";
+}
+
+function sourceLabel(service, timestamp) {
+  return `${service} · ${timestamp}`;
+}
+
+const bloodDeviation = Math.max(rangeDeviation(2.1, 4, 11), rangeDeviation(1.6, 2, 7.5));
+const metabolicDeviation = rangeDeviation(49, 20, 41);
+const activityDeviation = (4200 - 2200) / 4200;
+
 const signals = {
   activity: {
     label: "Activity signal",
     location: "Whole-body mobility",
-    tone: "attention",
-    value: "1,800 steps/day",
-    comparison: "Personal baseline: 4,200 steps/day",
-    detail: "Latest home readings range from 1,700 to 2,200 steps/day. The watch is active, good quality, and has 76% battery.",
-    source: "Home Health · 12 Sep 2026",
+    severity: severityFor(activityDeviation),
+    value: "2,200 steps/day",
+    comparison: "48% below Eleanor’s 4,200-step baseline",
+    detail: "This is the most recent Home Health reading, received at 17:10 UTC. Device data quality is good; the app does not infer a cause from the change.",
+    source: sourceLabel("Home Health", "12 Sep 2026 · 17:10 UTC"),
   },
   blood: {
     label: "Blood signal",
     location: "Circulatory system",
-    tone: "flag",
+    severity: severityFor(bloodDeviation),
     value: "WCC 2.1 · Neutrophils 1.6",
-    comparison: "Both are below the supplied source ranges",
-    detail: "Latest FBC: haemoglobin 144 g/L and platelets 269 ×10⁹/L. Values are presented as simulation signals, not clinical advice.",
-    source: "Diagnostics · 11 Sep 2026",
+    comparison: "WCC is 48% below its supplied lower range",
+    detail: "Latest FBC: haemoglobin 144 g/L and platelets 269 ×10⁹/L. The colour reflects distance from the supplied range, not a clinical assessment.",
+    source: sourceLabel("Diagnostics", "11 Sep 2026 · 08:00 UTC"),
   },
   metabolic: {
     label: "Metabolic signal",
     location: "Glucose monitoring",
-    tone: "flag",
+    severity: severityFor(metabolicDeviation),
     value: "HbA1c 49 mmol/mol",
-    comparison: "Source reference range: 20–41",
-    detail: "This is the latest historical HbA1c available in the simulation record.",
-    source: "Diagnostics · 11 Sep 2026",
+    comparison: "20% above the supplied upper range of 41",
+    detail: "This is the latest HbA1c available in the simulation record. The amber label represents a moderate distance from the displayed range.",
+    source: sourceLabel("Diagnostics", "11 Sep 2026 · 08:00 UTC"),
   },
   liver: {
     label: "Liver signal",
     location: "Abdominal monitoring",
-    tone: "attention",
-    value: "Bilirubin 25 µmol/L",
-    comparison: "Source reference range: 0–21",
-    detail: "Latest historical LFT also records ALT 11 U/L, ALP 55 U/L and albumin 35 g/L. Three later CareCircle LFT records are within their displayed ranges.",
-    source: "Diagnostics · 11–12 Sep 2026",
+    severity: "within",
+    value: "Latest LFT within source range",
+    comparison: "ALT 35 · ALP 75 · bilirubin 16 · albumin 42",
+    detail: "The most recent available LFT is a CareCircle result. All four displayed values are within its supplied ranges; earlier values are not used for this signal.",
+    source: sourceLabel("Diagnostics", "12 Sep 2026 · 12:02 UTC"),
   },
   mobility: {
     label: "Mobility pathway",
     location: "Lower-body and acute care",
-    tone: "attention",
+    severity: "moderate",
     value: "Reduced mobility · AMU bed 1",
-    comparison: "Hospital status: medical take · routine acuity",
-    detail: "The active hospital attendance is assigned to Dr Alex Morgan. It was recorded at 04:20 UTC on 12 September.",
-    source: "Northbank General · 12 Sep 2026",
+    comparison: "Active pathway · medical take · routine acuity",
+    detail: "This is an active pathway rather than a reference-range measurement. Amber means it needs a clear, current view, not that a numerical value is abnormal.",
+    source: sourceLabel("Northbank General", "12 Sep 2026 · 04:20 UTC"),
   },
   care: {
     label: "Care network",
     location: "Home and community",
-    tone: "network",
+    severity: "moderate",
     value: "Home support not yet arranged",
-    comparison: "Assessment awaiting allocation",
+    comparison: "Assessment awaiting allocation · due 13 Sep",
     detail: "Two daily visits are proposed; funding is pending, no carer is available, home access is not confirmed, and no key safe is recorded.",
-    source: "Community Care · due 13 Sep 2026",
+    source: sourceLabel("Community Care", "12 Sep 2026 · 08:00 UTC"),
   },
 };
 
@@ -67,15 +96,15 @@ const knowledge = [
   },
   {
     keys: ["activity", "steps", "watch", "wearable", "walking"],
-    answer: "Eleanor’s activity signal is 1,800 steps/day against a 4,200-step personal baseline. Recent readings range from 1,700 to 2,200; the watch is active with good-quality data.",
+    answer: "The most recent Home Health reading is 2,200 steps/day at 17:10 UTC, against Eleanor’s 4,200-step personal baseline. The signal is 48% below baseline; device data quality is good.",
   },
   {
     keys: ["blood", "fbc", "white", "neutrophil", "lab"],
-    answer: "The latest FBC shows white cells 2.1 ×10⁹/L and neutrophils 1.6 ×10⁹/L, below the source ranges. Haemoglobin is 144 g/L and platelets 269 ×10⁹/L.",
+    answer: "The latest FBC, from 11 September at 08:00 UTC, shows white cells 2.1 ×10⁹/L and neutrophils 1.6 ×10⁹/L. White cells are 48% below the supplied lower range; haemoglobin is 144 g/L and platelets 269 ×10⁹/L.",
   },
   {
     keys: ["home", "care", "support", "carer", "social"],
-    answer: "Home support is open but not yet arranged. The home-care assessment is waiting for allocation; two daily visits are proposed and funding is pending.",
+    answer: "Home support is open but not yet arranged. The current assessment is waiting for allocation; two daily visits are proposed and funding is pending.",
   },
   {
     keys: ["hospital", "mobility", "amu", "admission"],
@@ -95,6 +124,7 @@ function askTwin(question) {
 
 export default function Home() {
   const [selected, setSelected] = useState("activity");
+  const [focusVersion, setFocusVersion] = useState(0);
   const [question, setQuestion] = useState("What needs attention today?");
   const [answer, setAnswer] = useState(askTwin("What needs attention today?"));
   const signal = signals[selected];
@@ -106,24 +136,30 @@ export default function Home() {
     setAnswer(askTwin(question));
   }
 
+  function selectSignal(id) {
+    setSelected(id);
+    setFocusVersion((version) => version + 1);
+  }
+
   return (
     <main>
       <header className="topbar">
         <div className="brand"><span className="brand-mark">E</span><span>Eleanor Twin</span></div>
-        <div className="patient-pill"><span className="live-dot" />SIM-000006 · synthetic data</div>
-        <div className="snapshot">Snapshot · 12 Sep 2026 · 14:03 UTC · paused</div>
+        <div className="patient-pill"><span className="live-dot" />{patient.id} · synthetic data</div>
+        <div className="snapshot">Source refresh · 12 Sep 2026 · 18:05 UTC · paused</div>
       </header>
 
       <section className="hero">
         <div>
           <p className="eyebrow">DIGITAL TWIN / CARE MATRIX</p>
-          <h1>Eleanor Chen</h1>
+          <h1>{patient.name}</h1>
           <p className="intro">A connected view of Eleanor’s recorded signals, care pathways and lived context. Select a signal on the twin, or ask it a question.</p>
         </div>
         <div className="identity-grid">
-          <div><span>Age</span><strong>83</strong></div>
-          <div><span>Access</span><strong>Step-free</strong></div>
-          <div><span>Contact</span><strong>Telephone</strong></div>
+          <div><span>Age</span><strong>{patient.age}</strong></div>
+          <div><span>Gender</span><strong>Female</strong></div>
+          <div><span>Access</span><strong>{patient.access}</strong></div>
+          <div><span>Contact</span><strong>{patient.contact}</strong></div>
         </div>
       </section>
 
@@ -131,9 +167,9 @@ export default function Home() {
         <aside className="signal-rail" aria-label="Signal matrix">
           <p className="rail-label">Signal matrix</p>
           {cards.map(([id, item], index) => (
-            <button key={id} className={`signal-card ${selected === id ? "selected" : ""} ${item.tone}`} onClick={() => setSelected(id)}>
+            <button key={id} className={`signal-card ${selected === id ? "selected" : ""} ${item.severity}`} onClick={() => selectSignal(id)} aria-pressed={selected === id}>
               <span className="signal-index">0{index + 1}</span>
-              <span><strong>{item.label}</strong><small>{item.value}</small></span>
+              <span><strong>{item.label}</strong><small>{item.value}</small><em>{item.severity === "within" ? "Within source range" : item.severity === "high" ? "Far outside range" : "Needs attention"}</em></span>
               <i />
             </button>
           ))}
@@ -142,7 +178,7 @@ export default function Home() {
         <div className="twin-stage">
           <div className="matrix-field" />
           <div className="stage-copy"><span>SOMA-X BODY MAP</span><small>Drag to orbit · select a glowing signal</small></div>
-          <TwinCanvas selected={selected} onPick={setSelected} />
+          <TwinCanvas selected={selected} onPick={selectSignal} gender={patient.gender} focusVersion={focusVersion} signalSeverities={Object.fromEntries(cards.map(([id, item]) => [id, item.severity]))} />
           <div className="body-label label-head">blood</div>
           <div className="body-label label-left">metabolic</div>
           <div className="body-label label-right">liver</div>
@@ -151,7 +187,7 @@ export default function Home() {
 
         <aside className="inspector" aria-live="polite">
           <p className="rail-label">Selected signal</p>
-          <div className={`signal-state ${signal.tone}`}><span />{signal.tone === "flag" ? "Source-range flag" : signal.tone === "network" ? "Connected pathway" : "Needs context"}</div>
+          <div className={`signal-state ${signal.severity}`}><span />{signal.severity === "within" ? "Within source range" : signal.severity === "high" ? "Far outside source range" : "Needs attention"}</div>
           <h2>{signal.label}</h2>
           <p className="location">{signal.location}</p>
           <p className="signal-value">{signal.value}</p>
@@ -176,7 +212,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer>Simulation training data only · Values, labels and pathways must not be used as clinical advice.</footer>
+      <footer>Simulation training data only · Signal colours show source-range distance or pathway state, not clinical priority.</footer>
     </main>
   );
 }
