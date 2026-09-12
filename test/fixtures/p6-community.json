@@ -1,0 +1,556 @@
+{
+ "now": 1789200000000,
+ "resources": [
+  {
+   "id": "r-13",
+   "data": {
+    "unit": "steps/day",
+    "value": 1800,
+    "metric": "steps",
+    "quality": "good",
+    "baseline": 4200,
+    "observedAt": 1789200000000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Activity trend below personal baseline",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789200000000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-14",
+   "data": {
+    "battery": 76,
+    "quality": "good",
+    "lastSyncedAt": 1789200000000
+   },
+   "kind": "device",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Home activity watch",
+   "status": "active",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789200000000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-15",
+   "data": {
+    "unit": "steps/day",
+    "value": 4350,
+    "metric": "steps",
+    "quality": "good",
+    "observedAt": 1788595200000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Daily activity",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788595200000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-16",
+   "data": {
+    "unit": "steps/day",
+    "value": 4100,
+    "metric": "steps",
+    "quality": "good",
+    "observedAt": 1788681600000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Daily activity",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788681600000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-17",
+   "data": {
+    "unit": "steps/day",
+    "value": 4650,
+    "metric": "steps",
+    "quality": "good",
+    "observedAt": 1788768000000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Daily activity",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788768000000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-18",
+   "data": {
+    "unit": "steps/day",
+    "value": 3900,
+    "metric": "steps",
+    "quality": "good",
+    "observedAt": 1788854400000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Daily activity",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788854400000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-19",
+   "data": {
+    "unit": "steps/day",
+    "value": 3500,
+    "metric": "steps",
+    "quality": "good",
+    "observedAt": 1788940800000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Daily activity",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788940800000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-20",
+   "data": {
+    "unit": "steps/day",
+    "value": 2800,
+    "metric": "steps",
+    "quality": "good",
+    "observedAt": 1789027200000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Daily activity",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789027200000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-21",
+   "data": {
+    "unit": "steps/day",
+    "value": 2400,
+    "metric": "steps",
+    "quality": "good",
+    "observedAt": 1789113600000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Daily activity",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789113600000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-22",
+   "data": {
+    "unit": "bpm",
+    "value": 68,
+    "metric": "heart-rate",
+    "quality": "good",
+    "observedAt": 1788595200000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Resting heart rate",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788595200000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-23",
+   "data": {
+    "unit": "bpm",
+    "value": 67,
+    "metric": "heart-rate",
+    "quality": "good",
+    "observedAt": 1788681600000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Resting heart rate",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788681600000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-24",
+   "data": {
+    "unit": "bpm",
+    "value": 69,
+    "metric": "heart-rate",
+    "quality": "good",
+    "observedAt": 1788768000000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Resting heart rate",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788768000000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-25",
+   "data": {
+    "unit": "bpm",
+    "value": 68,
+    "metric": "heart-rate",
+    "quality": "good",
+    "observedAt": 1788854400000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Resting heart rate",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788854400000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-26",
+   "data": {
+    "unit": "bpm",
+    "value": 70,
+    "metric": "heart-rate",
+    "quality": "good",
+    "observedAt": 1788940800000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Resting heart rate",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788940800000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-27",
+   "data": {
+    "unit": "bpm",
+    "value": 69,
+    "metric": "heart-rate",
+    "quality": "good",
+    "observedAt": 1789027200000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Resting heart rate",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789027200000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-28",
+   "data": {
+    "unit": "bpm",
+    "value": 68,
+    "metric": "heart-rate",
+    "quality": "good",
+    "observedAt": 1789113600000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Resting heart rate",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789113600000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-29",
+   "data": {
+    "unit": "h",
+    "value": 7.2,
+    "metric": "sleep",
+    "quality": "good",
+    "observedAt": 1788595200000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Sleep duration",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788595200000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-30",
+   "data": {
+    "unit": "h",
+    "value": 7.5,
+    "metric": "sleep",
+    "quality": "good",
+    "observedAt": 1788681600000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Sleep duration",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788681600000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-31",
+   "data": {
+    "unit": "h",
+    "value": 6.8,
+    "metric": "sleep",
+    "quality": "good",
+    "observedAt": 1788768000000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Sleep duration",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788768000000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-32",
+   "data": {
+    "unit": "h",
+    "value": 7.1,
+    "metric": "sleep",
+    "quality": "good",
+    "observedAt": 1788854400000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Sleep duration",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788854400000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-33",
+   "data": {
+    "unit": "h",
+    "value": 7.4,
+    "metric": "sleep",
+    "quality": "good",
+    "observedAt": 1788940800000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Sleep duration",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1788940800000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-34",
+   "data": {
+    "unit": "h",
+    "value": 6.9,
+    "metric": "sleep",
+    "quality": "good",
+    "observedAt": 1789027200000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Sleep duration",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789027200000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  },
+  {
+   "id": "r-35",
+   "data": {
+    "unit": "h",
+    "value": 7.3,
+    "metric": "sleep",
+    "quality": "good",
+    "observedAt": 1789113600000
+   },
+   "kind": "observation",
+   "dueAt": 1789286400000,
+   "owner": "wearables",
+   "title": "Sleep duration",
+   "status": "available",
+   "version": 1,
+   "priority": "routine",
+   "createdAt": 1789113600000,
+   "patientId": "SIM-000006",
+   "visibleTo": [
+    "wearables",
+    "community",
+    "patient"
+   ]
+  }
+ ]
+}

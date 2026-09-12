@@ -1,9 +1,10 @@
 "use client";
 
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { Vector3 } from "three";
 
 const nodePositions = {
   activity: [0, 0.15, 0.88],
@@ -14,16 +15,34 @@ const nodePositions = {
   care: [0.75, -0.1, 0.62],
 };
 
-function SomaBody() {
+const severityColours = {
+  high: "#C2572F",
+  moderate: "#C98A1E",
+  within: "#2F6B4F",
+};
+
+const cameraFocus = {
+  activity: { position: [0, 0.1, 4.3], target: [0, 0.05, 0] },
+  blood: { position: [0, 1.12, 3.45], target: [0, 1.08, 0] },
+  metabolic: { position: [-0.7, 0.48, 3.25], target: [-0.35, 0.45, 0] },
+  liver: { position: [0.72, 0.44, 3.25], target: [0.4, 0.4, 0] },
+  mobility: { position: [0, -0.92, 3.55], target: [0, -0.92, 0] },
+  care: { position: [0.82, -0.08, 3.5], target: [0.64, -0.08, 0] },
+};
+
+function SomaBody({ gender }) {
   const source = useLoader(OBJLoader, "/models/soma-x-base-body.obj");
+  const profile = gender === "female"
+    ? { scale: [1.9, 2.08, 2.1], colour: "#6d4c73" }
+    : { scale: [2.1, 2.08, 2.1], colour: "#456a78" };
   const body = useMemo(() => {
     const clone = source.clone(true);
     clone.traverse((child) => {
       if (child.isMesh) {
         child.material = new child.material.constructor({
-          color: "#506fca",
-          emissive: "#1f4eaa",
-          emissiveIntensity: 0.12,
+          color: profile.colour,
+          emissive: "#ffffff",
+          emissiveIntensity: 0.04,
           metalness: 0.12,
           roughness: 0.55,
           transparent: true,
@@ -32,10 +51,10 @@ function SomaBody() {
       }
     });
     return clone;
-  }, [source]);
+  }, [source, profile.colour]);
 
   return (
-    <primitive object={body} position={[0, 0.05, 0]} scale={[2.1, 2.1, 2.1]} />
+    <primitive object={body} position={[0, 0.05, 0]} scale={profile.scale} />
   );
 }
 
@@ -70,42 +89,62 @@ function SignalNode({ id, color, selected, onPick }) {
   );
 }
 
-function Figure({ selected, onPick }) {
+function CameraDirector({ selected, focusVersion }) {
+  const controls = useRef();
+  const { camera } = useThree();
+  const targetPosition = useMemo(() => new Vector3(), []);
+  const targetLookAt = useMemo(() => new Vector3(), []);
+  const isMoving = useRef(true);
+
+  useEffect(() => {
+    const focus = cameraFocus[selected] ?? cameraFocus.activity;
+    targetPosition.set(...focus.position);
+    targetLookAt.set(...focus.target);
+    isMoving.current = true;
+  }, [focusVersion, selected, targetLookAt, targetPosition]);
+
+  useFrame(() => {
+    if (!isMoving.current) return;
+    camera.position.lerp(targetPosition, 0.1);
+    controls.current?.target.lerp(targetLookAt, 0.1);
+    controls.current?.update();
+    if (camera.position.distanceTo(targetPosition) < 0.015 && controls.current?.target.distanceTo(targetLookAt) < 0.015) {
+      isMoving.current = false;
+    }
+  });
+
+  return <OrbitControls ref={controls} enablePan={false} minDistance={2.8} maxDistance={6.5} />;
+}
+
+function Figure({ selected, onPick, gender, signalSeverities, focusVersion }) {
   const signals = useMemo(
-    () => [
-      ["activity", "#ffb84e"],
-      ["blood", "#ff5f7e"],
-      ["metabolic", "#ff5f7e"],
-      ["liver", "#ffb84e"],
-      ["mobility", "#ffb84e"],
-      ["care", "#8f7cff"],
-    ],
-    [],
+    () => Object.keys(nodePositions).map((id) => [id, severityColours[signalSeverities[id]] ?? severityColours.moderate]),
+    [signalSeverities],
   );
 
   return (
     <>
-      <ambientLight intensity={2.4} />
-      <pointLight position={[3, 3, 4]} intensity={13} color="#c7d8ff" />
-      <pointLight position={[-3, 0, 3]} intensity={5} color="#ffd3dc" />
-      <SomaBody />
+      <ambientLight intensity={2.8} />
+      <pointLight position={[3, 3, 4]} intensity={11} color="#ffffff" />
+      <pointLight position={[-3, 0, 3]} intensity={4} color="#f1e4ec" />
+      <SomaBody gender={gender} />
       <mesh position={[0, -1.72, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[2.5, 64]} />
-        <meshBasicMaterial color="#5277db" transparent opacity={0.1} />
+        <meshBasicMaterial color="#2F6B4F" transparent opacity={0.1} />
       </mesh>
       {signals.map(([id, color]) => (
         <SignalNode key={id} id={id} color={color} selected={id === selected} onPick={onPick} />
       ))}
-      <OrbitControls enablePan={false} minDistance={4.3} maxDistance={6.5} />
+      <CameraDirector selected={selected} focusVersion={focusVersion} />
     </>
   );
 }
 
-export default function TwinCanvas({ selected, onPick }) {
+export default function TwinCanvas({ selected, onPick, gender, signalSeverities, focusVersion }) {
   return (
     <Canvas camera={{ position: [0, 0.1, 5.2], fov: 42 }} dpr={[1, 1.5]}>
-      <color attach="background" args={["#eff4fb"]} />
-      <Figure selected={selected} onPick={onPick} />
+      <color attach="background" args={["#F2F4F1"]} />
+      <Figure selected={selected} onPick={onPick} gender={gender} signalSeverities={signalSeverities} focusVersion={focusVersion} />
     </Canvas>
   );
 }

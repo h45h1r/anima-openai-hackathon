@@ -45,7 +45,12 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string)
   const surname = simPatient.name.split(" ").pop() ?? simPatient.name;
   const relatives = await sim.searchPatients(surname).then((r) => r.items).catch(() => [] as SimPatient[]);
   const practiceId = simPatient.localIds?.gp ? `SIM-${simPatient.localIds.gp.split("-")[0] === "RIV" ? "RIVERSIDE" : simPatient.localIds.gp.split("-")[0]}` : undefined;
-  const org = practiceId ? await sim.organization(practiceId).catch(() => undefined) : undefined;
+  let org = practiceId ? await sim.organization(practiceId).catch(() => undefined) : undefined;
+  if (!org && practiceId) {
+    // The local sim-app serves the ODS search but not the single-organisation read.
+    const list = await sim.organizations().catch(() => undefined);
+    org = list?.entry?.map((e) => e.resource).find((r) => r?.id === practiceId) ?? undefined;
+  }
   const practice = org?.name ?? "GP practice";
 
   const rs = view.resources.filter((r) => !r.patientId || r.patientId === patientSimId);
@@ -165,6 +170,19 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string)
   for (const r of rs) {
     if (r.kind === "encounter" && r.data?.text) {
       careNotes.push({ id: r.id, date: day(r.createdAt), authorId: (r.data?.author && clinicianIdByName.get(r.data.author)) ?? defaultClinicianId, title: `${r.title}${r.data?.reason ? ` — ${r.data.reason}` : ""}`, text: r.data.text });
+    }
+    if (r.kind === "discharge-summary" && r.data?.sections) {
+      const sec = r.data.sections as NonNullable<CareNote["sections"]>;
+      const clinic = r.title.split("·")[0]?.trim();
+      careNotes.push({
+        id: r.id,
+        kind: "letter",
+        date: day((r.data?.sentAt as number | undefined) ?? r.createdAt),
+        authorId: (r.data?.sentBy && clinicianIdByName.get(r.data.sentBy as string)) ?? defaultClinicianId,
+        title: clinic ? `${clinic} clinic letter` : "Hospital letter",
+        text: [sec.reason, sec.course, sec.results, sec.diagnoses, sec.followUp].filter(Boolean).join(" "),
+        sections: sec,
+      });
     }
     if (r.kind === "observation" && typeof r.data?.text === "string" && r.data.text.length > 20) {
       careNotes.push({ id: r.id, date: day(r.createdAt), authorId: defaultClinicianId, title: r.title, text: r.data.text });

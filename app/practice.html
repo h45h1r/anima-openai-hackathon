@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CareCircle · Practice view</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..600,50&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="practice.css">
+</head>
+<body>
+<header class="bar">
+  <div>
+    <span class="tag">CareCircle · synthetic record · Anima sim world</span>
+    <h1>Your health. Your people. Your permissions.</h1>
+  </div>
+  <div class="who">
+    <strong id="pt-name">Eleanor Chen</strong>
+    <span id="pt-meta">SIM-000006 · 83 · Riverside Practice</span>
+    <a href="/twin/" class="ghost">Open her twin</a>
+  </div>
+  <div class="clock"><span>Sim clock</span><strong id="sim-now">…</strong></div>
+</header>
+
+<main class="stage">
+  <section class="circle" aria-labelledby="circle-h">
+    <h2 id="circle-h">Eleanor's circle</h2>
+    <p class="lede">Set once. Changed any time. Synced to the record so the practice never asks twice.</p>
+    <table class="consent" id="consent"></table>
+    <form id="agent-form" class="agent">
+      <label for="agent-text">Or just tell the agent</label>
+      <div class="row">
+        <input id="agent-text" placeholder="Let Tom see my appointments but not results">
+        <button type="submit">Apply</button>
+      </div>
+      <p id="agent-reply" class="reply" hidden></p>
+    </form>
+    <div class="quick">
+      <span>Try:</span>
+      <button data-say="Stop sharing my results with Sarah for now">Pause Sarah's results</button>
+      <button data-say="John can see my results and follow-up too">Open up to John</button>
+    </div>
+  </section>
+
+  <section class="phone-wrap" aria-label="Family messages">
+    <div class="phone">
+      <nav class="tabs" id="tabs"></nav>
+      <div class="thread" id="thread"></div>
+      <form class="ask" id="ask-form">
+        <input id="ask-text" placeholder="Ask as Sarah…" autocomplete="off">
+        <button type="submit" aria-label="Send">↑</button>
+      </form>
+    </div>
+    <p class="fine">Messages are delivered inside the demo, not to a real phone. WhatsApp-style thread is a mock.</p>
+  </section>
+
+  <section class="evidence" aria-labelledby="ev-h">
+    <h2 id="ev-h">What the practice sees</h2>
+    <ol class="gate" id="gate"></ol>
+    <div class="controls">
+      <button id="b-order" class="primary">1 · Order LFT in Anima</button>
+      <button id="b-advance">2 · Advance clock 121 min</button>
+      <button id="b-confirm">3 · Clinician: discussed with Eleanor <small>simulated</small></button>
+      <button id="b-escalate" class="warn">Nobody confirms for 3 days</button>
+      <button id="b-reset" class="ghost">Reset demo</button>
+    </div>
+    <div id="result" class="result" hidden></div>
+    <h3>Anima activity trail</h3>
+    <ol class="trail" id="trail"></ol>
+  </section>
+</main>
+<div id="toast" class="toast" hidden></div>
+<script src="practice.js" type="module"></script>
+</body>
+</html>

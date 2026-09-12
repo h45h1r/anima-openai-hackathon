@@ -74,3 +74,22 @@ The family page only receives selected fields from allowed categories. It exclud
 **Identity scope:** patient and GP accounts are explicitly local demo identities selected by the `patient` query parameter. They are not verified patient/clinician authentication. The server binds to loopback; do not expose this demo to real patients or the internet as an authorization service. Family links are bearer credentials, stored hashed and valid for 30 days; family sessions last 12 hours. Consent categories apply only to the companion family API. They do not gate the existing simulator APIs or alter care-team clinical access. Sync is to the local GP copy, not an external EHR or a native FHIR Consent service.
 
 Run `node sim-app/integration-companion.mjs` for the manual HTTP permission/sync regression check. It uses a separate synthetic patient and leaves its test membership revoked. The unit suite also covers category and field filtering. Kindred at port 3111 uses this database through `web/src/lib/consent-store.ts`. Its app, consent-request and agent consent writes wait for persistence before returning success. Open Kindred clients refresh external consent changes every 2.5 seconds. The original family-link API remains available for development, but it is not a second patient UI.
+
+## Enrichment
+
+`enrich/enrich.mjs` rewrites the demo cohort's synthetic blood histories so every analyte
+tells one coherent story (eGFR coupled to creatinine through CKD-EPI 2021), adds repeat
+medicines and active problems that match the coded conditions, books one story appointment
+per patient through the local action API, and gives Amira Khan a home activity watch with ten
+days of readings. It writes through the same projection and event tables as the app and is
+idempotent.
+
+```sh
+node sim-app/enrich/enrich.mjs --dry-run
+node sim-app/enrich/enrich.mjs
+node sim-app/enrich/enrich.mjs --verify
+```
+
+Set `DATABASE_URL`/`DIRECT_DATABASE_URL` (for example with `node --env-file=.env.neon.development`)
+and `--api` pointing at a backend on the same database to enrich Neon. Details, the cohort
+stories and caveats are in [enrich/README.md](enrich/README.md).

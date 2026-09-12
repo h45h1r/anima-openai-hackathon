@@ -107,6 +107,9 @@ export interface CareNote {
   authorId: string;
   title: string;
   text: string;
+  /** Present for hospital letters: the structured sections of the discharge correspondence. */
+  sections?: { reason?: string; course?: string; results?: string; diagnoses?: string; followUp?: string; gpActions?: string; medicationChanges?: string };
+  kind?: "letter" | "note";
 }
 
 export interface MentalHealthEntry {

@@ -88,6 +88,7 @@ export const sim = {
   view: (site: string, patientId: string, limit = 500) => call<SimView>(`/api/sites/${site}/view?patient=${encodeURIComponent(patientId)}&limit=${limit}`),
   searchPatients: (q: string) => call<{ total: number; items: SimPatient[] }>(`/api/sites/gp/patients?q=${encodeURIComponent(q)}`),
   organization: (id: string) => call<{ name?: string; address?: { line?: string[]; city?: string; postalCode?: string }[] }>(`/api/nhs/ods/Organization/${id}`),
+  organizations: () => call<{ entry?: { resource?: { id?: string; name?: string } }[] }>(`/api/nhs/ods/Organization?_count=100&_offset=0`),
   action: (site: string, action: SimAction) =>
     call<SimResource>(`/api/sites/${site}/actions`, {
       method: "POST",

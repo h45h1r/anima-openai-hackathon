@@ -62,6 +62,10 @@ Without `ANIMA_API_KEY`, Circle and companion chat still work; Ask/Care explain 
 
 The existing people and family relationships are demo configuration, not verified relatives. The persona switcher and demo sessions are not production authentication.
 
+## Body view
+
+`?tab=body` (patient and family) shows the record mapped onto a three.js figure: eight systems (heart, lungs, kidneys, sugar, liver, blood, joints, mind) computed from the live labs, problem list, medicines and wellbeing entries in `web/src/lib/body/systems.ts`. The figure is a stippled point cloud; with licensed models in `web/public/models/` (see `manifest.json` and `LICENSES.md` there) the body mesh is sampled into the same style and organ meshes light up per system. Consent applies per system: a family member without test-result access sees that system as "Not shared".
+
 ## Repository layout
 
 | Directory | Purpose |

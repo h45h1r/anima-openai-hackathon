@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CareCircle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..600,50&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="bar">
+  <div>
+    <span class="tag">CareCircle · synthetic record · Anima sim world</span>
+    <h1>Your health. Your people. Your permissions.</h1>
+  </div>
+  <div class="clock"><span>Sim clock</span><strong id="sim-now">…</strong><a href="practice.html" class="ghost">Practice view</a></div>
+</header>
+
+<main class="stage">
+  <!-- Eleanor's phone -->
+  <section class="phone main" aria-label="Eleanor's phone">
+    <div class="screen">
+      <div class="statusbar"><span>Eleanor</span><span id="e-time"></span></div>
+      <div class="pages">
+        <section class="page is-on" data-page="home">
+          <h2 class="greet">Good morning, <em>Eleanor</em></h2>
+          <div id="share-prompt" class="prompt" hidden></div>
+          <h3>How you're doing</h3>
+          <div id="cards" class="cards"><p class="fine">Reading your record…</p></div>
+          <h3>Coming up</h3>
+          <ul id="upcoming" class="upcoming"></ul>
+        </section>
+        <section class="page" data-page="body">
+          <iframe id="twin" title="Eleanor's body twin" src="/twin/?embed=1&focus=immune" loading="lazy"></iframe>
+          <div id="body-cards" class="body-cards"></div>
+        </section>
+        <section class="page" data-page="circle">
+          <h2 class="greet">My <em>circle</em></h2>
+          <p class="lede">Choose once what each person can see. Change it any time, here or by asking.</p>
+          <div id="people" class="people"></div>
+          <label class="askfirst">
+            <span><b>Ask me before sharing big news</b><small>Flagged results wait for your yes.</small></span>
+            <button id="askfirst" class="sw" role="switch" aria-checked="true"></button>
+          </label>
+        </section>
+        <section class="page" data-page="chat">
+          <div class="thread" id="e-thread"></div>
+          <form class="ask" id="e-form">
+            <input id="e-text" placeholder="Ask, or change who sees what…" autocomplete="off">
+            <button type="submit" aria-label="Send">↑</button>
+          </form>
+        </section>
+      </div>
+      <nav class="tabbar" id="e-tabs">
+        <button data-page="home" class="is-on">Home</button>
+        <button data-page="body">Body</button>
+        <button data-page="circle">Circle</button>
+        <button data-page="chat">Chat<span class="n" id="e-unread" hidden></span></button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Sarah's phone -->
+  <section class="phone small" aria-label="Sarah's phone">
+    <div class="screen">
+      <div class="statusbar"><span>Sarah · daughter</span><span id="s-time"></span></div>
+      <div class="pages">
+        <section class="page is-on" data-page="mum">
+          <h2 class="greet">Mum <em>this week</em></h2>
+          <div id="s-cards" class="cards"></div>
+          <h3>Coming up</h3>
+          <ul id="s-upcoming" class="upcoming"></ul>
+        </section>
+        <section class="page" data-page="schat">
+          <div class="thread" id="s-thread"></div>
+          <form class="ask" id="s-form">
+            <input id="s-text" placeholder="Ask about Mum's results…" autocomplete="off">
+            <button type="submit" aria-label="Send">↑</button>
+          </form>
+        </section>
+        <section class="page" data-page="group">
+          <div class="thread" id="g-thread"></div>
+          <p class="fine">Family group. Read-only in the demo.</p>
+        </section>
+      </div>
+      <nav class="tabbar" id="s-tabs">
+        <button data-page="mum" class="is-on">Mum</button>
+        <button data-page="schat">Chat<span class="n" id="s-unread" hidden></span></button>
+        <button data-page="group">Family<span class="n" id="g-unread" hidden></span></button>
+      </nav>
+    </div>
+  </section>
+</main>
+
+<footer class="director">
+  <button class="dir-toggle" id="dir-toggle" aria-expanded="false">Director <span id="gate-pill" class="pill"></span></button>
+  <div class="dir-body" id="dir-body" hidden>
+    <ol class="gate" id="gate"></ol>
+    <div class="controls">
+      <button id="b-order" class="primary">1 · Order LFT in Anima</button>
+      <button id="b-advance">2 · Advance clock 121 min</button>
+      <button id="b-confirm">3 · Practice tells Eleanor <small>simulated</small></button>
+      <button id="b-escalate" class="warn">Nobody tells her for 3 days</button>
+      <button id="b-reset" class="ghost">Reset</button>
+    </div>
+    <ol class="trail" id="trail"></ol>
+  </div>
+</footer>
+<div id="toast" class="toast" hidden></div>
+<script src="app.js" type="module"></script>
+</body>
+</html>
