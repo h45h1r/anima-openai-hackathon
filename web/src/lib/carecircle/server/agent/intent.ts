@@ -25,7 +25,8 @@ const LAB_Q =
 /** Appointment booking/slots — not preference memory keywords alone. */
 const APPT_Q = /\b(appoint(ment)?s?|book(ing)?|slots?|diary|schedule)\b/i;
 
-const DOC_Q = /\b(discharge|handover|document|letter|summary|next step|follow.?up task)\b/i;
+const DOC_Q =
+  /\b(discharge|handover|document|letter|summary|care\s*plan|next step|need to do next|do next|follow.?up task|what should i do)\b/i;
 
 const FOLLOWUP_Q =
   /^(what about|how about|and (?:the |my |what about )?|explain (?:that|this|it)|tell me more|why (?:is|was|that)|simpler|more simply|in plain|can you (?:clarify|expand)|also[, ]|what does that)/i;

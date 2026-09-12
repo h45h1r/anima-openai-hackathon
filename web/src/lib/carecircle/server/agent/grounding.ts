@@ -25,7 +25,14 @@ import {
   type ChatTurn,
 } from './intent';
 
-export { classifyAskIntent, isFollowUpQuestion, isLabIntent, type ChatTurn } from './intent';
+export {
+  classifyAskIntent,
+  isAppointmentIntent,
+  isDocumentIntent,
+  isFollowUpQuestion,
+  isLabIntent,
+  type ChatTurn,
+} from './intent';
 
 const TREND_Q = /\b(trend|chart|graph|changed|over time|history|compare|how has)\b/i;
 
@@ -527,16 +534,20 @@ export function buildDeterministicAnswer(input: {
     // Avoid dumping appointments for vague clinical asks that didn't match lab/vitals routing.
     const allowEvents = apptIntent || docIntent || /what.*(happening|next|record|care)|status|update/i.test(input.question);
     if (allowEvents) {
-      for (const ev of relevantEvents) {
-        facts.push({
-          text: formatEventFact(ev),
-          evidenceIds: [ev.evidenceId],
-        });
-        cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+      if (docIntent) {
+        pushDocumentFacts(relevantEvents, facts, cite);
+      } else {
+        for (const ev of relevantEvents) {
+          facts.push({
+            text: formatEventFact(ev),
+            evidenceIds: [ev.evidenceId],
+          });
+          cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+        }
       }
     }
 
-    if (input.measurements.length && /result|value|number|level/i.test(input.question) && !apptIntent) {
+    if (input.measurements.length && /result|value|number|level/i.test(input.question) && !apptIntent && !docIntent) {
       const byAnalyte = groupByAnalyte(input.measurements);
       const series = [...byAnalyte.values()].sort((a, b) => b.length - a.length)[0];
       const sorted = [...series].sort((a, b) => a.sampledAt.localeCompare(b.sampledAt));
@@ -550,13 +561,16 @@ export function buildDeterministicAnswer(input: {
   }
 
   let recordedNextStep: AgentAnswer['recordedNextStep'];
-  if ((!labIntent && (apptIntent || docIntent)) || docIntent || /next step|what happens next|follow.?up/i.test(input.question)) {
-    const next = input.events.find((e) =>
-      /follow|task|appoint|action|review/i.test(`${e.title} ${e.summary} ${e.status}`),
-    );
+  if ((!labIntent && (apptIntent || docIntent)) || docIntent || /next step|what happens next|follow.?up|need to do next/i.test(input.question)) {
+    const next =
+      input.events.find((e) => /follow|task|action|review|plan/i.test(`${e.title} ${e.summary}`)) ||
+      input.events.find((e) => /appoint/i.test(`${e.title} ${e.kind}`));
     if (next) {
+      const substance = extractEventSubstance(next) || truncate(humaniseEventSummary(next), 160);
       recordedNextStep = {
-        text: `Recorded next step: ${next.title} — ${truncate(humaniseEventSummary(next), 160)} (${humanStatus(next.status)}).`,
+        text: substance
+          ? `Recorded next step from ${friendlyDocTitle(next)}: ${substance}`
+          : `Recorded next step: ${next.title}.`,
         evidenceIds: [next.evidenceId],
       };
       cite(next.title, next.evidenceId, next.resourceId, next.service, next.kind, next.at);
@@ -581,7 +595,11 @@ export function buildDeterministicAnswer(input: {
       : proseFromFacts(facts, {
           short,
           labIntent,
+          docIntent,
+          apptIntent,
           memoriesHint: input.memoriesHint,
+          recordedNextStep: recordedNextStep?.text,
+          question: input.question,
         });
 
   return {
@@ -599,7 +617,15 @@ export function buildDeterministicAnswer(input: {
 /** Deterministic patient-facing prose from structured facts only. */
 export function proseFromFacts(
   facts: { text: string; evidenceIds: string[] }[],
-  opts?: { short?: boolean; labIntent?: boolean; memoriesHint?: string },
+  opts?: {
+    short?: boolean;
+    labIntent?: boolean;
+    docIntent?: boolean;
+    apptIntent?: boolean;
+    memoriesHint?: string;
+    recordedNextStep?: string;
+    question?: string;
+  },
 ): string {
   if (!facts.length) return 'I could not find permitted evidence for that question.';
   const short = opts?.short ?? false;
@@ -648,25 +674,203 @@ export function proseFromFacts(
     return sections.join('\n\n');
   }
 
-  const lead = lines[0];
-  const rest = lines.slice(1, short ? 3 : 5).map(stripFactChrome);
-  if (!rest.length) {
-    return `**What we know**\n${lead}\n\n**What it means**\nThis is what the permitted record shows for that question.\n\n**What to do next**\nAsk the care team if you want this explained in more detail.`;
+  if (opts?.docIntent || opts?.apptIntent) {
+    return proseFromEventFacts(lines, {
+      short,
+      docIntent: Boolean(opts.docIntent),
+      apptIntent: Boolean(opts.apptIntent),
+      recordedNextStep: opts.recordedNextStep,
+      question: opts.question,
+    });
   }
-  const bullets = rest.map((r) => `• ${r}`).join('\n');
-  return `**What we know**\n${lead}\n${bullets}\n\n**What it means**\nThese are the permitted details that match your question.\n\n**What to do next**\nAsk the care team if you want this explained in more detail.`;
+
+  const cleaned = lines.map(stripFactChrome).filter((l) => l && !isWorkflowChrome(l));
+  const lead = cleaned[0] || lines[0];
+  const rest = cleaned.slice(1, short ? 3 : 4);
+  const knowBody = rest.length
+    ? `${lead}\n${rest.map((r) => `• ${r}`).join('\n')}`
+    : lead;
+  const meaning = rest.length
+    ? 'Taken together, this is what the shared record currently shows for that question.'
+    : 'This is the clearest permitted detail in the record for that question.';
+  const next = opts?.recordedNextStep
+    ? stripRecordedNextPrefix(opts.recordedNextStep)
+    : 'If anything is unclear, check with the care team at your next contact.';
+
+  return `**What we know**\n${knowBody}\n\n**What it means**\n${meaning}\n\n**What to do next**\n${next}`;
+}
+
+function proseFromEventFacts(
+  lines: string[],
+  opts: {
+    short?: boolean;
+    docIntent: boolean;
+    apptIntent: boolean;
+    recordedNextStep?: string;
+    question?: string;
+  },
+): string {
+  const cleaned = lines.map(stripFactChrome).filter((l) => l && !isWorkflowChrome(l));
+  const actionLines = cleaned.filter((l) => looksLikeActionLine(l));
+  const contextLines = cleaned.filter((l) => !looksLikeActionLine(l));
+  const wantsNext = /next|do |follow|plan|should i/i.test(opts.question || '');
+
+  const knowBits: string[] = [];
+  if (opts.docIntent && (actionLines.length || contextLines.length)) {
+    const intro = wantsNext
+      ? 'Your latest care notes include these follow-up points:'
+      : 'From the latest letters and care notes on record:';
+    knowBits.push(intro);
+    const bullets = (actionLines.length ? actionLines : contextLines).slice(0, opts.short ? 3 : 4);
+    for (const b of bullets) knowBits.push(`• ${b}`);
+  } else if (opts.apptIntent) {
+    const intro = contextLines[0] || cleaned[0] || 'An appointment-related note is in the record.';
+    knowBits.push(intro);
+    for (const b of contextLines.slice(1, opts.short ? 2 : 3)) knowBits.push(`• ${b}`);
+  } else {
+    knowBits.push(cleaned[0] || lines[0]);
+    for (const b of cleaned.slice(1, 3)) knowBits.push(`• ${b}`);
+  }
+
+  const meaningBits: string[] = [];
+  if (opts.docIntent && actionLines.length) {
+    meaningBits.push(
+      'These are actions already written into your record by the care team — Kindred is restating them, not adding new advice.',
+    );
+  } else if (opts.docIntent) {
+    meaningBits.push(
+      'The shared documents describe what was recorded at that visit; they do not add a new diagnosis from Kindred.',
+    );
+  } else if (opts.apptIntent) {
+    meaningBits.push(
+      'This reflects appointment status in the record only — a preference or open slot is not the same as a confirmed booking.',
+    );
+  } else {
+    meaningBits.push('This is what the permitted record shows for that question.');
+  }
+
+  const nextBits: string[] = [];
+  if (opts.recordedNextStep) {
+    nextBits.push(stripRecordedNextPrefix(opts.recordedNextStep));
+  } else if (actionLines.length) {
+    nextBits.push('Follow the points above, and ask the care team if any step is unclear.');
+  } else if (opts.apptIntent) {
+    nextBits.push('Ask the care team to confirm the time if you are unsure whether it is booked.');
+  } else {
+    nextBits.push('Ask the care team if you want this explained in more detail.');
+  }
+
+  return [
+    `**What we know**\n${knowBits.join('\n')}`,
+    `**What it means**\n${meaningBits.join('\n')}`,
+    `**What to do next**\n${nextBits.join('\n')}`,
+  ].join('\n\n');
 }
 
 function stripFactChrome(line: string): string {
   return line
     .replace(/\s*—\s*outside illustrative range/gi, ' (outside illustrative range)')
     .replace(/\s*\(illustrative range[^)]*\)\.?/gi, '')
-    .replace(/\.$/, '');
+    .replace(/\bStatus:\s*[\w\s-]+/gi, '')
+    .replace(/\(\s*(sent|completed|draft|pending|recorded|arrived|booked|requested)\s*\)/gi, '')
+    .replace(/\s*[—-]\s*$/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\.\s*\./g, '.')
+    .replace(/\.$/, '')
+    .trim();
+}
+
+function isWorkflowChrome(line: string): boolean {
+  const t = line.trim();
+  return /^(status|stage)\b/i.test(t) || /^(sent|completed|draft|pending)$/i.test(t);
+}
+
+function looksLikeActionLine(line: string): boolean {
+  return /\b(continue|monitor|attend|follow|review|take|book|return|contact|check|keep|arrange|discuss|complete|start|stop|reduce|increase)\b/i.test(
+    line,
+  );
+}
+
+function stripRecordedNextPrefix(text: string): string {
+  return text.replace(/^Recorded next step(?: from [^:]+)?:\s*/i, '').trim();
+}
+
+function pushDocumentFacts(
+  events: NormalisedEvent[],
+  facts: { text: string; evidenceIds: string[] }[],
+  cite: (title: string, evidenceId: string, resourceId: string, service: string, kind: string, date?: string) => void,
+) {
+  const docs = events.filter(isDocumentLikeEvent).slice(0, 3);
+  const pool = docs.length ? docs : events.slice(0, 3);
+  for (const ev of pool) {
+    const actions = extractActionLines(ev);
+    const substance = extractEventSubstance(ev);
+    if (actions.length) {
+      facts.push({
+        text: `From ${friendlyDocTitle(ev)} (${formatDate(ev.at)}):`,
+        evidenceIds: [ev.evidenceId],
+      });
+      for (const a of actions.slice(0, 4)) {
+        facts.push({ text: a, evidenceIds: [ev.evidenceId] });
+      }
+    } else if (substance) {
+      facts.push({
+        text: `${friendlyDocTitle(ev)} (${formatDate(ev.at)}): ${substance}`,
+        evidenceIds: [ev.evidenceId],
+      });
+    } else {
+      facts.push({
+        text: formatEventFact(ev),
+        evidenceIds: [ev.evidenceId],
+      });
+    }
+    cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+  }
+}
+
+function isDocumentLikeEvent(ev: NormalisedEvent): boolean {
+  return /document|discharge|handover|letter|summary|consult|care\s*plan|note/i.test(
+    `${ev.kind} ${ev.title} ${ev.informationClass}`,
+  );
+}
+
+function friendlyDocTitle(ev: NormalisedEvent): string {
+  const t = ev.title.replace(/^Clinical Document:\s*/i, '').trim();
+  return t || ev.title;
+}
+
+function extractActionLines(ev: NormalisedEvent): string[] {
+  const raw = `${ev.summary || ''}\n${ev.rawSnippet || ''}`.replace(/\s+/g, ' ').trim();
+  if (!raw) return [];
+  const human = humaniseEventSummary(ev);
+  const blob = stripFactChrome(human || raw);
+  const chunks = blob
+    .split(/(?:;\s+|\.\s+(?=[A-Z])|\n+|•\s+)/)
+    .map((c) => stripFactChrome(c))
+    .filter((c) => c.length > 12 && looksLikeActionLine(c));
+  return [...new Set(chunks)].slice(0, 4);
+}
+
+function extractEventSubstance(ev: NormalisedEvent): string {
+  const human = stripFactChrome(humaniseEventSummary(ev));
+  if (!human) return '';
+  // Drop fictional-workflow boilerplate that doesn't help patients.
+  const cleaned = human
+    .replace(/\bThis is a fictional episode[^.]*\.?/gi, '')
+    .replace(/\bfor document workflow practice[^.]*\.?/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return truncate(cleaned, 220);
 }
 
 export function formatEventFact(ev: NormalisedEvent): string {
-  const summary = truncate(humaniseEventSummary(ev), 220);
-  return `${ev.title} (${humanStatus(ev.status)})${summary ? ` — ${summary}` : ''}.`;
+  const substance = extractEventSubstance(ev);
+  const when = formatDate(ev.at);
+  const title = friendlyDocTitle(ev);
+  if (substance) {
+    return `${title} (${when}): ${substance}`;
+  }
+  return `${title} on ${when}.`;
 }
 
 export function humaniseEventSummary(ev: NormalisedEvent): string {
@@ -749,8 +953,7 @@ function summariseUnknown(value: unknown, depth: number): string {
       }
       if (parts.length) {
         const who = asText(o.sentBy);
-        const stage = asText(o.stage);
-        const head = [stage && `Status: ${humanStatus(stage)}`, who && `From ${who}`].filter(Boolean).join('. ');
+        const head = who ? `From ${who}` : '';
         return [head, parts.join(' ')].filter(Boolean).join('. ');
       }
     }

@@ -86,9 +86,9 @@ export function humaniseResourceData(data: Record<string, unknown>, title = ''):
       const t = asString(secs[k]);
       if (t) parts.push(t.slice(0, 160));
     }
-    const stage = asString(data.stage);
     const who = asString(data.sentBy);
-    const head = [stage && `Status: ${stage}`, who && `From ${who}`].filter(Boolean).join('. ');
+    // Prefer clinical substance over workflow stage ("sent" / "completed").
+    const head = who ? `From ${who}` : '';
     if (parts.length || head) return [head, parts.join(' ')].filter(Boolean).join(' — ').slice(0, 500);
   }
   if (Array.isArray(data.entries)) {
@@ -387,7 +387,7 @@ export function buildSuggestions(ctx: ClinicalContext, allowedClasses: Informati
   const has = (c: InformationClass) => allowedClasses.includes(c) && ctx.recordClasses.includes(c);
   if (has('laboratory_results') && ctx.measurements.length) {
     const latest = ctx.measurements[ctx.measurements.length - 1];
-    suggestions.push(`Explain my latest ${latest.displayName} result`);
+    suggestions.push(friendlyLatestResultPrompt(latest.displayName));
     const byAnalyte = new Map<string, Measurement[]>();
     for (const m of ctx.measurements) {
       const list = byAnalyte.get(m.analyteId) || [];
@@ -396,25 +396,50 @@ export function buildSuggestions(ctx: ClinicalContext, allowedClasses: Informati
     }
     for (const [, series] of byAnalyte) {
       if (series.length >= 2) {
-        suggestions.push(`How has ${series[0].displayName} changed over time?`);
+        suggestions.push(friendlyTrendPrompt(series[0].displayName));
         break;
       }
     }
   }
   if (has('clinical_documents')) {
-    suggestions.push('What does the latest clinical document say I need to do next?');
+    suggestions.push('What should I do next from my latest letter?');
   }
   if (has('appointments') || has('logistics')) {
-    suggestions.push('Is my follow-up appointment confirmed, and when is it?');
+    suggestions.push('When is my next appointment?');
   }
   if (has('tasks')) {
-    suggestions.push('What open tasks or follow-ups are recorded?');
+    suggestions.push('What follow-ups are still open?');
   }
   if (has('medications')) {
-    suggestions.push('What is the status of my discharge medication supply?');
+    suggestions.push('How are my medicines looking?');
   }
   if (!suggestions.length) {
-    suggestions.push('What information is available in my shared care record right now?');
+    suggestions.push('What is in my shared care record right now?');
   }
   return suggestions.slice(0, 5);
+}
+
+function friendlyLatestResultPrompt(displayName: string): string {
+  const label = friendlyAnalyteLabel(displayName);
+  return `What does my latest ${label} show?`;
+}
+
+function friendlyTrendPrompt(displayName: string): string {
+  const label = friendlyAnalyteLabel(displayName);
+  return `How has my ${label} been changing?`;
+}
+
+function friendlyAnalyteLabel(displayName: string): string {
+  const name = displayName.trim();
+  if (/haemoglobin|hemoglobin/i.test(name)) return 'haemoglobin';
+  if (/home\s*activity/i.test(name)) return 'home activity reading';
+  if (/oxygen|spo2|pulse\s*ox/i.test(name)) return 'oxygen reading';
+  if (/heart\s*rate|pulse/i.test(name)) return 'heart rate';
+  if (/egfr|gfr/i.test(name)) return 'kidney (eGFR)';
+  if (/creatinine/i.test(name)) return 'creatinine';
+  if (/blood\s*pressure|systolic|diastolic/i.test(name)) return 'blood pressure';
+  if (/steps|walking/i.test(name)) return 'walking steps';
+  if (/active\s*energy|calories/i.test(name)) return 'activity energy';
+  if (/body\s*temp/i.test(name)) return 'temperature';
+  return name.toLowerCase();
 }

@@ -22,6 +22,7 @@ export default function AskPanel({
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const threadEnd = useRef<HTMLDivElement | null>(null);
   const thread = care.askThread;
   const level = viewer.id === state.patientId ? "everything" : kindredLevelForPerson(state, viewer.id);
@@ -34,6 +35,7 @@ export default function AskPanel({
     color: "#6D2E5B",
     initials: "K",
   };
+  const patientName = care.session?.selectedPatientName || state.patient.name;
 
   useEffect(() => {
     const draft = sessionStorage.getItem("kindred.draftQuestion");
@@ -106,21 +108,25 @@ export default function AskPanel({
   const latestAssistant = [...thread].reverse().find((m) => m.role === "assistant");
   const run = latestAssistant?.run || care.lastAnswer;
   const citations = run?.answer?.citations || [];
+  const empty = !thread.length && !busy;
+  const suggestions =
+    care.suggestions.length > 0
+      ? care.suggestions
+      : ["What do my latest blood tests show?", "When is my next appointment?", "How are my medicines looking?"];
 
   return (
     <div className="page">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-[26px] font-bold leading-tight sm:text-3xl">Ask</h1>
-          <p className="mt-1 text-[15px] text-muted">
-            Grounded clinical answers for <strong>{care.session?.selectedPatientName || state.patient.name}</strong>,
-            filtered for <strong>{viewer.shortName}</strong>. Access is managed in Circle.
+          <p className="mt-1 max-w-xl text-[15px] text-muted">
+            Plain answers from {patientName}&apos;s record, filtered for {viewer.shortName}.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Pill tone="plum">{levelLabel(level)}</Pill>
-          <Button variant="secondary" size="sm" onClick={onOpenCircle}>
-            Open Circle
+          <Pill tone="moss">{levelLabel(level)}</Pill>
+          <Button variant="ghost" size="sm" onClick={onOpenCircle}>
+            Circle
           </Button>
         </div>
       </div>
@@ -134,64 +140,59 @@ export default function AskPanel({
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
         <div className="flex min-h-[420px] flex-col rounded-2xl border border-line bg-card/60">
-          {!thread.length && !busy ? (
-            <div className="border-b border-line p-4">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted">Suggested</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(care.suggestions.length
-                  ? care.suggestions
-                  : [
-                      "Explain my latest blood tests",
-                      "What appointments are coming up?",
-                      "What medicines am I on?",
-                    ]
-                ).map((s) => (
+          {empty ? (
+            <div className="flex flex-1 flex-col items-center justify-center px-5 py-10 text-center">
+              <p className="max-w-md text-[17px] leading-relaxed text-ink">
+                Ask anything about the shared record — results, letters, or what to do next.
+              </p>
+              <div className="mt-5 flex max-w-lg flex-wrap justify-center gap-2">
+                {suggestions.map((s) => (
                   <button
                     key={s}
                     type="button"
                     disabled={busy}
                     onClick={() => void submit(s)}
-                    className="rounded-full border border-line bg-paper px-3 py-1.5 text-sm font-semibold hover:bg-card"
+                    className="rounded-full border border-line bg-paper px-3.5 py-2 text-sm font-medium text-ink hover:border-moss/40 hover:bg-moss-soft/40"
                   >
                     {s}
                   </button>
                 ))}
               </div>
             </div>
-          ) : null}
-
-          <div className="flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite">
-            {thread.map((msg) => (
-              <ThreadBubble
-                key={msg.id}
-                msg={msg}
-                agent={agent}
-                sourcesOpen={sourcesOpen}
-                setSourcesOpen={setSourcesOpen}
-                isLatestAssistant={msg.id === latestAssistant?.id && !busy}
-                onOpenCircle={onOpenCircle}
-              />
-            ))}
-            {busy && streamingText ? (
-              <div className="flex items-end gap-2">
-                <Avatar person={agent} size={28} />
-                <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-[15px] leading-relaxed text-ink shadow-sm ring-1 ring-line sm:max-w-[75%]">
-                  <Prose text={streamingText} />
-                  <span className="pulse-soft ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 rounded-sm bg-plum/60" />
+          ) : (
+            <div className="flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite">
+              {thread.map((msg) => (
+                <ThreadBubble
+                  key={msg.id}
+                  msg={msg}
+                  agent={agent}
+                  sourcesOpen={sourcesOpen}
+                  setSourcesOpen={setSourcesOpen}
+                  isLatestAssistant={msg.id === latestAssistant?.id && !busy}
+                  onOpenCircle={onOpenCircle}
+                />
+              ))}
+              {busy && streamingText ? (
+                <div className="flex items-end gap-2">
+                  <Avatar person={agent} size={28} />
+                  <div className="max-w-[min(100%,34rem)] rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-[15px] leading-relaxed text-ink shadow-sm ring-1 ring-line">
+                    <Prose text={streamingText} />
+                    <span className="pulse-soft ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 rounded-sm bg-moss/60" />
+                  </div>
                 </div>
-              </div>
-            ) : busy ? (
-              <div className="flex items-end gap-2">
-                <Avatar person={agent} size={28} />
-                <div className="rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-sm text-muted shadow-sm ring-1 ring-line">
-                  {care.askStatus || "Looking through the record…"}
+              ) : busy ? (
+                <div className="flex items-end gap-2">
+                  <Avatar person={agent} size={28} />
+                  <div className="rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-sm text-muted shadow-sm ring-1 ring-line">
+                    {care.askStatus || "Looking through the record…"}
+                  </div>
                 </div>
-              </div>
-            ) : null}
-            <div ref={threadEnd} />
-          </div>
+              ) : null}
+              <div ref={threadEnd} />
+            </div>
+          )}
 
           <form onSubmit={onSubmit} className="border-t border-line p-4">
             <label htmlFor="kindred-ask" className="sr-only">
@@ -202,18 +203,18 @@ export default function AskPanel({
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               rows={2}
-              placeholder={thread.length ? "e.g. What about my kidney results?" : "e.g. Explain my latest blood tests"}
-              className="w-full resize-none rounded-2xl border border-line bg-paper px-4 py-3 text-[15px] outline-none focus:border-plum"
+              placeholder={thread.length ? "Ask a follow-up…" : "e.g. What about my kidney results?"}
+              className="w-full resize-none rounded-2xl border border-line bg-paper px-4 py-3 text-[15px] outline-none focus:border-moss"
             />
             <div className="mt-2 flex items-center justify-between gap-2">
               {thread.length ? (
-                <Button variant="ghost" size="sm" disabled={busy} onClick={() => care.clearAskThread()}>
-                  Clear conversation
+                <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={() => care.clearAskThread()}>
+                  Clear
                 </Button>
               ) : (
-                <span />
+                <span className="text-xs text-muted">Grounded in the live record</span>
               )}
-              <Button type="submit" variant="plum" disabled={busy || !question.trim()}>
+              <Button type="submit" variant="primary" disabled={busy || !question.trim()}>
                 {busy ? "Working…" : "Ask"}
               </Button>
             </div>
@@ -221,39 +222,45 @@ export default function AskPanel({
         </div>
 
         <aside className="space-y-3">
-          <div className="rounded-2xl border border-line bg-card p-4">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted">Viewer</div>
-            <div className="mt-1 font-display text-lg font-bold">{viewer.name}</div>
-            <p className="mt-1 text-sm text-muted">
-              {viewer.relation || "Patient"} · Kindred sharing: {levelLabel(level)}
-            </p>
-            <p className="mt-2 text-sm text-muted">
-              Switch personas with the account menu (<code className="text-xs">?as=</code>). Circle owns access.
+          <div className="rounded-2xl border border-line/80 bg-card/80 px-3.5 py-3">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Viewer</div>
+            <div className="mt-0.5 font-display text-base font-bold">{viewer.name}</div>
+            <p className="mt-0.5 text-[13px] text-muted">
+              {viewer.relation || "Patient"} · {levelLabel(level)}
             </p>
           </div>
-          <div className="rounded-2xl border border-line bg-card p-4">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted">Live evidence</div>
-            <p className="mt-1 text-sm text-muted">
+
+          <details
+            className="rounded-2xl border border-line/80 bg-card/80 px-3.5 py-3"
+            open={evidenceOpen}
+            onToggle={(e) => setEvidenceOpen((e.target as HTMLDetailsElement).open)}
+          >
+            <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-wider text-muted [&::-webkit-details-marker]:hidden">
+              Evidence {evidenceOpen ? "▾" : "▸"}
+            </summary>
+            <p className="mt-2 text-[13px] text-muted">
               {care.context?.resourceCount ?? 0} resources · {care.context?.measurementCount ?? 0} measurements
             </p>
-            <Button className="mt-3" variant="secondary" size="sm" onClick={() => void care.refresh()}>
-              Refresh evidence
+            <Button className="mt-2" variant="ghost" size="sm" onClick={() => void care.refresh()}>
+              Refresh
             </Button>
-          </div>
+          </details>
+
           {citations.length ? (
-            <div className="rounded-2xl border border-line bg-card p-4">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted">Last sources</div>
-              <ul className="mt-2 space-y-1 text-sm">
-                {citations.slice(0, 6).map((c: { evidenceId: string; title: string }) => (
-                  <li key={c.evidenceId}>{c.title}</li>
+            <div className="rounded-2xl border border-line/80 bg-card/80 px-3.5 py-3">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Last sources</div>
+              <ul className="mt-1.5 space-y-1 text-[13px] text-muted">
+                {citations.slice(0, 4).map((c: { evidenceId: string; title: string }) => (
+                  <li key={c.evidenceId}>{c.title.replace(/^Clinical Document:\s*/i, "")}</li>
                 ))}
               </ul>
             </div>
           ) : null}
+
           <button
             type="button"
             onClick={onOpenCircle}
-            className="w-full rounded-2xl border border-plum/30 bg-plum-soft p-4 text-left text-sm font-semibold text-plum"
+            className="w-full rounded-2xl border border-line px-3.5 py-3 text-left text-[13px] font-semibold text-ink hover:bg-paper"
           >
             Change who can see what → Circle
           </button>
@@ -281,7 +288,7 @@ function ThreadBubble({
   if (msg.role === "user") {
     return (
       <div className="flex items-end justify-end gap-2">
-        <div className="max-w-[88%] rounded-2xl rounded-br-md bg-moss px-3.5 py-2.5 text-[15px] leading-relaxed text-white sm:max-w-[75%]">
+        <div className="max-w-[min(100%,34rem)] rounded-2xl rounded-br-md bg-moss px-3.5 py-2.5 text-[15px] leading-relaxed text-white">
           {msg.text}
         </div>
       </div>
@@ -303,15 +310,15 @@ function ThreadBubble({
   return (
     <div className="flex items-end gap-2">
       <Avatar person={agent} size={28} />
-      <div className="flex max-w-[88%] flex-col gap-1 sm:max-w-[75%]">
+      <div className="flex max-w-[min(100%,34rem)] flex-col gap-1">
         <div className="rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 text-[15px] leading-relaxed text-ink shadow-sm ring-1 ring-line">
           <Prose text={msg.text} />
         </div>
 
         {hasExtras ? (
-          <div className="mt-1 space-y-2 border-t border-line/70 pt-2">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 px-1">
             {isLatestAssistant && run?.answer?.policyNotice && !/^Remembered:/i.test(run.answer.policyNotice) ? (
-              <div className="rounded-xl bg-plum-soft/70 px-3 py-2 text-sm text-plum">
+              <div className="w-full rounded-xl bg-moss-soft/60 px-3 py-2 text-sm text-moss-deep">
                 {run.answer.policyNotice}{" "}
                 <button type="button" className="font-semibold underline" onClick={onOpenCircle}>
                   Open Circle
@@ -319,21 +326,8 @@ function ThreadBubble({
               </div>
             ) : null}
 
-            {isLatestAssistant && run?.answer?.facts?.length ? (
-              <details className="group">
-                <summary className="cursor-pointer text-[12px] font-semibold text-muted hover:text-ink">
-                  Key points from the record
-                </summary>
-                <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted">
-                  {run.answer.facts.slice(0, 8).map((f: { text: string }, i: number) => (
-                    <li key={i}>{f.text}</li>
-                  ))}
-                </ul>
-              </details>
-            ) : null}
-
             {isLatestAssistant && run?.answer?.visualisationSpec?.points?.length ? (
-              <div className="pt-1">
+              <div className="w-full pt-1">
                 <ResultChart
                   title={run.answer.visualisationSpec.title}
                   unit={run.answer.visualisationSpec.unit}
@@ -345,21 +339,34 @@ function ThreadBubble({
               </div>
             ) : null}
 
+            {isLatestAssistant && run?.answer?.facts?.length ? (
+              <details className="group">
+                <summary className="cursor-pointer text-[11px] font-medium text-muted/80 hover:text-muted">
+                  Key points
+                </summary>
+                <ul className="mt-1 list-disc space-y-1 pl-4 text-[12px] text-muted">
+                  {run.answer.facts.slice(0, 6).map((f: { text: string }, i: number) => (
+                    <li key={i}>{f.text}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+
             {isLatestAssistant && citations.length ? (
               <div>
                 <button
                   type="button"
                   onClick={() => setSourcesOpen((v) => !v)}
-                  className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold text-plum hover:bg-plum-soft"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-muted hover:text-ink"
                 >
-                  <KindredMark size={12} />
+                  <KindredMark size={11} />
                   {sourcesOpen ? "Hide sources" : `Sources · ${citations.length}`}
                 </button>
                 {sourcesOpen ? (
-                  <ul className="mt-1.5 space-y-1 text-[12px] text-muted">
+                  <ul className="mt-1 space-y-0.5 text-[12px] text-muted">
                     {citations.map((c: { evidenceId: string; title: string; date?: string }) => (
                       <li key={c.evidenceId}>
-                        {c.title}
+                        {c.title.replace(/^Clinical Document:\s*/i, "")}
                         {c.date ? ` · ${c.date.slice(0, 10)}` : ""}
                       </li>
                     ))}
@@ -369,7 +376,7 @@ function ThreadBubble({
             ) : null}
 
             {isLatestAssistant && run?.answer?.uncertainty ? (
-              <p className="text-[12px] leading-relaxed text-muted">{run.answer.uncertainty}</p>
+              <p className="w-full text-[11px] leading-relaxed text-muted/90">{run.answer.uncertainty}</p>
             ) : null}
           </div>
         ) : null}

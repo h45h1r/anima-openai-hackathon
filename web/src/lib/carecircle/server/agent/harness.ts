@@ -49,6 +49,8 @@ import {
   catalogueEvidence,
   clarifyAppointment,
   classifyAskIntent,
+  isAppointmentIntent,
+  isDocumentIntent,
   isFollowUpQuestion,
   isLabIntent,
   prefersShortPlain,
@@ -674,7 +676,11 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
               input.question,
             ),
             labIntent: isLabIntent(input.question, input.history),
+            docIntent: isDocumentIntent(input.question),
+            apptIntent: isAppointmentIntent(input.question),
             memoriesHint: bag.memoriesUsed.map((m) => m.content).join(' '),
+            recordedNextStep: bag.answer?.recordedNextStep?.text,
+            question: input.question,
           });
           bag.answer = { ...bag.answer, answer: fallback };
           emitAnswerTokens(fallback);
@@ -732,6 +738,10 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
                     input.question,
                   ),
                   labIntent: isLabIntent(input.question, input.history),
+                  docIntent: isDocumentIntent(input.question),
+                  apptIntent: isAppointmentIntent(input.question),
+                  recordedNextStep: bag.answer?.recordedNextStep?.text,
+                  question: input.question,
                 });
             bag.answer = {
               ...bag.answer,
