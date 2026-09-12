@@ -11,6 +11,11 @@ const BodyScene = dynamic(() => import("./BodyScene"), { ssr: false, loading: ()
 
 const STATE_HEX: Record<SystemState, string> = { out: "#c2572f", watch: "#c98a1e", ok: "#2f6b4f", none: "#9aa8a1", locked: "#6d2e5b" };
 const STATE_CLASS: Record<SystemState, string> = { out: "bg-rust", watch: "bg-amber", ok: "bg-moss", none: "bg-line", locked: "bg-plum" };
+const SYSTEM_GROUPS: { state: SystemState; label: string; description: string }[] = [
+  { state: "out", label: "Outside range", description: "Needs attention" },
+  { state: "watch", label: "Watch", description: "Keep an eye on" },
+  { state: "ok", label: "In range", description: "No current range flag" },
+];
 
 export default function BodyView({ state, viewerId, onAsk, embedded = false }: { state: AppState; viewerId: string; onAsk: (q: string) => void; embedded?: boolean }) {
   const patient = personById(state, state.patientId);
@@ -49,53 +54,64 @@ export default function BodyView({ state, viewerId, onAsk, embedded = false }: {
           <div className="font-display text-lg font-bold">{poss} body</div>
           <span className="text-sm text-muted">{outCount ? `${outCount} of ${systems.filter((s) => s.state !== "none" && s.state !== "locked").length} systems have something outside the usual range` : "Everything measured is in its usual range"} · tap a part to see what is behind it</span>
         </div>
-      ) : (
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-[26px] font-bold leading-tight sm:text-3xl">{poss} body, right now</h1>
-          <p className="mt-1 max-w-xl text-[15px] text-muted">Each part of the record mapped onto the body. Tap a system to see what’s behind it. Nothing here is a diagnosis; it is the record, arranged.</p>
-        </div>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-1 font-mono text-[10.5px] uppercase tracking-wider text-muted sm:grid-cols-3">
-          <Meta k="Health data" v={`${state.labs.length} analytes`} />
-          <Meta k="Last bloods" v={latest ? new Date(latest).toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : "—"} />
-          <Meta k="Problems" v={String(state.conditions.length)} />
-          <Meta k="Medicines" v={String(state.medications.length)} />
-          <Meta k="Outside range" v={String(outCount)} tone={outCount ? "rust" : undefined} />
-          <Meta k="Source" v="NHS-SIM · live" tone="moss" />
-        </dl>
-      </div>
-      )}
+      ) : null}
 
       <div className={`grid gap-4 ${embedded ? "lg:grid-cols-[minmax(0,1fr)_360px]" : "lg:grid-cols-[minmax(0,1fr)_400px]"}`}>
-        <div className={`relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(ellipse_at_50%_35%,#ffffff_0%,#eef4f6_45%,#e3ecf0_100%)] ${embedded ? "h-[74vh] min-h-[560px]" : "h-[62vh] min-h-[440px]"}`}>
-          <BodyScene focus={focus} tint={tint} onPick={(id) => setFocus((f) => (f === id ? null : id))} reducedMotion={reduced} allowZoom={!embedded} />
-          <div className="pointer-events-none absolute left-4 top-4 font-mono text-[10.5px] uppercase tracking-wider text-muted">
-            <div>{patient.name} · {state.patient.age}</div>
-            <div className="mt-0.5">{outCount} outside range · {watchCount} to watch</div>
-          </div>
-          <div className="pointer-events-none absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-2">
-            <div className="min-h-[3.5rem]">
-              {sel ? (
-                <div className="rise">
-                  <div className="font-display text-2xl font-bold leading-none" style={{ color: STATE_HEX[sel.state] }}>{sel.def.label}</div>
-                  <div className="mt-1 text-sm text-muted">{sel.summary}</div>
-                </div>
-              ) : (
-                <div className="text-sm text-muted">Drag to rotate · tap a glowing point or a system on the right</div>
-              )}
+        <div>
+          <div className={`relative overflow-hidden rounded-3xl bg-[radial-gradient(ellipse_at_50%_35%,#ffffff_0%,#eef4f6_45%,#e3ecf0_100%)] ${embedded ? "h-[74vh] min-h-[560px]" : "h-[58dvh] min-h-[360px] lg:h-[62vh] lg:min-h-[440px]"}`}>
+            <BodyScene focus={focus} tint={tint} onPick={(id) => setFocus((f) => (f === id ? null : id))} reducedMotion={reduced} allowZoom={!embedded} />
+            <div className="pointer-events-none absolute left-4 top-4 font-mono text-[10.5px] uppercase tracking-wider text-muted">
+              <div>{patient.name} · {state.patient.age}</div>
+              <div className="mt-0.5">{outCount} outside range · {watchCount} to watch</div>
             </div>
-            <ul className="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-wider text-muted">
-              {(["out", "watch", "ok"] as SystemState[]).map((s) => (
-                <li key={s} className="flex items-center gap-1"><span className={`h-2 w-2 rounded-full ${STATE_CLASS[s]}`} /> {STATE_LABEL[s]}</li>
-              ))}
-            </ul>
+            <div className="pointer-events-none absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-2">
+              <div className="min-h-[3.5rem]">
+                {sel ? (
+                  <div className="rise">
+                    <div className="font-display text-2xl font-bold leading-none" style={{ color: STATE_HEX[sel.state] }}>{sel.def.label}</div>
+                    <div className="mt-1 text-sm text-muted">{sel.summary}</div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted">Drag to rotate · tap a coloured area or a system card</div>
+                )}
+              </div>
+              <ul className="flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-wider text-muted">
+                {(["out", "watch", "ok"] as SystemState[]).map((s) => (
+                  <li key={s} className="flex items-center gap-1"><span className={`h-2 w-2 rounded-full ${STATE_CLASS[s]}`} /> {STATE_LABEL[s]}</li>
+                ))}
+              </ul>
+            </div>
           </div>
+          <dl className="grid grid-cols-2 gap-x-5 gap-y-1 px-1 py-4 font-mono text-[10px] uppercase tracking-wider text-muted sm:grid-cols-3 sm:text-[10.5px]">
+            <Meta k="Health data" v={`${state.labs.length} analytes`} />
+            <Meta k="Last bloods" v={latest ? new Date(latest).toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : "—"} />
+            <Meta k="Problems" v={String(state.conditions.length)} />
+            <Meta k="Medicines" v={String(state.medications.length)} />
+            <Meta k="Outside range" v={String(outCount)} tone={outCount ? "rust" : undefined} />
+            <Meta k="Source" v="NHS-SIM · live" tone="moss" />
+          </dl>
         </div>
 
-        <aside className="space-y-2">
-          {systems.map((s) => (
-            <SystemRow key={s.def.id} s={s} open={focus === s.def.id} onToggle={() => setFocus((f) => (f === s.def.id ? null : s.def.id))} onAsk={onAsk} patientName={patient.shortName} isPatient={isPatient} />
-          ))}
+        <aside className="space-y-5" aria-label="Health systems by status">
+          {SYSTEM_GROUPS.map((group) => {
+            const groupedSystems = systems.filter((system) => system.state === group.state);
+            if (!groupedSystems.length) return null;
+            return (
+              <section key={group.state} aria-labelledby={`system-group-${group.state}`}>
+                <div className="mb-2 flex items-baseline justify-between gap-3 px-1">
+                  <h2 id={`system-group-${group.state}`} className="flex items-center gap-2 font-display text-base font-bold">
+                    <span className={`h-2.5 w-2.5 rounded-full ${STATE_CLASS[group.state]}`} />{group.label}
+                  </h2>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted">{groupedSystems.length} {groupedSystems.length === 1 ? "system" : "systems"} · {group.description}</span>
+                </div>
+                <div className="space-y-2">
+                  {groupedSystems.map((system) => (
+                    <SystemRow key={system.def.id} s={system} open={focus === system.def.id} onToggle={() => setFocus((current) => (current === system.def.id ? null : system.def.id))} onAsk={onAsk} patientName={patient.shortName} isPatient={isPatient} />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </aside>
       </div>
     </div>
