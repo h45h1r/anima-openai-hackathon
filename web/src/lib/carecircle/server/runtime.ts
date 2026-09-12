@@ -1,12 +1,13 @@
+import { canonicalPolicy, saveCanonicalPolicy } from './consent/canonical';
 /**
  * In-process clinical Ask runtime (ported from CareCircle Express).
  * Used by Kindred Next.js API routes under /api/care/*.
  */
-import path from "node:path";
+import { careStore, careMemory, withCareRuntime } from "./store/runtime";
+import type { SessionState } from "./store/store";
 import { AnimaClient, AnimaClientError, normalisePatientSearchResponse } from "./anima/client";
 import { buildClinicalContext } from "./anima/normalise";
 import { runAgentQuestion, resolveAskModel, suggestionsForViewer } from "./agent/harness";
-import { ScopedMemoryService } from "./agent/memoryStore";
 import type { AskStreamEvent } from "./agent/events";
 import {
   clearResource,
@@ -24,16 +25,9 @@ import {
   humanizeAnimaError,
   type CareCircleErrorCode,
 } from "./errors";
-import { CareCircleStore } from "./store/store";
 import type { InformationClass } from "./types/domain";
 
-const dataDir = path.resolve(process.cwd(), process.env.CARE_CIRCLE_DATA_DIR || "./data");
-const store = new CareCircleStore(dataDir);
-const memoryService = new ScopedMemoryService({
-  initial: store.listMemories(),
-  persist: (items) => store.saveMemories(items),
-});
-const DEFAULT_BASE = process.env.ANIMA_BASE_URL || "https://sim.animahacks.com";
+const DEFAULT_BASE = process.env.ANIMA_BASE_URL || process.env.SIM_BASE_URL || "https://sim.animahacks.com";
 
 export type JsonResult = { status: number; body: unknown };
 
@@ -61,12 +55,12 @@ function sessionIdFrom(headers: Headers, body?: Record<string, unknown>, query?:
 function requireSession(headers: Headers, body?: Record<string, unknown>, query?: URLSearchParams) {
   const id = sessionIdFrom(headers, body, query);
   if (!id) return { error: jsonError(401, "missing_session") as JsonResult };
-  const session = store.getSession(id);
+  const session = careStore().getSession(id);
   if (!session?.animaApiKey) return { error: jsonError(401, "disconnected") as JsonResult };
   return { session };
 }
 
-function clientFor(session: NonNullable<ReturnType<typeof store.getSession>>) {
+function clientFor(session: SessionState) {
   return new AnimaClient({ baseUrl: session.animaBaseUrl, apiKey: session.animaApiKey });
 }
 
@@ -146,7 +140,7 @@ function publicContext(context: ReturnType<typeof buildClinicalContext>) {
 async function loadContext(
   client: AnimaClient,
   patientId: string,
-  session: NonNullable<ReturnType<typeof store.getSession>>,
+  session: SessionState,
 ) {
   const sites = (session.scopes?.length ? session.scopes : ["gp", "hospital", "pharmacy"]).filter((s) =>
     ["gp", "hospital", "pharmacy", "community", "diagnostics", "referrals", "wearables"].includes(s),
@@ -154,7 +148,7 @@ async function loadContext(
   const uniqueSites = [...new Set(sites.length ? sites : ["gp", "hospital", "pharmacy"])];
   const siteResources: { site: string; resources: import("./types/domain").AnimaResource[]; now?: number }[] = [];
   const errors: { site: string; message: string }[] = [];
-  for (const site of uniqueSites) {
+  await Promise.all(uniqueSites.map(async site => {
     try {
       const view = await client.getView(site, patientId, 500, 0);
       siteResources.push({ site, resources: view.resources || [], now: view.now });
@@ -164,11 +158,11 @@ async function loadContext(
         message: err instanceof Error ? err.message : "view failed",
       });
     }
-  }
+  }));
   if (!siteResources.length && errors.length) {
     throw new AnimaClientError(humanMessage("unavailable"), "unavailable");
   }
-  store.updateSession(session.sessionId, { lastSyncAt: new Date().toISOString() });
+  careStore().updateSession(session.sessionId, { lastSyncAt: new Date().toISOString() });
   return buildClinicalContext({ patientId, siteResources, errors });
 }
 
@@ -178,7 +172,7 @@ function detectAndHoldNewResults(
   context: ReturnType<typeof buildClinicalContext>,
   policy: ConsentPolicyState,
 ) {
-  const session = store.getSession(sessionId);
+  const session = careStore().getSession(sessionId);
   if (!session) return;
   const known = new Set(session.knownResourceIds[patientId] || []);
   const labResourceIds = [
@@ -196,10 +190,10 @@ function detectAndHoldNewResults(
     }
     known.add(id);
   }
-  store.updateSession(sessionId, {
+  careStore().updateSession(sessionId, {
     knownResourceIds: { ...session.knownResourceIds, [patientId]: [...known] },
   });
-  if (nextPolicy !== policy) store.savePolicy(nextPolicy);
+  if (nextPolicy !== policy) careStore().savePolicy(nextPolicy);
 }
 
 function animaErrorResult(err: unknown): JsonResult {
@@ -246,7 +240,7 @@ function mergeHistory(
 }
 
 async function executeAsk(input: {
-  session: NonNullable<ReturnType<typeof store.getSession>>;
+  session: SessionState;
   patientId: string;
   viewerId: string;
   question: string;
@@ -255,31 +249,31 @@ async function executeAsk(input: {
 }) {
   const client = clientFor(input.session);
   const context = await loadContext(client, input.patientId, input.session);
-  const policy = store.ensurePolicy(input.patientId, input.session.selectedPatientName || input.patientId);
+  const policy = await canonicalPolicy(input.patientId, input.session.selectedPatientName || input.patientId);
   detectAndHoldNewResults(input.session.sessionId, input.patientId, context, policy);
   const history = mergeHistory(
-    store.getChatTurns(input.session.sessionId, input.patientId, input.viewerId),
+    careStore().getChatTurns(input.session.sessionId, input.patientId, input.viewerId),
     sanitizeHistory(input.history),
   );
   const run = await runAgentQuestion({
     client,
     context,
-    policy: store.getPolicy(input.patientId)!,
+    policy: careStore().getPolicy(input.patientId)!,
     viewerId: input.viewerId,
     question: input.question,
     history,
     openaiApiKey: process.env.OPENAI_API_KEY,
     openaiModel: resolveAskModel(process.env.OPENAI_MODEL),
-    memory: memoryService,
-    onConsentUpdate: (next) => store.savePolicy(next),
+    memory: careMemory(),
+    onConsentUpdate: saveCanonicalPolicy,
     onEvent: input.onEvent,
   });
-  store.addRun(run);
-  store.appendChatTurns(input.session.sessionId, input.patientId, input.viewerId, [
+  careStore().addRun(run);
+  careStore().appendChatTurns(input.session.sessionId, input.patientId, input.viewerId, [
     { role: "user", content: input.question },
     { role: "assistant", content: run.answer.answer },
   ]);
-  const suggestions = suggestionsForViewer(context, store.getPolicy(input.patientId)!, input.viewerId);
+  const suggestions = suggestionsForViewer(context, careStore().getPolicy(input.patientId)!, input.viewerId);
   return { context, run, suggestions };
 }
 
@@ -299,7 +293,7 @@ function matchPath(parts: string[], pattern: string[]): boolean {
   return pattern.every((p, i) => p.startsWith(":") || p === parts[i]);
 }
 
-export async function handleCareApi(req: Request, pathParts: string[]): Promise<Response> {
+async function handleCareApiInScope(req: Request, pathParts: string[]): Promise<Response> {
   const method = req.method.toUpperCase();
   const url = new URL(req.url);
   const query = url.searchParams;
@@ -312,7 +306,7 @@ export async function handleCareApi(req: Request, pathParts: string[]): Promise<
       service: "kindred-care",
       openaiConfigured,
       openaiModel: openaiConfigured ? resolveAskModel(process.env.OPENAI_MODEL) : null,
-      animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY),
+      animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY || process.env.SIM_API_KEY),
       animaTeamNameConfigured: Boolean(process.env.ANIMA_TEAM_NAME),
       askTransport: ["sse", "rest"],
       ssePath: "/api/care/ask/stream",
@@ -338,8 +332,8 @@ async function dispatchJson(
 ): Promise<JsonResult> {
   try {
     if (method === "POST" && matchPath(pathParts, ["connect"])) {
-      const baseUrl = String(body.baseUrl || DEFAULT_BASE).replace(/\/$/, "");
-      let apiKey = String(body.apiKey || process.env.ANIMA_API_KEY || "").trim();
+      const baseUrl = String(process.env.VERCEL ? DEFAULT_BASE : body.baseUrl || DEFAULT_BASE).replace(/\/$/, "");
+      let apiKey = String(body.apiKey || process.env.ANIMA_API_KEY || process.env.SIM_API_KEY || "").trim();
       const teamName = String(body.teamName || process.env.ANIMA_TEAM_NAME || "").trim();
 
       let joinMeta: { team?: string; world?: string; scopes?: string[]; created?: boolean } = {};
@@ -356,7 +350,7 @@ async function dispatchJson(
 
       const client = new AnimaClient({ baseUrl, apiKey });
       const team = await client.getTeam();
-      const session = store.createSession({
+      const session = careStore().createSession({
         animaBaseUrl: baseUrl,
         animaApiKey: apiKey,
         teamLabel: team.team || joinMeta.team,
@@ -370,7 +364,7 @@ async function dispatchJson(
         status: 200,
         body: {
           requestId: session.sessionId,
-          session: store.publicSessionView(session),
+          session: careStore().publicSessionView(session),
           createdWorld: Boolean(joinMeta.created),
         },
       };
@@ -380,13 +374,13 @@ async function dispatchJson(
       const gate = requireSession(headers, body, query);
       if ("error" in gate && gate.error) return gate.error;
       const session = gate.session!;
-      return { status: 200, body: { session: store.publicSessionView(session) } };
+      return { status: 200, body: { session: careStore().publicSessionView(session) } };
     }
 
     if (method === "POST" && matchPath(pathParts, ["disconnect"])) {
       const id = sessionIdFrom(headers, body, query);
-      if (id && store.getSession(id)) {
-        store.updateSession(id, { animaApiKey: "", selectedPatientId: undefined, selectedPatientName: undefined });
+      if (id && careStore().getSession(id)) {
+        careStore().updateSession(id, { animaApiKey: "", selectedPatientId: undefined, selectedPatientName: undefined });
       }
       return { status: 200, body: { ok: true } };
     }
@@ -401,12 +395,12 @@ async function dispatchJson(
       const client = clientFor(session);
       const raw = await client.searchPatients(site, q, offset);
       const normalised = normalisePatientSearchResponse(raw);
-      store.updateSession(session.sessionId, { lastSyncAt: new Date().toISOString() });
+      careStore().updateSession(session.sessionId, { lastSyncAt: new Date().toISOString() });
       return {
         status: 200,
         body: {
           requestId: `pat-${Date.now()}`,
-          freshness: store.getSession(session.sessionId)?.lastSyncAt,
+          freshness: careStore().getSession(session.sessionId)?.lastSyncAt,
           ...normalised,
           site,
         },
@@ -424,21 +418,21 @@ async function dispatchJson(
       const { items } = normalisePatientSearchResponse(raw);
       const match = items.find((p) => p.id === patientId);
       if (!match) return jsonError(404, "patient_not_in_world");
-      store.updateSession(session.sessionId, {
+      careStore().updateSession(session.sessionId, {
         selectedPatientId: match.id,
         selectedPatientName: match.name,
         activeViewerId: "patient",
         lastSyncAt: new Date().toISOString(),
       });
-      const policy = store.ensurePolicy(match.id, match.name);
+      const policy = await canonicalPolicy(match.id, match.name);
       const context = await loadContext(client, match.id, session);
       detectAndHoldNewResults(session.sessionId, match.id, context, policy);
       return {
         status: 200,
         body: {
           patient: match,
-          session: store.publicSessionView(store.getSession(session.sessionId)!),
-          policy: publicPolicy(store.getPolicy(match.id)!),
+          session: careStore().publicSessionView(careStore().getSession(session.sessionId)!),
+          policy: publicPolicy(careStore().getPolicy(match.id)!),
           context: publicContext(context),
         },
       };
@@ -452,11 +446,11 @@ async function dispatchJson(
       if (session.selectedPatientId !== patientId) return jsonError(409, "patient_mismatch");
       const client = clientFor(session);
       const context = await loadContext(client, patientId, session);
-      store.ensurePolicy(patientId, session.selectedPatientName || patientId);
-      detectAndHoldNewResults(session.sessionId, patientId, context, store.getPolicy(patientId)!);
+      await canonicalPolicy(patientId, session.selectedPatientName || patientId);
+      detectAndHoldNewResults(session.sessionId, patientId, context, careStore().getPolicy(patientId)!);
       const viewerId = String(query.get("viewerId") || session.activeViewerId);
       const full = context;
-      const policyNow = store.getPolicy(patientId)!;
+      const policyNow = careStore().getPolicy(patientId)!;
       const evidence = [
         ...full.measurements.map((m) => ({
           evidenceId: m.evidenceId,
@@ -501,12 +495,12 @@ async function dispatchJson(
       const viewerId = String(body.viewerId || "");
       const patientId = session.selectedPatientId;
       if (!patientId) return jsonError(400, "no_patient");
-      const policy = store.ensurePolicy(patientId, session.selectedPatientName || patientId);
+      const policy = await canonicalPolicy(patientId, session.selectedPatientName || patientId);
       if (!policy.viewers.some((v) => v.viewerId === viewerId)) return jsonError(400, "unknown_viewer");
-      store.updateSession(session.sessionId, { activeViewerId: viewerId });
+      careStore().updateSession(session.sessionId, { activeViewerId: viewerId });
       return {
         status: 200,
-        body: { session: store.publicSessionView(store.getSession(session.sessionId)!), policy: publicPolicy(policy) },
+        body: { session: careStore().publicSessionView(careStore().getSession(session.sessionId)!), policy: publicPolicy(policy) },
       };
     }
 
@@ -516,7 +510,7 @@ async function dispatchJson(
       const session = gate.session!;
       const patientId = pathParts[1];
       if (session.selectedPatientId !== patientId) return jsonError(409, "patient_mismatch");
-      const policy = store.ensurePolicy(patientId, session.selectedPatientName || patientId);
+      const policy = await canonicalPolicy(patientId, session.selectedPatientName || patientId);
       return { status: 200, body: { policy: publicPolicy(policy) } };
     }
 
@@ -528,7 +522,7 @@ async function dispatchJson(
       if (session.selectedPatientId !== patientId) return jsonError(409, "patient_mismatch");
       if (session.activeViewerId !== "patient") return jsonError(403, "only_patient_may_edit_consent");
       try {
-        const policy = store.ensurePolicy(patientId, session.selectedPatientName || patientId);
+        const policy = await canonicalPolicy(patientId, session.selectedPatientName || patientId);
         const { viewerId, sharingLevel, updates, expectedVersion } = body as {
           viewerId: string;
           sharingLevel?: KindredSharingLevel;
@@ -539,8 +533,8 @@ async function dispatchJson(
           sharingLevel === "everything" || sharingLevel === "practical" || sharingLevel === "updates"
             ? updateSharingLevel(policy, viewerId, sharingLevel, Number(expectedVersion), "patient")
             : updateGrants(policy, viewerId, updates || {}, Number(expectedVersion), "patient");
-        store.savePolicy(next);
-        return { status: 200, body: { policy: publicPolicy(next) } };
+        await saveCanonicalPolicy(next);
+        return { status: 200, body: { policy: publicPolicy(careStore().getPolicy(patientId)!) } };
       } catch {
         return jsonError(409, "consent_conflict");
       }
@@ -553,9 +547,9 @@ async function dispatchJson(
       const patientId = pathParts[1];
       if (session.selectedPatientId !== patientId) return jsonError(409, "patient_mismatch");
       const { resourceId, state } = body as { resourceId: string; state: "held" | "cleared" };
-      let policy = store.ensurePolicy(patientId, session.selectedPatientName || patientId);
+      let policy = await canonicalPolicy(patientId, session.selectedPatientName || patientId);
       policy = state === "held" ? holdResource(policy, resourceId, "demo") : clearResource(policy, resourceId, "demo");
-      store.savePolicy(policy);
+      careStore().savePolicy(policy);
       return { status: 200, body: { policy: publicPolicy(policy) } };
     }
 
@@ -575,27 +569,27 @@ async function dispatchJson(
 
       const client = clientFor(session);
       const context = await loadContext(client, patientId, session);
-      store.ensurePolicy(patientId, session.selectedPatientName || patientId);
-      detectAndHoldNewResults(session.sessionId, patientId, context, store.getPolicy(patientId)!);
+      await canonicalPolicy(patientId, session.selectedPatientName || patientId);
+      detectAndHoldNewResults(session.sessionId, patientId, context, careStore().getPolicy(patientId)!);
       const clientHistory = sanitizeHistory(body.history);
       const history = mergeHistory(
-        store.getChatTurns(session.sessionId, patientId, authenticatedViewer),
+        careStore().getChatTurns(session.sessionId, patientId, authenticatedViewer),
         clientHistory,
       );
       const run = await runAgentQuestion({
         client,
         context,
-        policy: store.getPolicy(patientId)!,
+        policy: careStore().getPolicy(patientId)!,
         viewerId: authenticatedViewer,
         question,
         history,
         openaiApiKey: process.env.OPENAI_API_KEY,
         openaiModel: resolveAskModel(process.env.OPENAI_MODEL),
-        memory: memoryService,
-        onConsentUpdate: (next) => store.savePolicy(next),
+        memory: careMemory(),
+        onConsentUpdate: saveCanonicalPolicy,
       });
-      store.addRun(run);
-      store.appendChatTurns(session.sessionId, patientId, authenticatedViewer, [
+      careStore().addRun(run);
+      careStore().appendChatTurns(session.sessionId, patientId, authenticatedViewer, [
         { role: "user", content: question },
         { role: "assistant", content: run.answer.answer },
       ]);
@@ -604,7 +598,7 @@ async function dispatchJson(
         body: {
           freshness: context.fetchedAt,
           run,
-          suggestions: suggestionsForViewer(context, store.getPolicy(patientId)!, authenticatedViewer),
+          suggestions: suggestionsForViewer(context, careStore().getPolicy(patientId)!, authenticatedViewer),
           memoriesUsed: run.memoriesUsed || [],
           memoriesWritten: run.memoriesWritten || [],
         },
@@ -683,7 +677,7 @@ async function dispatchJson(
       const minutes = Number(body.advanceMinutes || 121);
       const client = clientFor(session);
       const clock = await client.advanceClock(minutes);
-      store.updateSession(session.sessionId, { lastSyncAt: new Date().toISOString() });
+      careStore().updateSession(session.sessionId, { lastSyncAt: new Date().toISOString() });
       return {
         status: 200,
         body: { clock, notice: "Simulation clock advanced (paused). Refresh patient context for new events." },
@@ -694,9 +688,9 @@ async function dispatchJson(
       const gate = requireSession(headers, body, query);
       if ("error" in gate && gate.error) return gate.error;
       const session = gate.session!;
-      store.resetCareCircleState(session.selectedPatientId);
+      careStore().resetCareCircleState(session.selectedPatientId);
       if (session.selectedPatientId) {
-        store.ensurePolicy(session.selectedPatientId, session.selectedPatientName || session.selectedPatientId);
+        await canonicalPolicy(session.selectedPatientId, session.selectedPatientName || session.selectedPatientId);
       }
       return { status: 200, body: { ok: true } };
     }
@@ -706,7 +700,7 @@ async function dispatchJson(
       if ("error" in gate && gate.error) return gate.error;
       const session = gate.session!;
       if (!session.selectedPatientId) return jsonError(400, "no_patient");
-      return { status: 200, body: { runs: store.listRuns(session.selectedPatientId) } };
+      return { status: 200, body: { runs: careStore().listRuns(session.selectedPatientId) } };
     }
 
     return jsonError(404, "not_found");
@@ -823,4 +817,38 @@ async function handleAskStream(req: Request): Promise<Response> {
       "X-Accel-Buffering": "no",
     },
   });
+}
+
+export async function handleCareApi(req: Request, pathParts: string[]): Promise<Response> {
+  if (req.method === 'GET' && matchPath(pathParts, ['health'])) return handleCareApiInScope(req, pathParts);
+  const body = req.method === 'GET' ? {} : await req.clone().json().catch(() => ({}));
+  const isConnect = req.method === 'POST' && matchPath(pathParts, ['connect']);
+  const sessionId = isConnect ? cryptoRandom() : sessionIdFrom(req.headers, body, new URL(req.url).searchParams);
+  if (!sessionId || !/^[A-Za-z0-9_-]{6,80}$/.test(sessionId)) return Response.json({ error: 'missing_session' }, { status: 401 });
+  if (req.method !== 'POST' || !matchPath(pathParts, ['ask', 'stream'])) {
+    return withCareRuntime(() => handleCareApiInScope(req, pathParts), sessionId);
+  }
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let final: Uint8Array | undefined;
+      try {
+        await withCareRuntime(async () => {
+          const response = await handleCareApiInScope(req, pathParts);
+          if (!response.ok) throw new Error((await response.json()).message || 'Ask request failed.');
+          const reader = response.body!.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (new TextDecoder().decode(value).includes('"type":"final"')) final = value;
+            else controller.enqueue(value);
+          }
+        }, sessionId);
+        if (final) controller.enqueue(final);
+      } catch (error) {
+        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', code: 'internal', message: error instanceof Error ? error.message : 'Ask failed.' })}\n\n`)); } catch { /* Client disconnected. */ }
+      } finally { try { controller.close(); } catch { /* Client disconnected. */ } }
+    },
+  });
+  return new Response(stream, { headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-store', 'X-Accel-Buffering': 'no' } });
 }

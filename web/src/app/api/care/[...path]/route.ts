@@ -1,5 +1,6 @@
 import { handleCareApi } from "@/lib/carecircle/server/runtime";
 
+export const maxDuration = 180;
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 

@@ -37,9 +37,13 @@ export interface CareCircleStoreData {
 
 export class CareCircleStore {
   private data: CareCircleStoreData;
-  private readonly filePath: string;
+  private readonly filePath?: string;
 
-  constructor(dataDir: string) {
+  constructor(dataDir?: string, snapshot?: Partial<CareCircleStoreData>, private readonly sessionId?: string) {
+    if (!dataDir) {
+      this.data = { sessions: {}, policies: {}, runs: [], toolLog: [], memories: [], chatTurns: {}, ...snapshot };
+      return;
+    }
     fs.mkdirSync(dataDir, { recursive: true });
     this.filePath = path.join(dataDir, 'store.json');
     if (fs.existsSync(this.filePath)) {
@@ -58,6 +62,8 @@ export class CareCircleStore {
     }
   }
 
+  snapshot(): CareCircleStoreData { return this.data; }
+
   listMemories(): CareCircleMemoryItem[] {
     return this.data.memories || [];
   }
@@ -68,12 +74,12 @@ export class CareCircleStore {
   }
 
   private persist() {
-    fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2));
+    if (this.filePath) fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2));
   }
 
   createSession(partial: Omit<SessionState, 'sessionId' | 'createdAt' | 'activeViewerId' | 'knownResourceIds' | 'scopes'> & { scopes?: string[] }): SessionState {
     const session: SessionState = {
-      sessionId: nanoid(12),
+      sessionId: this.sessionId || nanoid(12),
       createdAt: new Date().toISOString(),
       activeViewerId: 'patient',
       knownResourceIds: {},

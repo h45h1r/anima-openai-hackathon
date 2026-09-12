@@ -1,8 +1,9 @@
+import { withRuntimeState } from '@/lib/store';
 import { NextResponse } from "next/server";
 import { addAudit, addMessage, ensureLoaded, mutate, setConsent, threadForPair } from "@/lib/store";
 import { CATEGORIES, personById } from "@/lib/types";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const body = (await req.json()) as { requestId: string; approve: boolean };
   const state = await ensureLoaded();
   const reqRec = state.consentRequests.find((r) => r.id === body.requestId);
@@ -31,4 +32,8 @@ export async function POST(req: Request) {
     });
   }
   return NextResponse.json({ ok: true, status });
+}
+
+export async function POST(req: Request) {
+  return withRuntimeState(() => handlePOST(req));
 }

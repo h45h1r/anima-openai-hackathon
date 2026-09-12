@@ -1,0 +1,6 @@
+.env*
+.vercel
+node_modules
+*.test.mjs
+actions/*.test.mjs
+deployment

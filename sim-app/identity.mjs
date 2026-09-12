@@ -4,7 +4,15 @@ import { readFile } from 'node:fs/promises';
 const random = () => randomBytes(32).toString('base64url');
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const json = (res, status, data, headers = {}) => {res.writeHead(status, {'Content-Type':'application/json','Cache-Control':'no-store',...headers});res.end(JSON.stringify(data));return true;};
-async function body(req) {let value='';for await(const chunk of req){value+=chunk;if(value.length>32768)throw Error('Request too large');}return req.headers['content-type']?.includes('application/json')?JSON.parse(value || '{}'):Object.fromEntries(new URLSearchParams(value));}
+async function body(req) {
+  if (req.body !== undefined) {
+    const size = Buffer.byteLength(typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    if (size > 32768) throw Object.assign(new Error('Request too large.'), { status: 413 });
+    try {
+      return typeof req.body === 'string' ? (req.headers['content-type']?.includes('application/x-www-form-urlencoded') ? Object.fromEntries(new URLSearchParams(req.body)) : JSON.parse(req.body || '{}')) : req.body;
+    } catch { throw Object.assign(new Error('Invalid JSON.'), { status: 400 }); }
+  }
+let value='';for await(const chunk of req){value+=chunk;if(value.length>32768)throw Error('Request too large');}return req.headers['content-type']?.includes('application/json')?JSON.parse(value || '{}'):Object.fromEntries(new URLSearchParams(value));}
 
 export async function createIdentityHandler({pool, worldId}) {
   const original=await readFile(new URL('./public/cis2/index.html',import.meta.url),'utf8');
@@ -12,7 +20,7 @@ export async function createIdentityHandler({pool, worldId}) {
   const page=(res,title,content,status=200)=>{res.writeHead(status,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)} · Local Staff Identity</title><style>${style}</style></head><body><main id="main"><div class="container"><img src="/control/brands/staff-identity.svg" width="48" alt="Staff Identity"><h1>${escape(title)}</h1>${content}</div></main><footer class="footer">Fictional staff sign-in · Local copy · No real smartcard or security key</footer></body></html>`);return true;};
   const saved=(await pool.query('SELECT value FROM sim.local_settings WHERE world_id=$1 AND key=$2',[worldId,'cis2'])).rows[0]?.value;
   let settings=saved || {scenario:'normal',tokenLifetimeSeconds:900,clients:null};
-  const staff=(await pool.query("SELECT body FROM sim.resources WHERE world_id=$1 AND kind='staff' ORDER BY resource_id LIMIT 100",[worldId])).rows.map(({body:r})=>({sub:r.id,name:r.title,role:r.data?.role || 'staff',organisation:r.data?.department || r.owner}));
+  const staff=(await pool.query("SELECT DISTINCT ON (resource_id) body FROM sim.resource_projections WHERE world_id=$1 AND kind='staff' ORDER BY resource_id,version DESC NULLS LAST,(site=owner) DESC,(site<>'patient') DESC,length(body::text) DESC,site LIMIT 100",[worldId])).rows.map(({body:r})=>({sub:r.id,name:r.title,role:r.data?.role || 'staff',organisation:r.data?.department || r.owner}));
   const requests=new Map(),codes=new Map(),tokens=new Map(),sessions=new Map();
   const {privateKey,publicKey}=generateKeyPairSync('rsa',{modulusLength:2048});
   const kid=random();const jwk={...publicKey.export({format:'jwk'}),kid,use:'sig',alg:'RS256'};

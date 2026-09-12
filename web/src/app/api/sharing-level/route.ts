@@ -1,8 +1,9 @@
+import { withRuntimeState } from '@/lib/store';
 import { NextResponse } from "next/server";
 import { ensureLoaded, setSharingLevel } from "@/lib/store";
 import type { SharingLevel } from "@/lib/types";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   try {
     const body = (await req.json()) as { granteeId: string; level: SharingLevel; actorId?: string };
     const state = await ensureLoaded();
@@ -13,4 +14,8 @@ export async function POST(req: Request) {
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Sharing level could not be saved." }, { status: (error as { status?: number }).status || 503 });
   }
+}
+
+export async function POST(req: Request) {
+  return withRuntimeState(() => handlePOST(req));
 }

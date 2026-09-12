@@ -129,25 +129,8 @@ export function useCareClinical(kindred: AppState | null, kindredViewerId: strin
 
   const syncLevels = useCallback(
     async (sessionId: string, patientId: string, state: AppState, policyVersion: number) => {
-      let version = policyVersion;
-      for (const row of familyForLevelSync(state)) {
-        if (row.level !== "everything" && row.level !== "practical" && row.level !== "updates") continue;
-        try {
-          const res = await careApi<{ policy: any }>(`/consent/${patientId}`, {
-            method: "PUT",
-            sessionId,
-            body: JSON.stringify({
-              viewerId: row.careViewerId,
-              sharingLevel: row.level,
-              expectedVersion: version,
-            }),
-          });
-          version = res.policy?.policyVersion ?? version + 1;
-          setPolicy(res.policy);
-        } catch {
-          /* best-effort — Kindred remains authority */
-        }
-      }
+      const res = await careApi<{ policy: any }>(`/consent/${patientId}`, { sessionId });
+      setPolicy(res.policy);
     },
     [],
   );

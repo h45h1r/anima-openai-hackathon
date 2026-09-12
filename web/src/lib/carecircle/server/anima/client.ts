@@ -32,6 +32,12 @@ function redact(url: string): string {
   return url.replace(/([?&](?:key|token)=)[^&]+/gi, '$1[REDACTED]');
 }
 
+function backendHeaders(baseUrl: string): Record<string, string> {
+  const configured = process.env.ANIMA_BASE_URL || process.env.SIM_BASE_URL;
+  return configured && new URL(baseUrl).origin === new URL(configured).origin && process.env.COMPANION_BYPASS_SECRET
+    ? { 'x-vercel-protection-bypass': process.env.COMPANION_BYPASS_SECRET } : {};
+}
+
 export class AnimaClient {
   private readonly baseUrl: string;
   private readonly apiKey: string;
@@ -55,7 +61,7 @@ export class AnimaClient {
   }> {
     const res = await fetch(`${baseUrl.replace(/\/$/, '')}/api/keys`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...backendHeaders(baseUrl), 'Content-Type': 'application/json' },
       body: JSON.stringify({ teamName }),
     });
     const text = await res.text();
@@ -98,6 +104,7 @@ export class AnimaClient {
       const res = await fetch(url, {
         method,
         headers: {
+          ...backendHeaders(this.baseUrl),
           Authorization: `Bearer ${this.apiKey}`,
           Accept: 'application/json',
           ...(init?.body ? { 'Content-Type': 'application/json' } : {}),

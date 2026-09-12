@@ -1,9 +1,12 @@
-// In-memory store fed by the NHS-SIM. Single process, survives Next.js HMR via
-// globalThis. Every mutation broadcasts a full snapshot to connected SSE
-// clients so every open persona view updates at the same time.
+// Local mode keeps process state; database mode restores and commits an isolated
+// patient snapshot for each request. Clinical data and consent come from the sim.
 
 import { loadStateFromSim } from "./sim/mapper";
-import { simConfigured, sim } from "./sim/client";
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { randomUUID } from 'node:crypto';
+import { cookies } from 'next/headers';
+import { withRuntimeSnapshot, runtimeSnapshot, restoreRuntimeSnapshot } from './runtime-store';
+import { simConfigured, sim } from './sim/client';
 import { applyConsentSnapshot, consentRequest, getConsentSnapshot, toStoredCategory, type ConsentMember } from "./consent-store";
 import { DEMO_PATIENTS, DEFAULT_PATIENT_SIM_ID, circleFor } from "./data/circle";
 import type { AgentMode, AppState, AuditEntry, AuditKind, Category, ConsentCheck, Message } from "./types";
@@ -23,6 +26,41 @@ interface StoreShape {
   consentQueue?: Promise<unknown>;
   /** Currently loaded patient SIM id (survives HMR; switchable at demo time). */
   activePatientSimId?: string;
+}
+
+const requestStore = new AsyncLocalStorage<StoreShape>();
+const runtimeBases = new Map<string, { state: AppState; expires: number }>();
+const runtimeLoads = new Map<string, Promise<AppState>>();
+
+async function loadRuntimeBase(patientId: string): Promise<AppState> {
+  const cached = runtimeBases.get(patientId);
+  if (cached && cached.expires > Date.now()) return structuredClone(cached.state);
+  if (!runtimeLoads.has(patientId)) runtimeLoads.set(patientId,
+    loadStateFromSim(agentMode(), agentModel(), patientId).then(state => {
+      if (runtimeBases.size >= 20) runtimeBases.delete(runtimeBases.keys().next().value!);
+      runtimeBases.set(patientId, { state, expires: Date.now() + 15000 });
+      return state;
+    }).finally(() => { runtimeLoads.delete(patientId); }));
+  return structuredClone(await runtimeLoads.get(patientId)!);
+}
+
+export async function withRuntimeState<T>(work: () => Promise<T>, write = true, selectedPatientId?: string): Promise<T> {
+  if (!process.env.DATABASE_URL || requestStore.getStore()) return work();
+  const patientId = selectedPatientId || (await cookies()).get('kindred_patient')?.value || DEFAULT_PATIENT_SIM_ID;
+  if (!/^SIM-\d+$/.test(patientId)) throw new Error('Invalid patient selection.');
+  return withRuntimeSnapshot(patientId, write, async saved => {
+    const scope: StoreShape = { state: await loadRuntimeBase(patientId), activePatientSimId: patientId, loading: null, listeners: new Set(), broadcastTimer: null };
+    return requestStore.run(scope, async () => {
+      if (selectedPatientId) await ensureSyntheticCircle(scope.state);
+      await refreshConsent(true);
+      scope.state = restoreRuntimeSnapshot(scope.state, saved);
+      try {
+        const value = await work();
+        const success = !(value instanceof Response) || value.ok;
+        return { value, ...(write && success && scope.state.loaded ? { snapshot: runtimeSnapshot(scope.state) } : {}) };
+      } finally { if (scope.broadcastTimer) clearTimeout(scope.broadcastTimer); }
+    });
+  });
 }
 
 declare global {
@@ -76,6 +114,8 @@ function emptyState(err?: string): AppState {
 }
 
 function getStore(): StoreShape {
+  const scoped = requestStore.getStore();
+  if (scoped) return scoped;
   if (!globalThis.__kindredStore) {
     globalThis.__kindredStore = { state: emptyState(), loading: null, listeners: new Set(), broadcastTimer: null, activePatientSimId: DEFAULT_PATIENT_SIM_ID };
   }
@@ -178,6 +218,7 @@ export function subscribe(fn: Listener): () => void {
 
 let counter = 0;
 export function newId(prefix: string): string {
+  if (process.env.DATABASE_URL) return `${prefix}-${randomUUID()}`;
   counter += 1;
   return `${prefix}-${Date.now().toString(36)}-${counter.toString(36)}`;
 }
@@ -217,6 +258,7 @@ export function mutate(fn: (draft: AppState) => void): AppState {
 
 /** Re-fetch everything from the sim (keeps nothing local). */
 export async function resetState(): Promise<AppState> {
+  if (process.env.DATABASE_URL) runtimeBases.delete(getActivePatientSimId());
   const s = getStore();
   s.state = { ...emptyState(), loaded: false };
   scheduleBroadcast();

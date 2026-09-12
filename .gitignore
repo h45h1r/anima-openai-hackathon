@@ -23,6 +23,8 @@ coverage/
 
 # Local runtime / dumps
 **/data/
+!web/src/lib/data/
+!web/src/lib/data/**
 *.log
 *.dump
 *.sql.gz

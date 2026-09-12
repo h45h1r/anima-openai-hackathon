@@ -35,6 +35,7 @@ export const INFORMATION_CLASSES: InformationClass[] = [
 export interface ConsentPolicyState {
   patientId: string;
   policyVersion: number;
+  canonicalRevision?: number;
   viewers: Viewer[];
   grants: ConsentGrant[];
   disclosures: DisclosureEvent[];

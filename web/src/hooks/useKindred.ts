@@ -6,6 +6,7 @@ import type { AppState, Category, SharingLevel } from "@/lib/types";
 export function useKindred() {
   const [state, setState] = useState<AppState | null>(null);
   const [connected, setConnected] = useState(false);
+  const [patientRevision, setPatientRevision] = useState(0);
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function useKindred() {
       cancelled = true;
       esRef.current?.close();
     };
-  }, []);
+  }, [patientRevision]);
 
   const post = useCallback(async (url: string, body?: unknown, method = "POST") => {
     const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
@@ -53,7 +54,7 @@ export function useKindred() {
     sendChat: (threadId: string, actorId: string, text: string) => post("/api/chat", { threadId, actorId, text }),
     runProactive: () => post("/api/proactive"),
     reset: () => post("/api/reset"),
-    switchPatient: (patientId: string) => post("/api/patient", { patientId }),
+    switchPatient: async (patientId: string) => { const result = await post("/api/patient", { patientId }); setPatientRevision(value => value + 1); return result; },
     respondRequest: (requestId: string, approve: boolean) => post("/api/consent-request", { requestId, approve }),
   };
 

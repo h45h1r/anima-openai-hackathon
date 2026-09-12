@@ -644,7 +644,7 @@ export function proseFromFacts(
 
   if (opts?.labIntent) {
     const dateLine = lines.find((l) => /latest .+ results on record/i.test(l));
-    const valueLines = lines.filter((l) => /: .+/.test(l) && !/previous |illustrative range|on record/i.test(l));
+    const valueLines = lines.filter((l) => /: .+/.test(l) && !/previous |on record/i.test(l));
     const prev = lines.find((l) => /^Previous /i.test(l));
     const flagged = valueLines.filter((l) => /outside illustrative range/i.test(l));
     const ok = valueLines.filter((l) => !/outside illustrative range/i.test(l));
@@ -661,8 +661,8 @@ export function proseFromFacts(
       ? short
         ? `${flagged.length === 1 ? 'One value sits' : 'Some values sit'} outside the illustrative range shown on the record.`
         : `${flagged.length === 1 ? 'One value sits' : `${flagged.length} values sit`} outside the illustrative range shown on the record — worth noting with the care team if it hasn’t been discussed.`
-      : valueBullets.length
-        ? 'The noted values sit within the illustrative ranges on the record.'
+      : ok.some(line => /illustrative range/i.test(line))
+        ? 'The values with a reference range shown are within that range.'
         : '';
     const change =
       prev && !short ? `For context: ${stripFactChrome(prev)}.` : '';

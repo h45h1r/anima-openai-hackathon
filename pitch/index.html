@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kindred · Pitch</title>
+<title>CareCircle · Pitch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -119,6 +119,32 @@ p { margin: 0; }
 @media (max-width: 900px) { .hero, .cols3, .pillars { grid-template-columns: 1fr; } .stat-row { grid-template-columns: 1fr 1fr; } .flow { grid-template-columns: repeat(2, 1fr); } .flow div::after { display: none; } .row { grid-template-columns: 1fr; } .foot .legal { white-space: normal; } }
 @media print { .deck { height: auto; overflow: visible; } .slide { height: 100vh; page-break-after: always; } .pager { display: none; } }
 .voice { margin-top: 0.6rem; font-family: var(--display); font-weight: 500; font-size: clamp(1rem, 1.4vw, 1.3rem); color: #6D2E5B; line-height: 1.3; }
+
+/* arithmetic chains on the scale slide */
+.chain-label { margin: 1.1rem 0 0.35rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--plum); }
+.chain { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 0 0.6rem; align-items: stretch; }
+.chain.three { grid-template-columns: 1fr auto 1fr auto 1fr; }
+.chain .step { border-top: 3px solid var(--line); padding: 0.5rem 0.2rem 0 0; }
+.chain .step.hot { border-top-color: var(--plum); }
+.chain.quiet .step { border-top-color: var(--line); }
+.chain .n { font-family: var(--display); font-size: clamp(1.7rem, 3.1vw, 3rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; }
+.chain .step.hot .n { color: var(--plum); }
+.chain .n small { font-size: 0.42em; color: var(--muted); font-weight: 600; letter-spacing: 0; margin-left: 0.08em; }
+.chain .l { margin-top: 0.3rem; font-size: clamp(0.78rem, 0.98vw, 0.98rem); color: var(--muted); line-height: 1.32; }
+.chain .l b { color: var(--ink); font-weight: 600; }
+.chain .s { margin-top: 0.25rem; font-size: 0.66rem; color: var(--muted); line-height: 1.3; }
+.chain .op { align-self: center; padding-top: 0.6rem; font-family: var(--display); font-weight: 700; font-size: clamp(1.1rem, 1.8vw, 1.7rem); color: var(--plum); white-space: nowrap; min-width: 1.2em; text-align: center; }
+@media (max-width: 900px) { .chain, .chain.three { grid-template-columns: 1fr; } .chain .op { padding: 0.2rem 0; text-align: left; } }
+
+.chain.simple { grid-template-columns: 1fr auto 1fr auto 1.15fr; margin-top: 2.2rem; gap: 0 1.2rem; }
+.chain.simple .n { font-size: clamp(3rem, 6.5vw, 6.5rem); }
+.chain.simple .l { font-size: clamp(1rem, 1.35vw, 1.3rem); margin-top: 0.6rem; }
+.chain.simple .op { font-size: clamp(2rem, 3.5vw, 3.4rem); padding-top: 1.2rem; }
+.chain.simple .step { border-top-width: 4px; padding-top: 0.9rem; }
+.under { display: block; margin-top: 2.4rem; max-width: 60ch; font-size: clamp(1.05rem, 1.5vw, 1.4rem); color: var(--muted); line-height: 1.4; }
+.under b { color: var(--ink); font-weight: 600; }
+.under .pill { display: inline-flex; width: auto; margin-left: 0.5rem; vertical-align: middle; }
+.under b { display: inline; }
 </style>
 </head>
 <body>
@@ -132,16 +158,6 @@ p { margin: 0; }
       <div class="brand"><svg class="mark" width="0.78em" height="0.78em" viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="24" r="14" fill="none" stroke="#2F6B4F" stroke-width="5"/><circle cx="30" cy="24" r="14" fill="none" stroke="#6D2E5B" stroke-width="5"/></svg><span class="product">Kindred</span></div>
       <p class="tagline">A care companion for older people and patients with chronic conditions. Patients choose what to share with family members and carers; their choices appear in the GP consent view.</p>
     </div>
-    <div class="card">
-      <div class="who">Eleanor Chen, 83 <span class="pill mono">SIM-000006</span></div>
-      <ul class="facts">
-        <li>Four abnormal blood panels since May, white cells <span class="lab">2.7 · 1.6 · 1.3 · 2.1 ×10⁹/L</span> against a range of 4 to 11. <b>Each one was filed. Nobody looked at them together.</b> The only message she ever received was about paperwork.</li>
-        <li>Admitted at <b>04:20 this morning</b>. A GP appointment still booked for 08:30.</li>
-        <li>Landline only. Her husband could not drive her to her last review. <b>Nothing in her record has gone to her family.</b></li>
-      </ul>
-      <p class="close">She is the human middleware between her clinicians and her family.</p>
-      <p class="voice">“I want to know what that is. I want to know what’s going on. I want to be aware.”</p>
-    </div>
   </div>
   <div class="foot"><span class="src">Built on the Anima simulated NHS neighbourhood. All patient data synthetic, authored by the simulator, not by us. Fictional demo, not an official NHS product.</span><span class="legal">Team 5</span></div>
 </section>
@@ -151,26 +167,16 @@ p { margin: 0; }
   <span class="kicker">The scale</span>
   <div class="body">
     <h2>This is not one patient.</h2>
-    <div class="scale">
-      <div class="row">
-        <div class="n">47<small>%</small></div>
-        <div><p class="l">of blood results have <b>no record of being communicated</b> to the patient. 31% for abnormal results.</p><p class="s">PACT audit, 2,572 patients, 57 practices</p></div>
-      </div>
-      <div class="row">
-        <div class="n">5.6<small>m</small></div>
-        <div><p class="l">results a month, around <b>68m a year</b>, with no evidence the patient was told.</p><p class="s"><span class="pill ex">Extrapolated</span>12m NHS App result views a month at 47%</p></div>
-      </div>
-      <div class="row">
-        <div class="n">35,000</div>
-        <div><p class="l"><b>GP-hours every working day</b> spent managing results.</p><p class="s"><span class="pill ex">Extrapolated</span>74 minutes a day per doctor across 28,426 FTE GPs in England</p></div>
-      </div>
-      <div class="row">
-        <div class="n">1<small>reading</small></div>
-        <div><p class="l">is not effective at spotting decline. <b>The trajectory is</b>, and every GP system already holds the data.</p><p class="s">41 serious incidents in 13 months from uncommunicated results, including a 45 mm lung mass (HSIB 2019). 5 million unpaid carers. 0.4% of portal users have shared access.</p></div>
-      </div>
+    <div class="chain simple">
+      <div class="step"><div class="n">12<small>m</small></div><p class="l">results seen in the NHS App <b>every month</b></p><p class="s">NHS App roadmap, July 2026</p></div>
+      <div class="op">×</div>
+      <div class="step"><div class="n">47<small>%</small></div><p class="l"><b>never recorded as told</b> to the patient</p><p class="s">UK audit, 2,572 patients, 57 practices</p></div>
+      <div class="op">=</div>
+      <div class="step hot"><div class="n">68<small>m</small></div><p class="l">results <b>a year</b> with no evidence the patient was told</p><p class="s"><span class="pill ex">Extrapolated</span></p></div>
     </div>
+    <p class="under">And GPs spend about <b>35,000 hours every working day</b> managing results. <span class="pill ex">Extrapolated</span></p>
   </div>
-  <div class="foot"><span class="src">Watson (PACT) 2024 · NHS App roadmap Jul 2026 · Poon 2004 · NHS England GP Workforce Jul 2026 · Stow 2018 · HSIB 2019 · Census 2021 · Wolff 2016. Working in the speaker notes.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+  <div class="foot"><span class="src">12m × 47% × 12 months = 67.7m. 74 min per GP a day (Poon 2004) × 28,426 full-time GPs (NHS England, July 2026) = 35,059 hours. Full working and caveats in the notes.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
 </section>
 
 <!-- 3. Why it happens -->
@@ -179,9 +185,9 @@ p { margin: 0; }
   <div class="body">
     <h2 style="max-width:30ch">Results go nowhere, then aren't understood, <em>then the family is locked out.</em></h2>
     <div class="cols3">
-      <div class="col card rust"><div class="num">01</div><h3>Not seen coming</h3><p>Results are reviewed one at a time. No one reads the trend.</p></div>
-      <div class="col card amber"><div class="num">02</div><h3>Not told</h3><p>No reliable “patient informed” state exists in the record, and nothing routes a result to the people who need to act.</p></div>
-      <div class="col card plum"><div class="num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>03</div><h3>Not understood, locked out</h3><p>The App shows the number and says ring your GP; only 51% of adults can find the out-of-range value. Proxy access hands a person the whole record after a practice-led setup, and almost nobody has it.</p></div>
+      <div class="col card rust"><div class="num">01</div><h3>Blind to the trend</h3><p>Each result is read on its own. Nobody reads the trend.</p></div>
+      <div class="col card amber"><div class="num">02</div><h3>No proof she was told</h3><p>The record never says whether she was told. Nothing chases it.</p></div>
+      <div class="col card plum"><div class="num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>03</div><h3>Numbers, not meaning</h3><p>The App shows a number and says ring your GP. Her family sees nothing.</p></div>
     </div>
   </div>
   <div class="foot"><span class="src">Citations in the speaker notes.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
@@ -265,7 +271,7 @@ p { margin: 0; }
 <div class="pager" id="pager"></div>
 <script>
 // Product name lives here only. Change it once and every slide, the title and the pager follow.
-const PRODUCT = "Kindred";
+const PRODUCT = "CareCircle";
 for (const el of document.querySelectorAll(".product")) el.textContent = PRODUCT;
 document.title = `${PRODUCT} · Pitch`;
 const deck = document.getElementById("deck"), slides = [...document.querySelectorAll(".slide")], pager = document.getElementById("pager");

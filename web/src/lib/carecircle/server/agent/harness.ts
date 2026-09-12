@@ -92,7 +92,7 @@ export type RunAgentInput = {
   openaiModel?: string;
   memory: ScopedMemoryService;
   /** Optional live consent mutation callback (patient-only tool). */
-  onConsentUpdate?: (policy: ConsentPolicyState) => void;
+  onConsentUpdate?: (policy: ConsentPolicyState) => void | Promise<void>;
   onEvent?: AskEventSink;
 };
 
@@ -268,7 +268,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       informationClass: z.string().optional(),
       allowed: z.boolean().optional(),
     }),
-    execute: (ctx) => {
+    execute: async (ctx) => {
       const t0 = Date.now();
       if (input.viewerId !== 'patient') {
         emit({ type: 'tool', tool: 'update_consent', status: 'error', detail: 'patient_only' });
@@ -294,8 +294,8 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
                 bag.policy.policyVersion,
                 'patient',
               );
+        await input.onConsentUpdate?.(next);
         bag.policy = next;
-        input.onConsentUpdate?.(next);
         const detail = level
           ? `${ctx.args.targetViewerId}:level=${level}`
           : `${ctx.args.targetViewerId}:${ctx.args.informationClass}=${ctx.args.allowed}`;
