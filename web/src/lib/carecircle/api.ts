@@ -1,6 +1,6 @@
-/** Browser client for the CareCircle Express clinical API (proxied via /care-api). */
+/** Browser client for Kindred clinical Ask (in-process /api/care). */
 
-const API_BASE = process.env.NEXT_PUBLIC_CARE_API_BASE || "/care-api";
+const API_BASE = process.env.NEXT_PUBLIC_CARE_API_BASE || "/api/care";
 
 export class ApiError extends Error {
   constructor(
@@ -47,7 +47,7 @@ export async function careApi<T>(
   try {
     res = await fetch(`${API_BASE}${path}`, { ...opts, headers });
   } catch {
-    throw new ApiError("Clinical Ask server unreachable — start CareCircle API on :8787.", 503, null, "unavailable");
+    throw new ApiError("Clinical Ask is unavailable — restart Kindred (`npm run dev`).", 503, null, "unavailable");
   }
   const text = await res.text();
   let body: unknown = null;
@@ -69,19 +69,19 @@ export async function careApi<T>(
 
 function humanizeCode(code: string): string {
   const map: Record<string, string> = {
-    missing_session: "Connect the clinical Ask server first.",
-    disconnected: "Not connected — restart CareCircle API (:8787).",
-    unauthorized: "Permission denied — check ANIMA_API_KEY in carecircle/.env.",
-    missing_key: "No Anima key — set ANIMA_API_KEY in carecircle/.env.",
+    missing_session: "Connect clinical Ask first.",
+    disconnected: "Clinical Ask session expired — refresh the page.",
+    unauthorized: "Permission denied — check ANIMA_API_KEY in web/.env.local.",
+    missing_key: "No Anima key — set ANIMA_API_KEY in web/.env.local.",
     forbidden: "Permission denied for this Anima action.",
     not_found: "Patient or resource not found.",
-    patient_not_in_world: "This Kindred patient was not found in the CareCircle Anima world.",
+    patient_not_in_world: "This Kindred patient was not found in the Anima world.",
     patient_mismatch: "Selected patient does not match this request.",
     viewer_mismatch: "Wrong viewer for this Ask session.",
     question_required: "Enter a question before asking.",
     no_patient: "Select a patient first.",
     unknown_viewer: "Unknown viewer for clinical Ask.",
-    unavailable: "Clinical Ask server unreachable — start CareCircle API on :8787.",
+    unavailable: "Clinical Ask is unavailable — restart Kindred (`npm run dev`).",
     internal: "Something went wrong in clinical Ask — retry.",
   };
   return map[code] || `Request failed (${code})`;

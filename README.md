@@ -2,7 +2,7 @@
 
 A care companion for older people and patients with chronic conditions. Patients choose what to share with family members and carers; their choices appear in the GP consent view.
 
-**One product surface:** open Kindred at [http://localhost:3111](http://localhost:3111). Home, Circle (people / sharing levels), Ask (clinical, grounded), Care / Results, and Family all live in that single shell. Personas use Kindred `?as=` — not a separate CareCircle UI.
+**One product:** open Kindred at [http://localhost:3111](http://localhost:3111). Home, Circle (people / sharing levels), Ask (clinical, grounded), Care / Results, and Family all live in that single shell. Personas use Kindred `?as=` — there is no separate CareCircle app.
 
 [Mission statement](mission-statement.md) · [Design system](docs/design-system.md) · [Neon setup](sim-app/deployment/README.md) · [Backend details](sim-app/README.md)
 
@@ -10,66 +10,55 @@ A care companion for older people and patients with chronic conditions. Patients
 
 | Piece | Path | Port | Role |
 | --- | --- | --- | --- |
-| **Kindred app** (the product) | `web/` | **:3111** | Single UI: Circle, Ask, Care, Family |
+| **Kindred app** (the product) | `web/` | **:3111** | UI + clinical Ask/SSE API in-process |
 | Companion backend | `sim-app/` | **:4192** | Postgres consent / GP observation |
-| Clinical Ask API (optional backend) | `carecircle/server/` | **:8787** | SSE Ask / live Anima context — **no separate web UI required** |
 
-Kindred owns people, circle, sharing levels, and `?as=` personas. The CareCircle **server** powers clinical Ask behind `/care-api` in Kindred. Do not open `carecircle/web` (:3112) for the demo — that Next app is leftover MVP UI.
+Kindred owns people, circle, sharing levels, and `?as=` personas. Clinical Ask (Anima grounding, SSE) runs as Kindred routes under `/api/care/*` — no second UI and no Express process on :8787.
 
-## Start the single app
+## Start
 
 Use Node.js 22.18 or newer.
 
 ```sh
 npm ci --prefix web
 npm ci --prefix sim-app
-npm ci --prefix carecircle
 cp web/.env.example web/.env.local
-cp carecircle/.env.example carecircle/.env   # set ANIMA_API_KEY for clinical Ask
 ```
 
-Set `SIM_API_KEY` in `web/.env.local` for the Kindred patient record. Set `ANIMA_API_KEY` in `carecircle/.env` for grounded Ask (same Anima team key is fine).
+Set in `web/.env.local`:
+
+- `SIM_API_KEY` — Kindred patient record (Anima sim)
+- `ANIMA_API_KEY` — grounded clinical Ask (same team key is fine)
+- `OPENAI_API_KEY` — optional; improves Ask phrasing (deterministic grounding still works without it)
 
 ```sh
-# One command: companion + Ask API + Kindred UI
+# Companion + Kindred (Ask included)
 npm run dev:product
 ```
 
-Or three terminals:
+Or two terminals:
 
 ```sh
 npm run dev:sim    # :4192
-npm run dev:ask    # :8787 CareCircle Express only
-npm run dev        # :3111 Kindred
+npm run dev        # :3111 Kindred (UI + clinical Ask)
 ```
 
 Open **one URL:** [http://localhost:3111/?as=eleanor&tab=circle](http://localhost:3111/?as=eleanor&tab=circle)
 
 - Circle / sharing levels → Kindred
-- Ask / Care → Kindred tabs calling the Ask API
+- Ask / Care → Kindred tabs (`/api/care`)
 - Switch family viewers → account menu (`?as=`)
 
 GP consent (optional): [http://localhost:4192/gp/consent/?patient=SIM-000006](http://localhost:4192/gp/consent/?patient=SIM-000006)
 
-Without `dev:ask` / `ANIMA_API_KEY`, Circle and companion chat still work; the Ask and Care tabs show how to start the clinical API.
-
-## CareCircle server (backend only)
-
-```bash
-cd carecircle
-cp .env.example .env   # ANIMA_API_KEY; optional OPENAI_API_KEY
-npm install
-npm run dev --prefix server   # or from repo root: npm run dev:ask
-```
-
-See [`carecircle/README.md`](./carecircle/README.md) for Ask streaming, evals, and Amira demo notes. The Express API is the integration surface; Kindred rewrites `/care-api/*` → `:8787/api/*`.
+Without `ANIMA_API_KEY`, Circle and companion chat still work; Ask/Care explain how to add the key.
 
 ## What's connected
 
 - Add a family member with sharing off, choose a sharing level or individual categories, and remove their access.
-- Ask uses CareCircle SSE grounding and maps Kindred `?as=` personas onto Ask viewers; Circle remains the access authority.
+- Ask uses in-process Anima grounding and maps Kindred `?as=` personas onto Ask viewers; Circle remains the access authority.
 - Consent changes persist through `sim-app/`, which updates the GP observation and consent audit in one PostgreSQL transaction.
-- Clinical records for Kindred home/circle are read from the configured Anima simulator; Ask evidence comes from the CareCircle Anima session.
+- Clinical records for Kindred home/circle are read from the configured Anima simulator.
 
 The existing people and family relationships are demo configuration, not verified relatives. The persona switcher and demo sessions are not production authentication.
 
@@ -77,11 +66,10 @@ The existing people and family relationships are demo configuration, not verifie
 
 | Directory | Purpose |
 | --- | --- |
-| `web/` | **The product** — Kindred shell, Circle, Ask, Care, Family |
-| `carecircle/server/` | Clinical Ask / context API used by Kindred |
-| `carecircle/web/` | Legacy MVP UI (not required; do not present as the product) |
+| `web/` | **The product** — Kindred shell, Circle, Ask, Care, Family, clinical API |
 | `sim-app/` | Companion backend, GP consent, Neon notes |
 | `docs/` | Design system and research notes |
+| `carecircle/` | Removed as a product — see short deprecation note only |
 
 ## ADK
 
@@ -89,7 +77,7 @@ The existing people and family relationships are demo configuration, not verifie
 git submodule update --init vendor/adk
 ```
 
-See [ADK notes](docs/adk-notes.md). The Kindred runtime has not yet been migrated to ADK; CareCircle Ask uses ADK on the Express server.
+See [ADK notes](docs/adk-notes.md). Clinical Ask uses `@animahealth/adk` inside Kindred (`web/src/lib/carecircle/server`).
 
 ## Checks
 

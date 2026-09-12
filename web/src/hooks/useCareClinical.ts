@@ -152,7 +152,7 @@ export function useCareClinical(kindred: AppState | null, kindredViewerId: strin
         return res.patient.id;
       } catch (err) {
         if (err instanceof ApiError && err.code === "patient_not_in_world") {
-          // Fall back to CareCircle demo patient so Ask still works in one shell.
+          // Fall back to demo patient so Ask still works in one shell.
           const fallbackId = "SIM-000001";
           const res = await careApi<{
             patient: { id: string; name: string };
@@ -169,7 +169,7 @@ export function useCareClinical(kindred: AppState | null, kindredViewerId: strin
           setContext(res.context);
           setStatus("ready");
           setError(
-            `${patientName} (${patientSimId}) is not in this CareCircle Anima world — clinical Ask is using ${res.patient.name} (${res.patient.id}). Circle / sharing stay on Kindred.`,
+            `${patientName} (${patientSimId}) is not in this Anima world — clinical Ask is using ${res.patient.name} (${res.patient.id}). Circle / sharing stay on Kindred.`,
           );
           return res.patient.id;
         }
@@ -221,7 +221,7 @@ export function useCareClinical(kindred: AppState | null, kindredViewerId: strin
         const canAuto = Boolean(health.animaEnvKeyConfigured) || Boolean(health.animaTeamNameConfigured);
         if (!canAuto) {
           setStatus("needs_server");
-          setError("Set ANIMA_API_KEY in carecircle/.env, then start the CareCircle API (`npm run dev:ask`).");
+          setError("Set ANIMA_API_KEY in web/.env.local, then restart Kindred (`npm run dev`).");
           return;
         }
 

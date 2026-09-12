@@ -71,18 +71,18 @@ export default function AskPanel({
       <div className="page max-w-xl">
         <h1 className="font-display text-[26px] font-bold sm:text-3xl">Ask</h1>
         <p className="mt-2 text-[15px] text-muted">
-          Clinical Ask needs the CareCircle API behind the scenes (not a second app UI).
+          Clinical Ask runs inside Kindred. Add your Anima key and restart the app.
         </p>
         <div className="mt-4 rounded-2xl border border-line bg-card p-4 text-sm leading-relaxed">
           <ol className="list-decimal space-y-2 pl-5">
             <li>
               Set <code className="rounded bg-paper px-1">ANIMA_API_KEY</code> in{" "}
-              <code className="rounded bg-paper px-1">carecircle/.env</code>
+              <code className="rounded bg-paper px-1">web/.env.local</code>
             </li>
             <li>
-              Run <code className="rounded bg-paper px-1">npm run dev:ask</code> (API on :8787)
+              Restart with <code className="rounded bg-paper px-1">npm run dev</code>
             </li>
-            <li>Keep this Kindred tab open — one URL for Circle and Ask</li>
+            <li>Open Ask in this same Kindred tab</li>
           </ol>
           <Button className="mt-4" variant="plum" onClick={() => care.retry()}>
             Retry connect

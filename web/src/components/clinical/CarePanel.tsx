@@ -100,7 +100,7 @@ export default function CarePanel({
         <h1 className="font-display text-[26px] font-bold sm:text-3xl">My care</h1>
         <p className="mt-2 text-muted">
           {care.status === "needs_server"
-            ? "Start the CareCircle API (`npm run dev:ask`) for live care and results."
+            ? "Set ANIMA_API_KEY in web/.env.local and restart Kindred for live care and results."
             : "Loading care context…"}
         </p>
         {care.status === "needs_server" ? (
