@@ -90,15 +90,15 @@ export default function App() {
       ? [
           { id: "home", label: "Home", icon: <HomeIcon />, badge: pending },
           { id: "body", label: "Body", icon: <BodyIcon /> },
+          { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
           { id: "circle", label: "Circle", icon: <LockIcon size={20} /> },
           { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
-          { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
         ]
       : [
           { id: "home", label: patient.shortName, icon: <HomeIcon /> },
           { id: "body", label: "Body", icon: <BodyIcon /> },
-          { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
+          { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
         ];
   const tabParam = params.get("tab") as Tab | null;
   const tab: Tab = tabParam && (tabs.some((t) => t.id === tabParam) || tabParam === "activity" || (tabParam === "levels" && isPatient)) ? tabParam : "home";
@@ -216,7 +216,7 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
   if (tab === "home") {
     return (
       <div className="page">
-        {isPatient ? <PatientHome state={state} actions={actions} onOpenCircle={() => go({ tab: "circle" })} onOpenChat={() => go({ tab: "kindred" })} /> : <FamilyHome state={state} actions={actions} viewerId={viewer.id} onAsk={onAsk} />}
+        {isPatient ? <PatientHome state={state} actions={actions} onOpenChat={() => go({ tab: "kindred" })} /> : <FamilyHome state={state} actions={actions} viewerId={viewer.id} onAsk={onAsk} />}
       </div>
     );
   }

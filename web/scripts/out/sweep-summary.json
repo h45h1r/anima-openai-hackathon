@@ -1,0 +1,59 @@
+{
+  "runAt": "2026-09-12T14:28:10.223Z",
+  "wallSeconds": 59,
+  "simClock": {
+    "now": 1789236300000,
+    "iso": "2026-09-12T18:05:00.000Z",
+    "paused": true,
+    "speed": 60
+  },
+  "baseUrl": "https://sim.animahealth.com",
+  "requestedSample": 2000,
+  "patientsScanned": 1215,
+  "sampleNote": "sample of 1215, scaled to 50000",
+  "stoppedEarlyAtDeadline": false,
+  "fetchErrors": [],
+  "cacheHits": 1215,
+  "requests": 68,
+  "retries": 0,
+  "hospitalViewIncluded": true,
+  "directoryTotal": 50000,
+  "counts": {
+    "ruleA_abnormalUnactioned_raw": 1211,
+    "ruleA_abnormalUnactioned_clearlyAbnormal": 1211,
+    "ruleB_worseningTrend": 828,
+    "ruleB_worseningTrend_latestResultOver30DaysOld": 444,
+    "ruleC_missedNotRebooked": 39,
+    "anyRule": 1212,
+    "scoreAtLeast2": 1212,
+    "pendingResultsExcludedFromHeadline": 9645
+  },
+  "scaledTo50000": {
+    "ruleA_raw": 49835,
+    "ruleA_clearlyAbnormal": 49835,
+    "ruleB": 34074,
+    "ruleC": 1605,
+    "anyRule": 49877,
+    "scoreAtLeast2": 49877
+  },
+  "ruleC": {
+    "applicable": true,
+    "appointmentStatusesSeen": {
+      "booked": 12,
+      "unknown": 36,
+      "completed": 621,
+      "missed": 39
+    },
+    "note": "Missed/cancelled appointment statuses were present."
+  },
+  "definitions": {
+    "abnormal": "value < referenceLow or value > referenceHigh (the API does not flag abnormality).",
+    "clearlyAbnormal": "out of range AND (analyte in neutrophils, white-cell-count, haemoglobin, potassium, creatinine, egfr, hba1c, crp, alt, bilirubin OR value beyond the bound by more than 1.2 x the reference width).",
+    "action": "task, outgoing conversation entry (message to patient), appointment startsAt, encounter, or test order with time after the result's createdAt.",
+    "ruleA": "abnormal result >= 30 sim days old with no action in the 30 days after it; results < 30 days old are 'pending' and excluded.",
+    "ruleB": ">= 2 consecutive abnormal observations of the same analyte (rising: alt, creatinine, hba1c, crp; falling: egfr, haemoglobin), each worse than the last, first-to-last span >= 90 days, no action after the latest.",
+    "ruleC": "appointment status in noshow/cancelled/dna with no later appointment carrying the same title.",
+    "score": "B=3, A=2, C=1, +1 if age >= 75."
+  },
+  "step5Narratives": "skipped: OPENAI_API_KEY returned 401 / was empty at run time"
+}

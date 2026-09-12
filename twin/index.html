@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eleanor Chen · Digital Twin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..600,50&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="twin.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-id">
+    <span class="tag">Synthetic record · Anima sim</span>
+    <h1 class="name">Eleanor Chen</h1>
+    <span class="meta" id="meta"></span>
+  </div>
+  <nav class="views" aria-label="Camera angles">
+    <button data-view="front" class="is-on">Front</button>
+    <button data-view="side">Side</button>
+    <button data-view="back">Back</button>
+    <button data-view="top">Top</button>
+    <button id="spin" aria-pressed="true">Orbit</button>
+  </nav>
+  <div class="clock"><span>Sim clock</span><strong id="sim-now"></strong></div>
+</header>
+
+<main class="stage">
+  <aside class="left">
+    <section class="block">
+      <h2>Living</h2>
+      <p id="social"></p>
+      <p id="contact"></p>
+      <p class="goal"><em>What matters to me</em><span id="goal"></span></p>
+    </section>
+    <section class="block">
+      <h2>Problem list</h2>
+      <ul id="problems" class="plain"></ul>
+      <p class="fine" id="ehr-empty"></p>
+    </section>
+    <section class="block">
+      <h2>Systems</h2>
+      <ol id="systems" class="systems"></ol>
+    </section>
+  </aside>
+
+  <section class="figure" aria-label="Rotatable body twin">
+    <canvas id="c"></canvas>
+    <div id="labels" class="labels"></div>
+    <div class="legend">
+      <span><i class="dot ok"></i>In range</span>
+      <span><i class="dot flag"></i>Out of range</span>
+      <span><i class="dot none"></i>No data yet</span>
+      <span class="hint">Drag to orbit · scroll to zoom · click a marker</span>
+    </div>
+  </section>
+
+  <aside class="right">
+    <div id="detail" class="detail">
+      <p class="empty">Select a system on the body or in the list to see its trend as of the chosen date.</p>
+    </div>
+  </aside>
+</main>
+
+<footer class="time">
+  <div class="time-head">
+    <label for="scrub">As of</label>
+    <strong id="asof"></strong>
+    <span id="asof-sub" class="fine"></span>
+    <button id="today" class="ghost">Jump to sim now</button>
+  </div>
+  <div class="track">
+    <div id="ticks" class="ticks"></div>
+    <input id="scrub" type="range" min="0" max="376" value="376" step="1" aria-label="Record date">
+  </div>
+  <ol id="recent" class="recent"></ol>
+</footer>
+
+<script type="module" src="twin.js"></script>
+</body>
+</html>
