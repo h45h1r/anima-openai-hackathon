@@ -49,7 +49,7 @@ The existing people and family relationships are demo configuration, not verifie
 | `sim-app/` | Copied simulator frontend, local workflow API, consent service and tests |
 | `sim-app/deployment/` | Neon project metadata, migration verification and hosting configuration examples |
 | `replica/` | Read-only capture/import tools, SQL schema and database documentation |
-| `docs/` | Simulator/ADK research and example agent integrations |
+| `docs/` | Simulator/ADK research and example agent integrations. Start with the [design system](docs/design-system.md) before building a screen |
 | `prototype/` | Earlier GP reconstruction retained for the research notes; not the default app |
 | `vendor/adk/` | Pinned upstream ADK submodule used by the research examples |
 
