@@ -179,12 +179,29 @@ function dotTexture(): THREE.Texture {
   return t;
 }
 
+function ringTexture(): THREE.Texture {
+  const c = document.createElement("canvas");
+  c.width = c.height = 96;
+  const g = c.getContext("2d")!;
+  g.strokeStyle = "rgba(255,255,255,1)";
+  g.lineWidth = 5;
+  g.beginPath();
+  g.arc(48, 48, 40, 0, Math.PI * 2);
+  g.stroke();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+const MARKER_DOT = 0.022; // world units; the figure is 1.8 tall
+const MARKER_RING = 0.075;
+
 const BASE = new THREE.Color("#6fa6cf");
 const BASE_DIM = new THREE.Color("#a9c8dd");
 
 export default function BodyScene({ focus, tint, onPick, reducedMotion = false }: BodySceneProps) {
   const host = useRef<HTMLDivElement>(null);
-  const api = useRef<{ setFocus: (id: SystemId | null, tintHex?: string) => void } | null>(null);
+  const api = useRef<{ setFocus: (id: SystemId | null, tintHex?: string) => void; setTints: (t: Partial<Record<SystemId, string>>) => void } | null>(null);
 
   useEffect(() => {
     const el = host.current;
@@ -215,16 +232,6 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
     key.position.set(1.5, 3, 2.5);
     scene.add(key);
 
-    const organs = new THREE.Group();
-    scene.add(organs);
-    const organsBySystem = new Map<SystemId, THREE.Mesh[]>();
-    const anchorOverride = new Map<SystemId, THREE.Vector3>();
-    const anchorOf = (id: SystemId): [number, number, number] => {
-      const o = anchorOverride.get(id);
-      if (o) return [o.x, o.y, o.z];
-      return SYSTEMS.find((s) => s.id === id)!.anchor;
-    };
-    let disposed = false;
 
     const swapPoints = (next: Float32Array) => {
       positions = next;
@@ -304,24 +311,43 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       if (!disposed) paint(currentFocus, currentTint);
     });
 
-    // Focus ring (a soft halo sprite placed at the anchor)
-    const ringCanvas = document.createElement("canvas");
-    ringCanvas.width = ringCanvas.height = 128;
-    const rg = ringCanvas.getContext("2d")!;
-    rg.strokeStyle = "rgba(109,46,91,0.9)";
-    rg.lineWidth = 3;
-    rg.beginPath();
-    rg.arc(64, 64, 52, 0, Math.PI * 2);
-    rg.stroke();
-    rg.strokeStyle = "rgba(109,46,91,0.35)";
-    rg.lineWidth = 10;
-    rg.beginPath();
-    rg.arc(64, 64, 58, 0, Math.PI * 2);
-    rg.stroke();
-    const ringTex = new THREE.CanvasTexture(ringCanvas);
-    const ring = new THREE.Sprite(new THREE.SpriteMaterial({ map: ringTex, transparent: true, opacity: 0, depthWrite: false }));
-    ring.scale.set(0.34, 0.34, 1);
-    scene.add(ring);
+    const organs = new THREE.Group();
+    scene.add(organs);
+    const organsBySystem = new Map<SystemId, THREE.Mesh[]>();
+    const anchorOverride = new Map<SystemId, THREE.Vector3>();
+    const anchorOf = (id: SystemId): [number, number, number] => {
+      const o = anchorOverride.get(id);
+      if (o) return [o.x, o.y, o.z];
+      return SYSTEMS.find((s) => s.id === id)!.anchor;
+    };
+    let disposed = false;
+
+    // Small pulsing markers, one per system, colour-coded by status.
+    const dotTex = dotTexture();
+    const ringTex = ringTexture();
+    const markers = new THREE.Group();
+    scene.add(markers);
+    interface Marker { dot: THREE.Sprite; ring: THREE.Sprite; system: SystemId; phase: number }
+    const markerList: Marker[] = [];
+    for (const [i, def] of SYSTEMS.entries()) {
+      const dot = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex, color: "#9aa8a1", transparent: true, opacity: 0.95, depthWrite: false, depthTest: false }));
+      dot.scale.set(MARKER_DOT, MARKER_DOT, 1);
+      dot.renderOrder = 20;
+      dot.userData.system = def.id;
+      const ring = new THREE.Sprite(new THREE.SpriteMaterial({ map: ringTex, color: "#9aa8a1", transparent: true, opacity: 0.4, depthWrite: false, depthTest: false }));
+      ring.scale.set(MARKER_RING, MARKER_RING, 1);
+      ring.renderOrder = 19;
+      ring.userData.system = def.id;
+      markers.add(dot, ring);
+      markerList.push({ dot, ring, system: def.id, phase: (i * 0.37) % 1 });
+    }
+    const placeMarkers = () => {
+      for (const m of markerList) {
+        const [ax, ay, az] = anchorOf(m.system);
+        m.dot.position.set(ax, ay, az + 0.09);
+        m.ring.position.copy(m.dot.position);
+      }
+    };
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
@@ -340,8 +366,19 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
     let currentFocus: SystemId | null = null;
     let currentTint: string | undefined;
 
+    let tintMap: Partial<Record<SystemId, string>> = {};
+    const colourMarkers = () => {
+      for (const m of markerList) {
+        const hex = tintMap[m.system] ?? "#9aa8a1";
+        (m.dot.material as THREE.SpriteMaterial).color.set(hex);
+        (m.ring.material as THREE.SpriteMaterial).color.set(hex);
+      }
+    };
+
     const paint = (id: SystemId | null, tintHex?: string) => {
       currentTint = tintHex;
+      colourMarkers();
+      placeMarkers();
       for (const [sys, meshes] of organsBySystem) {
         for (const mesh of meshes) {
           const mm = mesh.material as THREE.MeshStandardMaterial;
@@ -375,12 +412,8 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
         colors[i * 3 + 2] = c.b;
       }
       geo.attributes.color.needsUpdate = true;
-      ring.visible = !(def && organsBySystem.has(def.id));
       if (def) {
-        const [ax, ay, az] = anchorOf(def.id);
-        ring.position.set(ax, ay, az + 0.02);
-        ring.scale.setScalar(def.radius * 2.6);
-        (ring.material as THREE.SpriteMaterial).color.set(tintHex ?? "#6d2e5b");
+        const [ax, ay] = anchorOf(def.id);
         targetLook.set(ax * 0.5, ay, 0);
         targetDist = organsBySystem.has(def.id) ? 1.7 : 2.1;
       } else {
@@ -390,7 +423,7 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       currentFocus = id;
       controls.autoRotate = !reducedMotion && !id;
     };
-    api.current = { setFocus: paint };
+    api.current = { setFocus: paint, setTints: (t) => { tintMap = t; colourMarkers(); } };
     paint(null);
 
     // Picking: nearest projected anchor within 44px, only for a click (no drag)
@@ -404,12 +437,12 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       downAt = null;
       if (moved > 6) return;
       const rect = renderer.domElement.getBoundingClientRect();
-      if (organs.children.length) {
+      {
         const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
         const ray = new THREE.Raycaster();
         ray.setFromCamera(ndc, camera);
-        const hit = ray.intersectObjects(organs.children, false)[0];
-        if (hit) {
+        const hit = ray.intersectObjects([...markers.children, ...organs.children], false)[0];
+        if (hit && hit.object.userData.system) {
           onPick(hit.object.userData.system as SystemId);
           return;
         }
@@ -456,9 +489,21 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       const nd = lerp(dist, targetDist, 1 - Math.pow(0.001, dt));
       camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(nd));
       controls.update();
-      const rm = ring.material as THREE.SpriteMaterial;
-      rm.opacity = lerp(rm.opacity, currentFocus ? 0.9 : 0, 1 - Math.pow(0.001, dt));
-      if (currentFocus && !reducedMotion) ring.scale.setScalar((SYSTEMS.find((s) => s.id === currentFocus)!.radius * 2.6) * (1 + 0.04 * Math.sin(clock.elapsedTime * 2.2)));
+      const t = clock.elapsedTime;
+      for (const m of markerList) {
+        const focused = m.system === currentFocus;
+        const dim = currentFocus && !focused ? 0.45 : 1;
+        (m.dot.material as THREE.SpriteMaterial).opacity = 0.95 * dim;
+        m.dot.scale.setScalar(MARKER_DOT * (focused ? 1.35 : 1));
+        if (reducedMotion) {
+          m.ring.scale.setScalar(MARKER_RING * 1.1);
+          (m.ring.material as THREE.SpriteMaterial).opacity = 0.35 * dim;
+        } else {
+          const frac = ((t * (focused ? 0.9 : 0.55) + m.phase) % 1 + 1) % 1;
+          m.ring.scale.setScalar(MARKER_RING * (0.6 + 1.1 * frac) * (focused ? 1.25 : 1));
+          (m.ring.material as THREE.SpriteMaterial).opacity = 0.5 * (1 - frac) * dim;
+        }
+      }
       renderer.render(scene, camera);
     };
     tick();
@@ -480,7 +525,11 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       mat.map?.dispose();
       mat.dispose();
       ringTex.dispose();
-      (ring.material as THREE.SpriteMaterial).dispose();
+      dotTex.dispose();
+      for (const m of markerList) {
+        (m.dot.material as THREE.SpriteMaterial).dispose();
+        (m.ring.material as THREE.SpriteMaterial).dispose();
+      }
       renderer.dispose();
       el.removeChild(renderer.domElement);
       api.current = null;
@@ -489,6 +538,7 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
   }, [reducedMotion]);
 
   useEffect(() => {
+    api.current?.setTints(tint);
     api.current?.setFocus(focus, focus ? tint[focus] : undefined);
   }, [focus, tint]);
 
