@@ -91,7 +91,9 @@ export function computeSystems(state: AppState, viewerId: string): SystemStatus[
     else if (analytes.length) parts.push(`${analytes.length} result${analytes.length > 1 ? "s" : ""} in range`);
     if (conditions.length) parts.push(conditions.map((c) => c.name).join(", "));
     if (medicines.length) parts.push(`${medicines.length} medicine${medicines.length > 1 ? "s" : ""}`);
-    if (mental.length) parts.push(mental.map((m) => m.title).join(", "));
+    const condNames = new Set(conditions.map((c) => c.name.toLowerCase()));
+    const mentalTitles = mental.map((m) => m.title).filter((t) => !condNames.has(t.toLowerCase()));
+    if (mentalTitles.length) parts.push(Array.from(new Set(mentalTitles)).join(", "));
     const summary = state_ === "locked" ? "Not shared with you" : parts.join(" · ") || "Nothing on record";
 
     return { def, state: state_, analytes, outOfRange, conditions, medicines, mental, summary };
