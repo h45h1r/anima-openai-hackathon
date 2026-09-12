@@ -164,27 +164,26 @@ export function createAskAgent(
   modelName: string,
   tools: ReturnType<CareCircleAdkApp['tool']>[],
 ) {
-  // Explicit prompt_cache_breakpoint is not supported on gpt-4o-mini.
-  // Keep a stable static prefix anyway (automatic caching on supported models).
   const explicitCache =
     process.env.OPENAI_PROMPT_CACHE === '1' ||
     /gpt-4\.1|gpt-5|o[0-9]/i.test(modelName);
-  const cacheKey = `carecircle-v3-${modelName}`.slice(0, 64);
+  const cacheKey = `carecircle-v4-${modelName}`.slice(0, 64);
+  // Slightly warmer rewrite pass — grounding still enforced in harness.
+  const rewriteOpts = { temperature: 0.35, maxTokens: 700 };
   return app.agent({
     name: 'carecircle_ask',
     model: openai(
       modelName,
       explicitCache
         ? {
-            temperature: 0.1,
-            maxTokens: 450,
+            ...rewriteOpts,
             promptCache: {
               key: cacheKey,
               mode: 'explicit',
               ttl: '30m',
             },
           }
-        : { temperature: 0.1, maxTokens: 450 },
+        : rewriteOpts,
     ),
     maxSteps: 4,
     tools,

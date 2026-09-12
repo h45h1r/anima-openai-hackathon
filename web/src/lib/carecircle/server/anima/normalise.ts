@@ -62,15 +62,15 @@ function toIsoDate(v: unknown): string | undefined {
 
 /** Turn nested simulator payloads into short readable prose (never raw JSON). */
 export function humaniseResourceData(data: Record<string, unknown>, title = ''): string {
-  const preferred = ['text', 'body', 'summary', 'notes', 'reason', 'statusText', 'followUp', 'message', 'notice'];
+  const preferred = ['text', 'body', 'summary', 'notes', 'reason', 'statusText', 'followUp', 'message', 'notice', 'gpActions', 'clinicalDetails'];
   for (const key of preferred) {
     const v = asString(data[key]);
-    if (v && !v.trim().startsWith('{')) return v.slice(0, 500);
+    if (v && !v.trim().startsWith('{')) return v.slice(0, 900);
   }
   if (Array.isArray(data.analytes)) {
     const panel = asString((data.panel as { name?: string } | undefined)?.name) || title || 'Panel';
     const bits = (data.analytes as Record<string, unknown>[])
-      .slice(0, 8)
+      .slice(0, 10)
       .map((a) => {
         const name = asString(a.name) || asString(a.id) || 'result';
         const value = asNumber(a.value);
@@ -84,28 +84,28 @@ export function humaniseResourceData(data: Record<string, unknown>, title = ''):
     const parts: string[] = [];
     for (const k of ['reason', 'course', 'plan', 'actions', 'followUp', 'gpActions']) {
       const t = asString(secs[k]);
-      if (t) parts.push(t.slice(0, 160));
+      if (t) parts.push(t.slice(0, 280));
     }
     const who = asString(data.sentBy);
     // Prefer clinical substance over workflow stage ("sent" / "completed").
     const head = who ? `From ${who}` : '';
-    if (parts.length || head) return [head, parts.join(' ')].filter(Boolean).join(' — ').slice(0, 500);
+    if (parts.length || head) return [head, parts.join(' ')].filter(Boolean).join(' — ').slice(0, 900);
   }
   if (Array.isArray(data.entries)) {
     const bodies = (data.entries as Record<string, unknown>[])
       .map((e) => asString(e.body) || asString(e.text))
       .filter(Boolean)
-      .slice(0, 2) as string[];
-    if (bodies.length) return bodies.join(' ').slice(0, 500);
+      .slice(0, 4) as string[];
+    if (bodies.length) return bodies.join(' ').slice(0, 900);
   }
-  if (asString(data.gpActions)) return String(data.gpActions).slice(0, 500);
-  if (asString(data.clinicalDetails)) return String(data.clinicalDetails).slice(0, 500);
+  if (asString(data.gpActions)) return String(data.gpActions).slice(0, 900);
+  if (asString(data.clinicalDetails)) return String(data.clinicalDetails).slice(0, 900);
   // Last resort: flatten scalar fields only (never JSON.stringify the whole object).
   const scalars = Object.entries(data)
     .filter(([, v]) => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')
-    .slice(0, 6)
+    .slice(0, 8)
     .map(([k, v]) => `${k}: ${v}`);
-  return scalars.join('; ').slice(0, 400);
+  return scalars.join('; ').slice(0, 700);
 }
 
 function pickPanelId(resource: AnimaResource, data: Record<string, unknown>): string {
@@ -282,7 +282,7 @@ export function resourceToEvent(resource: AnimaResource, patientId: string, serv
   const summaryParts: string[] = [];
   for (const key of ['text', 'body', 'summary', 'notes', 'reason', 'statusText', 'followUp', 'gpActions', 'clinicalDetails']) {
     const v = asString(data[key]);
-    if (v && !v.trim().startsWith('{') && !v.trim().startsWith('[')) summaryParts.push(v.slice(0, 500));
+    if (v && !v.trim().startsWith('{') && !v.trim().startsWith('[')) summaryParts.push(v.slice(0, 900));
   }
   if (summaryParts.length === 0) {
     const human = humaniseResourceData(data, resource.title);
