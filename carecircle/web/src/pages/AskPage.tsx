@@ -1,9 +1,11 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ResultChart from '../components/ResultChart';
 import { useApp, type AskThreadMessage } from '../lib/state';
 
 export default function AskPage() {
   const app = useApp();
+  const location = useLocation();
   const [question, setQuestion] = useState('');
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -11,6 +13,13 @@ export default function AskPage() {
   const threadEnd = useRef<HTMLDivElement | null>(null);
   const run = app.lastAnswer;
   const thread = app.askThread;
+
+  useEffect(() => {
+    const draft = (location.state as { draftQuestion?: string } | null)?.draftQuestion;
+    if (draft && typeof draft === 'string') {
+      setQuestion(draft);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     threadEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });

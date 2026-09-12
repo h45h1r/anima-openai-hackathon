@@ -233,6 +233,37 @@ button, input, textarea, select { font: inherit; }
 }
 .tabbar a.active { color: var(--plum); }
 
+.boot-screen {
+  min-height: min(60vh, 28rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.switch-patient-mobile {
+  display: inline-flex;
+}
+@media (min-width: 1024px) {
+  .switch-patient-mobile { display: none !important; }
+}
+
+button.linkish,
+.linkish {
+  background: none !important;
+  border: none;
+  color: var(--plum);
+  text-decoration: underline;
+  padding: 0;
+  min-height: auto;
+  font-weight: 600;
+  display: inline;
+  cursor: pointer;
+}
+
 /* ——— Primitives ——— */
 button {
   cursor: pointer;
@@ -287,6 +318,51 @@ button.danger:hover,
 button.btn-danger:hover { background: #f8e6df; }
 button.sm { min-height: 32px; padding: 0 0.75rem; font-size: 0.875rem; }
 button.lg { min-height: 48px; padding: 0 1.25rem; font-size: 1rem; }
+
+.account-menu {
+  position: relative;
+}
+.account-menu-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  min-height: 2.25rem !important;
+  padding: 0 !important;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card) !important;
+  color: var(--muted) !important;
+}
+.account-menu-btn:hover,
+.account-menu-btn.open {
+  border-color: var(--plum);
+  background: var(--plum-soft) !important;
+  color: var(--plum) !important;
+}
+.account-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  min-width: 11.5rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: 0 18px 40px rgba(20, 38, 31, 0.12);
+  padding: 0.35rem;
+  z-index: 40;
+}
+.account-menu-panel button {
+  width: 100%;
+  justify-content: flex-start;
+  background: transparent !important;
+  color: var(--ink) !important;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+}
+.account-menu-panel button:hover {
+  background: var(--paper) !important;
+}
 
 .pill {
   display: inline-flex;

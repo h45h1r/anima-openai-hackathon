@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp, type PatientSummary } from '../lib/state';
+import { DEFAULT_PATIENT_ID, DEFAULT_PATIENT_NAME, useApp, type PatientSummary } from '../lib/state';
 import { Button, Card } from '../components/ui';
 
 export default function PatientsPage() {
@@ -14,6 +14,7 @@ export default function PatientsPage() {
   const [openingId, setOpeningId] = useState<string | null>(null);
   const searchPatients = app.searchPatients;
   const openingRef = useRef(false);
+  const missingDefault = app.bootPhase === 'default_patient_missing';
 
   const runSearch = useCallback(
     async (query: string) => {
@@ -51,7 +52,7 @@ export default function PatientsPage() {
     setError(null);
     try {
       await app.selectPatient(id);
-      nav(`/patient/${id}/ask`);
+      nav(`/patient/${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not open patient');
     } finally {
@@ -60,14 +61,39 @@ export default function PatientsPage() {
     }
   }
 
+  async function retryDefault() {
+    setOpeningId(DEFAULT_PATIENT_ID);
+    setError(null);
+    try {
+      const result = await app.selectDefaultPatient();
+      if (result.outcome === 'ready') nav(`/patient/${result.patientId}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not open default patient');
+    } finally {
+      setOpeningId(null);
+    }
+  }
+
   return (
     <Card className="stack">
       <div>
-        <h1 className="page-title">Choose a live patient</h1>
+        <h1 className="page-title">Switch patient</h1>
         <p className="muted">
-          Results come only from Anima <code>GET /api/sites/gp/patients</code>. No hardcoded patient is auto-selected.
+          CareCircle opens <strong>{DEFAULT_PATIENT_NAME}</strong> (<code>{DEFAULT_PATIENT_ID}</code>) by default when
+          that ID appears in live Anima search. Use this page to pick another live patient for judging.
         </p>
       </div>
+
+      {missingDefault ? (
+        <div className="error-banner" role="alert">
+          {DEFAULT_PATIENT_NAME} (<code>{DEFAULT_PATIENT_ID}</code>) was not found in live Anima search. Pick another
+          patient below — CareCircle will not invent a record.{' '}
+          <Button type="button" variant="secondary" size="sm" disabled={Boolean(openingId)} onClick={() => void retryDefault()}>
+            Retry {DEFAULT_PATIENT_ID}
+          </Button>
+        </div>
+      ) : null}
+
       <label className="field">
         Search name or SIM ID
         <input
@@ -89,7 +115,7 @@ export default function PatientsPage() {
         </div>
       ) : null}
       {!loading && !error && !openingId && items.length === 0 ? (
-        <div className="info-banner">No patients matched. Keep editing the search.</div>
+        <div className="info-banner">No patients matched in live Anima. Keep editing the search.</div>
       ) : null}
       <div className="list" role="list">
         {items.map((p) => (
@@ -106,6 +132,7 @@ export default function PatientsPage() {
               <strong className="font-display">{p.name}</strong>
               <div className="muted small">
                 {p.id} · DOB {p.birthDate} · synthetic
+                {p.id === DEFAULT_PATIENT_ID ? ' · demo default' : ''}
               </div>
               {p.conditions?.length ? (
                 <div className="muted small">{p.conditions.slice(0, 3).join(' · ')}</div>
@@ -116,7 +143,7 @@ export default function PatientsPage() {
         ))}
       </div>
       <p className="muted small">
-        Showing {items.length} of {total} (page size 30).
+        Showing {items.length} of {total} (page size 30). Results from Anima <code>GET /api/sites/gp/patients</code> only.
       </p>
     </Card>
   );

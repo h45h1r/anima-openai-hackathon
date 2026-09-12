@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import { useApp } from '../lib/state';
+import { DEFAULT_ANIMA_BASE, DEFAULT_PATIENT_ID, useApp } from '../lib/state';
 import { Button, Card } from '../components/ui';
 
 type HealthInfo = {
@@ -12,12 +12,16 @@ type HealthInfo = {
   animaTeamNameConfigured?: boolean;
 };
 
+/**
+ * Connection / API settings — not the cold-start gate when ANIMA_API_KEY is in server env.
+ * Cold load auto-connects in AppProvider.bootstrap(); this page is the escape hatch.
+ */
 export default function ConnectPage() {
   const app = useApp();
   const nav = useNavigate();
   const [apiKey, setApiKey] = useState('');
   const [teamName, setTeamName] = useState('');
-  const [baseUrl, setBaseUrl] = useState('https://sim.animahacks.com');
+  const [baseUrl, setBaseUrl] = useState(DEFAULT_ANIMA_BASE);
   const [busy, setBusy] = useState(false);
   const [health, setHealth] = useState<HealthInfo | null>(null);
 
@@ -35,14 +39,26 @@ export default function ConnectPage() {
     };
   }, []);
 
+  // If bootstrap already landed a patient, leave Connect unless user explicitly opened settings.
+  // Stay on page when already connected so they can override the key.
   const canUseEnv = Boolean(health?.animaEnvKeyConfigured || health?.animaTeamNameConfigured);
   const canSubmit = Boolean(apiKey.trim() || teamName.trim() || canUseEnv);
+  const alreadyInApp = Boolean(app.session?.connected && app.session?.selectedPatientId);
+
+  async function finishAfterConnect() {
+    const result = await app.selectDefaultPatient();
+    if (result.outcome === 'ready') {
+      nav(`/patient/${result.patientId}`, { replace: true });
+      return;
+    }
+    nav('/patients', { replace: true });
+  }
 
   async function connectWith(input: { apiKey?: string; teamName?: string; baseUrl?: string }) {
     setBusy(true);
     try {
       await app.connect(input);
-      nav('/patients');
+      await finishAfterConnect();
     } catch {
       // error surfaced in banner
     } finally {
@@ -66,22 +82,31 @@ export default function ConnectPage() {
   return (
     <section className="hero-connect">
       <div>
-        <h1>CareCircle</h1>
+        <h1>{alreadyInApp ? 'Connection / API' : 'CareCircle'}</h1>
         <p className="lead">
-          Understand synthetic clinical information with the people you trust — grounded in live Anima records,
-          filtered by your consent boundaries.
+          {alreadyInApp
+            ? 'Override the Anima key or base URL if the live connection fails. The team key stays on the CareCircle server.'
+            : 'Understand synthetic clinical information with the people you trust — grounded in live Anima records, filtered by your consent boundaries.'}
         </p>
+        {alreadyInApp ? (
+          <p className="muted small" style={{ marginTop: '0.75rem' }}>
+            Demo patient defaults to <strong>{DEFAULT_PATIENT_ID}</strong> after reconnect.{' '}
+            <button type="button" className="linkish" onClick={() => nav(`/patient/${app.session?.selectedPatientId}`)}>
+              Back to Home
+            </button>
+          </p>
+        ) : null}
         <Card style={{ marginTop: '1.5rem', maxWidth: 520 }}>
           <form className="stack" onSubmit={onSubmit}>
             <p className="muted small">
-              The Anima team key stays on the CareCircle server. Prefer the server <code>.env</code> key for demos —
-              paste only if you need to override. Never commit secrets.
+              Prefer the server <code>.env</code> key for demos — paste only to override. Never commit secrets.
             </p>
 
             {health?.animaEnvKeyConfigured ? (
               <div className="stack" style={{ gap: '0.75rem' }}>
                 <p className="muted small">
-                  Server already has <code>ANIMA_API_KEY</code> — no paste needed.
+                  Server already has <code>ANIMA_API_KEY</code>
+                  {alreadyInApp ? ' — reconnect without pasting.' : ' — cold load usually auto-connects; use this if that failed.'}
                   {health.openaiConfigured ? (
                     <>
                       {' '}
@@ -92,7 +117,7 @@ export default function ConnectPage() {
                   )}
                 </p>
                 <Button type="button" variant="plum" disabled={busy} onClick={onUseServerEnv}>
-                  {busy ? 'Connecting…' : 'Continue with server key'}
+                  {busy ? 'Connecting…' : alreadyInApp ? 'Reconnect with server key' : 'Connect with server key'}
                 </Button>
                 <p className="muted small">Or override below with a pasted key / team name.</p>
               </div>
@@ -102,7 +127,7 @@ export default function ConnectPage() {
                   Server has <code>ANIMA_TEAM_NAME</code> — connect without pasting a key.
                 </p>
                 <Button type="button" variant="plum" disabled={busy} onClick={onUseServerEnv}>
-                  {busy ? 'Connecting…' : 'Continue with server team name'}
+                  {busy ? 'Connecting…' : 'Connect with server team name'}
                 </Button>
               </div>
             ) : health ? (

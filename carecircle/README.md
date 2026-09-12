@@ -37,7 +37,7 @@ npm run dev
 | `PORT` | No | API port (8787) |
 | `VITE_API_BASE` | No | Leave empty in dev (Vite proxies `/api`) |
 
-\*Or paste the key / team name in the Connect screen.
+\*Or paste the key / team name under **Connection / API** (header menu) if the server has no env key.
 
 
 ## Agent stack (hackathon MVP)
@@ -60,14 +60,15 @@ Covers consent leakage, held results, identity manipulation, grounding/visualisa
 
 ## Judge demo journey
 
-1. Open http://localhost:5173/connect → paste Anima key (or team name) → **Connect**
-2. Search **Amira** / `SIM-000001` (or any returned patient) → **one click** Open
+1. Open http://localhost:5173 — with `ANIMA_API_KEY` in server `.env`, CareCircle **auto-connects** and opens **Amira Khan (`SIM-000001`)** on **Home** (no Patients click). Hard-refresh if you still see an old Connect gate.
+2. Use **Switch patient** (header / menu) only if you want another live patient. If Amira is missing from live search, the app shows a clear error and the switcher — it never invents a patient.
 3. **Ask CareCircle**: “Explain my latest blood tests” → then “What about my kidney results?” — second answer should focus on U&E / eGFR / creatinine / potassium, not repeat the full FBC dump. Thread stays visible on the left; **Who can see what** on the right shows viewer, consent, holds, and last sources.
 4. Open a **source** chip; inspect visualisation if measurements exist
 5. Switch viewer to **Sarah** then **Tom** → ask again (thread resets per viewer)
-6. As patient, open **People and access** → change a grant → Save → re-ask as Tom
-7. Ask about appointments / afternoon preference — confirm stage is preference/request/slots, not fake booking
+6. As patient, open **People** → change a grant → Save → re-ask as Tom
+7. **My care**: review next appointments, use **Ask about next appointment** or **Draft request (no book)** — stages stay preference/request/slots, never a fake booking
 8. Optional: Home → **Advance clock +121m** → Refresh (new labs may enter **held** for family)
+9. Bad key / override: header menu → **Connection / API**
 
 ## Smoke API script
 
