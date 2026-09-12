@@ -119,6 +119,22 @@ p { margin: 0; }
 @media (max-width: 900px) { .hero, .cols3, .pillars { grid-template-columns: 1fr; } .stat-row { grid-template-columns: 1fr 1fr; } .flow { grid-template-columns: repeat(2, 1fr); } .flow div::after { display: none; } .row { grid-template-columns: 1fr; } .foot .legal { white-space: normal; } }
 @media print { .deck { height: auto; overflow: visible; } .slide { height: 100vh; page-break-after: always; } .pager { display: none; } }
 .voice { margin-top: 0.6rem; font-family: var(--display); font-weight: 500; font-size: clamp(1rem, 1.4vw, 1.3rem); color: #6D2E5B; line-height: 1.3; }
+
+/* arithmetic chains on the scale slide */
+.chain-label { margin: 1.1rem 0 0.35rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--plum); }
+.chain { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 0 0.6rem; align-items: stretch; }
+.chain.three { grid-template-columns: 1fr auto 1fr auto 1fr; }
+.chain .step { border-top: 3px solid var(--line); padding: 0.5rem 0.2rem 0 0; }
+.chain .step.hot { border-top-color: var(--plum); }
+.chain.quiet .step { border-top-color: var(--line); }
+.chain .n { font-family: var(--display); font-size: clamp(1.7rem, 3.1vw, 3rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; color: var(--ink); white-space: nowrap; }
+.chain .step.hot .n { color: var(--plum); }
+.chain .n small { font-size: 0.42em; color: var(--muted); font-weight: 600; letter-spacing: 0; margin-left: 0.08em; }
+.chain .l { margin-top: 0.3rem; font-size: clamp(0.78rem, 0.98vw, 0.98rem); color: var(--muted); line-height: 1.32; }
+.chain .l b { color: var(--ink); font-weight: 600; }
+.chain .s { margin-top: 0.25rem; font-size: 0.66rem; color: var(--muted); line-height: 1.3; }
+.chain .op { align-self: center; padding-top: 0.6rem; font-family: var(--display); font-weight: 700; font-size: clamp(1.1rem, 1.8vw, 1.7rem); color: var(--plum); white-space: nowrap; min-width: 1.2em; text-align: center; }
+@media (max-width: 900px) { .chain, .chain.three { grid-template-columns: 1fr; } .chain .op { padding: 0.2rem 0; text-align: left; } }
 </style>
 </head>
 <body>
@@ -138,29 +154,40 @@ p { margin: 0; }
 
 <!-- 2. The scale -->
 <section class="slide">
-  <span class="kicker">The scale</span>
+  <span class="kicker">The scale · follow the arithmetic</span>
   <div class="body">
     <h2>This is not one patient.</h2>
-    <div class="scale">
-      <div class="row">
-        <div class="n">47<small>%</small></div>
-        <div><p class="l">of blood results have <b>no record of being communicated</b> to the patient. 31% for abnormal results.</p><p class="s">PACT audit, 2,572 patients, 57 practices</p></div>
-      </div>
-      <div class="row">
-        <div class="n">5.6<small>m</small></div>
-        <div><p class="l">results a month, around <b>68m a year</b>, with no evidence the patient was told.</p><p class="s"><span class="pill ex">Extrapolated</span>12m NHS App result views a month at 47%</p></div>
-      </div>
-      <div class="row">
-        <div class="n">35,000</div>
-        <div><p class="l"><b>GP-hours every working day</b> spent managing results.</p><p class="s"><span class="pill ex">Extrapolated</span>74 minutes a day per doctor across 28,426 FTE GPs in England</p></div>
-      </div>
-      <div class="row">
-        <div class="n">1<small>reading</small></div>
-        <div><p class="l">is not effective at spotting decline. <b>The trajectory is</b>, and every GP system already holds the data.</p><p class="s">41 serious incidents in 13 months from uncommunicated results, including a 45 mm lung mass (HSIB 2019). 5 million unpaid carers. 0.4% of portal users have shared access.</p></div>
-      </div>
+
+    <div class="chain-label">Seen, but not told</div>
+    <div class="chain">
+      <div class="step"><div class="n">12<small>m</small></div><p class="l">test results viewed in the NHS App <b>every month</b></p><p class="s">NHS App roadmap, July 2026</p></div>
+      <div class="op">×</div>
+      <div class="step"><div class="n">47<small>%</small></div><p class="l">have <b>no record of the patient being told</b>. 31% even when abnormal.</p><p class="s">PACT audit, 2,572 patients, 57 practices</p></div>
+      <div class="op">=</div>
+      <div class="step"><div class="n">5.6<small>m</small></div><p class="l">results a month with <b>no evidence anyone told the patient</b></p><p class="s"><span class="pill ex">Extrapolated</span></p></div>
+      <div class="op">× 12</div>
+      <div class="step hot"><div class="n">68<small>m</small></div><p class="l">a year. <b>Every one of them is somebody's Eleanor.</b></p><p class="s"><span class="pill ex">Extrapolated</span></p></div>
+    </div>
+
+    <div class="chain-label">What it costs the practice</div>
+    <div class="chain three">
+      <div class="step"><div class="n">74<small>min</small></div><p class="l">a day <b>per GP</b> managing results</p><p class="s">Poon et al. 2004, 262 physicians</p></div>
+      <div class="op">×</div>
+      <div class="step"><div class="n">28,426</div><p class="l"><b>full-time GPs</b> in England</p><p class="s">NHS England GP Workforce, July 2026</p></div>
+      <div class="op">=</div>
+      <div class="step hot"><div class="n">35,000</div><p class="l"><b>GP-hours every working day</b> on results alone</p><p class="s"><span class="pill ex">Extrapolated</span></p></div>
+    </div>
+
+    <div class="chain-label">And when one slips</div>
+    <div class="chain three quiet">
+      <div class="step"><div class="n">41</div><p class="l"><b>serious incidents in 13 months</b> from uncommunicated results, one a 45 mm lung mass</p><p class="s">HSIB, 2019</p></div>
+      <div class="op"></div>
+      <div class="step"><div class="n">1<small>reading</small></div><p class="l">cannot show decline. <b>The trajectory can</b>, and every GP system already holds it.</p><p class="s">Stow et al., BMC Medicine 2018</p></div>
+      <div class="op"></div>
+      <div class="step"><div class="n">0.4<small>%</small></div><p class="l">of portal users have shared access for a carer. <b>5 million carers</b> in England and Wales.</p><p class="s">Wolff 2016 · Census 2021</p></div>
     </div>
   </div>
-  <div class="foot"><span class="src">Watson (PACT) 2024 · NHS App roadmap Jul 2026 · Poon 2004 · NHS England GP Workforce Jul 2026 · Stow 2018 · HSIB 2019 · Census 2021 · Wolff 2016. Working in the speaker notes.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+  <div class="foot"><span class="src">Working for every extrapolated figure is in the speaker notes. 12m × 47% = 5.6m; × 12 = 67.7m. 74 min × 28,426 ÷ 60 = 35,059 hours.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
 </section>
 
 <!-- 3. Why it happens -->
