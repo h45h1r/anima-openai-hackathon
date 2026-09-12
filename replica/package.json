@@ -1,0 +1,13 @@
+{
+  "name": "anima-sim-replica",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "import": "node --env-file=../.env.local import.mjs",
+    "serve": "node server.mjs",
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  }
+}

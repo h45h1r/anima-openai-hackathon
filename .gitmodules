@@ -1,0 +1,4 @@
+[submodule "vendor/adk"]
+	path = vendor/adk
+	url = https://github.com/mycontinuum-com/adk.git
+	ignore = untracked

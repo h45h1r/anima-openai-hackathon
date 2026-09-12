@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><script src="/local-bootstrap.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NHS-SIM API explorer</title>
+  <link rel="stylesheet" href="/docs/explorer/swagger-ui.css">
+  <link rel="stylesheet" href="/docs/explorer/explorer.css">
+</head>
+<body>
+  <header class="explorer-header">
+    <a href="/docs/">NHS-SIM / Handbook</a>
+    <nav aria-label="API documentation"><a href="/docs/api/">API guide</a><a href="/api/openapi.json" download="nhs-sim.openapi.json">Download OpenAPI JSON</a><a href="/control/">Open simulator</a></nav>
+  </header>
+  <main>
+    <section class="explorer-intro" aria-labelledby="explorer-title">
+      <h1 id="explorer-title">API explorer</h1>
+      <p>Inspect request schemas and test calls against this simulator. Use <strong>Authorize</strong> to enter your team key, then expand an endpoint and choose <strong>Try it out</strong> and <strong>Execute</strong>.</p>
+      <p>Calls change your team's world. Copy your existing key from <strong>Team &amp; API key</strong> in a workspace. <code>POST /api/keys</code> creates a separate world each time. Your key is cleared when you reload this page.</p>
+      <p>These are synthetic simulation APIs, including simplified NHS adapters. <a href="/docs/quickstart/">Start with a worked example</a>.</p>
+    </section>
+    <div id="swagger-ui"></div>
+    <noscript>Enable JavaScript to test requests, or <a href="/api/openapi.json">download the OpenAPI JSON specification</a>.</noscript>
+  </main>
+  <script src="/docs/explorer/swagger-ui-bundle.js"></script>
+  <script src="/docs/explorer/explorer.js"></script>
+</body>
+</html>

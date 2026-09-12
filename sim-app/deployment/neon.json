@@ -1,0 +1,17 @@
+{
+  "projectId": "empty-sunset-32555267",
+  "projectName": "kindred-anima",
+  "region": "aws-eu-west-2",
+  "postgresVersion": 18,
+  "database": "kindred",
+  "branches": {
+    "production": "br-rough-art-za6q8z12",
+    "development": "br-misty-bonus-zaz9y3du"
+  },
+  "compute": {
+    "minCU": 0.25,
+    "maxCU": 1,
+    "suspendAfterSeconds": 300
+  },
+  "productionProtected": true
+}

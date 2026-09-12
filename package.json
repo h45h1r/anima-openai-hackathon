@@ -1,0 +1,18 @@
+{
+  "name": "kindred",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "dev": "npm run dev --prefix web -- --port 3111",
+    "dev:sim": "npm start --prefix sim-app",
+    "dev:neon": "npm run start:neon --prefix sim-app",
+    "dev:prototype": "node --env-file-if-exists=.env.local prototype/server.mjs",
+    "build": "npm run build --prefix web",
+    "typecheck": "npm run typecheck --prefix web",
+    "test": "npm run test:sim && npm run test:web && npm run test:prototype",
+    "test:sim": "npm test --prefix sim-app",
+    "test:web": "npm test --prefix web",
+    "test:prototype": "node --test prototype/*.test.mjs"
+  }
+}

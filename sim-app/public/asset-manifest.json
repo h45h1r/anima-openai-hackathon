@@ -1,0 +1,1749 @@
+{
+  "assets": [
+    {
+      "path": "/gp/assets/product-brand-DjIUSgRA.js",
+      "source": "https://sim.animahealth.com/gp/assets/product-brand-DjIUSgRA.js",
+      "bytes": 1245,
+      "upstreamSha256": "dfd613f34f94a66d1de2717ecd637d3e9f3b8f1ecae57d1163d9d664995c71c8",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/product-brand-CuTQAtko.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/product-brand-CuTQAtko.js",
+      "bytes": 1245,
+      "upstreamSha256": "303b2de20e53fc7b8e2804f6a3e7493169cb7fd9414081d1207a08ca68ff24c8",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/messaging-workspace-Dfjvtjex.css",
+      "source": "https://sim.animahealth.com/wearables/assets/messaging-workspace-Dfjvtjex.css",
+      "bytes": 14222,
+      "upstreamSha256": "16d11e9f82850439e7592d195628e581b6248033a595e9ca90d5fc048e22e5b4",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/messaging-workspace-OWXLwRNc.js",
+      "source": "https://sim.animahealth.com/control/assets/messaging-workspace-OWXLwRNc.js",
+      "bytes": 18981,
+      "upstreamSha256": "289bf246f8178fb22323a585df61fe632b861e65e9e59cf97b6fadfcef8eaf42",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/document-workspace-C2GNFJSF.js",
+      "source": "https://sim.animahealth.com/wearables/assets/document-workspace-C2GNFJSF.js",
+      "bytes": 16653,
+      "upstreamSha256": "da1f9f36af3e6b509d0190ef12bfc1e603133df13df950799ff3ad66f49f7856",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/record-attribution-OQq-oYVJ.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/record-attribution-OQq-oYVJ.js",
+      "bytes": 1903,
+      "upstreamSha256": "5e7f8d1d49884d1bad33f802060062808d29fcb2371b3f154f404c487776e403",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/plan-exploration-Bt-RhEwp.js",
+      "source": "https://sim.animahealth.com/community/assets/plan-exploration-Bt-RhEwp.js",
+      "bytes": 4044,
+      "upstreamSha256": "4cf7c2d81727d876df75e4e6e5a450757eb4431f4da376cc88b4734fa592804e",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/record-attribution-C_yth9i6.js",
+      "source": "https://sim.animahealth.com/wearables/assets/record-attribution-C_yth9i6.js",
+      "bytes": 1903,
+      "upstreamSha256": "f432b0d6669bd30acb98799fae7874a6841604e7649d62e6cb080b28056996be",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/systems-DR1w4Obh.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/systems-DR1w4Obh.css",
+      "bytes": 28693,
+      "upstreamSha256": "5d65e6fca991c655a969f76fd71a8abc0d4f97af61d07f98e3c01510329a1239",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/record-attribution-BiUIju20.css",
+      "source": "https://sim.animahealth.com/gp/assets/record-attribution-BiUIju20.css",
+      "bytes": 379,
+      "upstreamSha256": "6cf08eb840d96fc860b446dbd14845e8eb7c958d474b8ac7b4319ff7d636ed40",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/pharmacy-workspace-CGiwxIpx.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/pharmacy-workspace-CGiwxIpx.css",
+      "bytes": 14621,
+      "upstreamSha256": "068fb87cc8ec082cdca0afa86c6ab8ce71ac5c565ef8df97c7b1ebb5b03491bd",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/pharmacy-workspace-CGiwxIpx.css",
+      "source": "https://sim.animahealth.com/community/assets/pharmacy-workspace-CGiwxIpx.css",
+      "bytes": 14621,
+      "upstreamSha256": "068fb87cc8ec082cdca0afa86c6ab8ce71ac5c565ef8df97c7b1ebb5b03491bd",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/document-workspace-DARuS1bs.css",
+      "source": "https://sim.animahealth.com/community/assets/document-workspace-DARuS1bs.css",
+      "bytes": 12576,
+      "upstreamSha256": "2a21ea138b1742d962e58e1d8fb33db3a4bf648434e351ba26c0bcb5121a9a6b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/document-workspace-DARuS1bs.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/document-workspace-DARuS1bs.css",
+      "bytes": 12576,
+      "upstreamSha256": "2a21ea138b1742d962e58e1d8fb33db3a4bf648434e351ba26c0bcb5121a9a6b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/index--RtVaVMc.js",
+      "source": "https://sim.animahealth.com/wearables/assets/index--RtVaVMc.js",
+      "bytes": 382416,
+      "upstreamSha256": "6d7d64893ddc527bcf33cdb547e6461a7c41c9915637be505d188b80105852d1",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/index-B3tGnViK.css",
+      "source": "https://sim.animahealth.com/wearables/assets/index-B3tGnViK.css",
+      "bytes": 86838,
+      "upstreamSha256": "40da367be68557e9d0943d8e50f11e4492e3cd4a9d42c8bc14e3bab0edc05f93",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/telephony-workspace-DnMVblMH.js",
+      "source": "https://sim.animahealth.com/control/assets/telephony-workspace-DnMVblMH.js",
+      "bytes": 54667,
+      "upstreamSha256": "19b6af7fbda6631d3fcd5f9d0664a6f32a1192ab82120ba3f0dbacf478928ec1",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/",
+      "source": "https://sim.animahealth.com/pharmacy/",
+      "bytes": 545,
+      "upstreamSha256": "7f8c226af418dc91d98a44014584ce80e6f894d207445e2c1b6ac399e9713ed8",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/plan-exploration-uOF-LgiW.js",
+      "source": "https://sim.animahealth.com/gp/assets/plan-exploration-uOF-LgiW.js",
+      "bytes": 4044,
+      "upstreamSha256": "f31da8ecadee205ee981d141748bf3714fb1f9e1f552ec1d52168c7e2f492943",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/document-workspace-CYOOfCR3.js",
+      "source": "https://sim.animahealth.com/gp/assets/document-workspace-CYOOfCR3.js",
+      "bytes": 16653,
+      "upstreamSha256": "29443967618e591896c35cef6e1ab74e3c7c89860ea97223db642b0a03d9e57e",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/plan-exploration-DOPgfWRR.css",
+      "source": "https://sim.animahealth.com/community/assets/plan-exploration-DOPgfWRR.css",
+      "bytes": 1183,
+      "upstreamSha256": "aad0f20dc896c573952fbaa3bb07ed2d5441afc9eba7f9c9b62346f9983b5b64",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/telephony-workspace-DJjENUC8.js",
+      "source": "https://sim.animahealth.com/gp/assets/telephony-workspace-DJjENUC8.js",
+      "bytes": 54667,
+      "upstreamSha256": "7b33fd44fe366f5d819fde7ab8eb806be87586a752b09d0f2ccf497c7a526b4f",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/plan-exploration-DOPgfWRR.css",
+      "source": "https://sim.animahealth.com/control/assets/plan-exploration-DOPgfWRR.css",
+      "bytes": 1183,
+      "upstreamSha256": "aad0f20dc896c573952fbaa3bb07ed2d5441afc9eba7f9c9b62346f9983b5b64",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/",
+      "source": "https://sim.animahealth.com/control/",
+      "bytes": 542,
+      "upstreamSha256": "94f1389b9d3e94ddbd494546c41ad8752d06d6fd142919b99dc5bcab3d0c7310",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/systems-Brf2gtMy.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/systems-Brf2gtMy.js",
+      "bytes": 104974,
+      "upstreamSha256": "5d7a1bdab1916da1dba35db4fe1790271d090397c5018db505018080db8210e9",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/product-brand-C66U_yzH.css",
+      "source": "https://sim.animahealth.com/wearables/assets/product-brand-C66U_yzH.css",
+      "bytes": 950,
+      "upstreamSha256": "79a6cd71216dc5fccf6f5044c5bf651fcbf81188385ca18da50c225499616429",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/document-workspace-gD7uRDK8.js",
+      "source": "https://sim.animahealth.com/community/assets/document-workspace-gD7uRDK8.js",
+      "bytes": 16653,
+      "upstreamSha256": "027c9e9dc2e9c902d3252bfe4afd3534c6a43292f9793ac31c3fca0370d0ef54",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/telephony-workspace-scquSPMu.css",
+      "source": "https://sim.animahealth.com/control/assets/telephony-workspace-scquSPMu.css",
+      "bytes": 10637,
+      "upstreamSha256": "663ca9f6a7e8969e87e01d58f7ffc7030311908451e2e3fac14e1a04722b60d7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/messages/",
+      "source": "https://sim.animahealth.com/gp/messages/",
+      "bytes": 527,
+      "upstreamSha256": "dca8220d10a43e805bc8d6794afd8523ea4100df10ebe43b647108b3c84ca05c",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/systems-BCRK2OAR.js",
+      "source": "https://sim.animahealth.com/wearables/assets/systems-BCRK2OAR.js",
+      "bytes": 104974,
+      "upstreamSha256": "a5a64bdb6b6570723d97565c8bf8fecfe5a239317a5799a342d7219d682320e5",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/plan-exploration-DOPgfWRR.css",
+      "source": "https://sim.animahealth.com/gp/assets/plan-exploration-DOPgfWRR.css",
+      "bytes": 1183,
+      "upstreamSha256": "aad0f20dc896c573952fbaa3bb07ed2d5441afc9eba7f9c9b62346f9983b5b64",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/messaging-workspace-B6nm1y9H.js",
+      "source": "https://sim.animahealth.com/wearables/assets/messaging-workspace-B6nm1y9H.js",
+      "bytes": 18981,
+      "upstreamSha256": "9258e0a18460b6a7520b0e489876430d3e21622a4764a70562dfba56770f6590",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/telephony/",
+      "source": "https://sim.animahealth.com/gp/telephony/",
+      "bytes": 527,
+      "upstreamSha256": "dca8220d10a43e805bc8d6794afd8523ea4100df10ebe43b647108b3c84ca05c",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/document-workspace-DARuS1bs.css",
+      "source": "https://sim.animahealth.com/control/assets/document-workspace-DARuS1bs.css",
+      "bytes": 12576,
+      "upstreamSha256": "2a21ea138b1742d962e58e1d8fb33db3a4bf648434e351ba26c0bcb5121a9a6b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/care-workspaces-B3-CcfJ7.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/care-workspaces-B3-CcfJ7.js",
+      "bytes": 17891,
+      "upstreamSha256": "4099ec55f88408e2357733fbc35a8590fa3530e16de9c5bc828e0ec85ad3f8ab",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/pharmacy-workspace-CGiwxIpx.css",
+      "source": "https://sim.animahealth.com/hospital/assets/pharmacy-workspace-CGiwxIpx.css",
+      "bytes": 14621,
+      "upstreamSha256": "068fb87cc8ec082cdca0afa86c6ab8ce71ac5c565ef8df97c7b1ebb5b03491bd",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/systems-B1uh_yTI.js",
+      "source": "https://sim.animahealth.com/control/assets/systems-B1uh_yTI.js",
+      "bytes": 104974,
+      "upstreamSha256": "8c374bf80ebc2ee6311852294a9ab4b2a9c3e2f3e0cf13e79fe631a3ed4fc142",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/document-workspace-DARuS1bs.css",
+      "source": "https://sim.animahealth.com/hospital/assets/document-workspace-DARuS1bs.css",
+      "bytes": 12576,
+      "upstreamSha256": "2a21ea138b1742d962e58e1d8fb33db3a4bf648434e351ba26c0bcb5121a9a6b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/messages/",
+      "source": "https://sim.animahealth.com/wearables/messages/",
+      "bytes": 548,
+      "upstreamSha256": "60024cc0a39080022745b6af169a1348cd1e1efe23229b10273cc770b3304103",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/pharmacy-workspace-CGiwxIpx.css",
+      "source": "https://sim.animahealth.com/control/assets/pharmacy-workspace-CGiwxIpx.css",
+      "bytes": 14621,
+      "upstreamSha256": "068fb87cc8ec082cdca0afa86c6ab8ce71ac5c565ef8df97c7b1ebb5b03491bd",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/home-workspace-Cx_vIiUa.js",
+      "source": "https://sim.animahealth.com/hospital/assets/home-workspace-Cx_vIiUa.js",
+      "bytes": 10270,
+      "upstreamSha256": "3af6ce0b1c1c4d55ae0da4f55a6b2cc9cc125f069ef9dd689c7fd335afdd516b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/telephony-workspace-scquSPMu.css",
+      "source": "https://sim.animahealth.com/gp/assets/telephony-workspace-scquSPMu.css",
+      "bytes": 10637,
+      "upstreamSha256": "663ca9f6a7e8969e87e01d58f7ffc7030311908451e2e3fac14e1a04722b60d7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/telephony-workspace-BbDDEG53.js",
+      "source": "https://sim.animahealth.com/community/assets/telephony-workspace-BbDDEG53.js",
+      "bytes": 54667,
+      "upstreamSha256": "78344e8234c9cb90cec99a97c957daf7980b156483cd3ba9ec27b19110bc487b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/messaging-workspace-Dfjvtjex.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/messaging-workspace-Dfjvtjex.css",
+      "bytes": 14222,
+      "upstreamSha256": "16d11e9f82850439e7592d195628e581b6248033a595e9ca90d5fc048e22e5b4",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/systems-7MLcCY0D.js",
+      "source": "https://sim.animahealth.com/hospital/assets/systems-7MLcCY0D.js",
+      "bytes": 104974,
+      "upstreamSha256": "d3e41c5fc6531cb1e396de7ade9a6b4e702c80acb61bb09763d182b2dbd4d82f",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/systems-DR1w4Obh.css",
+      "source": "https://sim.animahealth.com/community/assets/systems-DR1w4Obh.css",
+      "bytes": 28693,
+      "upstreamSha256": "5d65e6fca991c655a969f76fd71a8abc0d4f97af61d07f98e3c01510329a1239",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/home-workspace-6Yyr8E9_.js",
+      "source": "https://sim.animahealth.com/community/assets/home-workspace-6Yyr8E9_.js",
+      "bytes": 10270,
+      "upstreamSha256": "ce8c2e70f861dcf6f26153ff72ca1a1ac1acc71e75a44afaf5276e590b4fcea4",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/index-B3tGnViK.css",
+      "source": "https://sim.animahealth.com/community/assets/index-B3tGnViK.css",
+      "bytes": 86838,
+      "upstreamSha256": "40da367be68557e9d0943d8e50f11e4492e3cd4a9d42c8bc14e3bab0edc05f93",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/index-Bf5G1RC_.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/index-Bf5G1RC_.js",
+      "bytes": 382414,
+      "upstreamSha256": "dd581d05345709bba82500428789b4f6e0f932139132b6c757a832c0c2109ecf",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/telephony-workspace-scquSPMu.css",
+      "source": "https://sim.animahealth.com/hospital/assets/telephony-workspace-scquSPMu.css",
+      "bytes": 10637,
+      "upstreamSha256": "663ca9f6a7e8969e87e01d58f7ffc7030311908451e2e3fac14e1a04722b60d7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/document-workspace-mK9MbrKu.js",
+      "source": "https://sim.animahealth.com/hospital/assets/document-workspace-mK9MbrKu.js",
+      "bytes": 16653,
+      "upstreamSha256": "350c3949c2928081537279fd71ab42fd61a13a9e1a52b7b63f86e8d04617c0c7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/messaging-workspace-Dfjvtjex.css",
+      "source": "https://sim.animahealth.com/community/assets/messaging-workspace-Dfjvtjex.css",
+      "bytes": 14222,
+      "upstreamSha256": "16d11e9f82850439e7592d195628e581b6248033a595e9ca90d5fc048e22e5b4",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/messaging-workspace-1Lk2JgNj.js",
+      "source": "https://sim.animahealth.com/hospital/assets/messaging-workspace-1Lk2JgNj.js",
+      "bytes": 18981,
+      "upstreamSha256": "889fa9ce1394426c782856f4bb371f8387cec9115ef4245d56ee98d9c9033bfa",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/home-workspace-CN53t3-Z.js",
+      "source": "https://sim.animahealth.com/gp/assets/home-workspace-CN53t3-Z.js",
+      "bytes": 10270,
+      "upstreamSha256": "5cf8fdda2eb279062fea7c1c8cc8e6db3a8c633090523e018f0afd98b7b59201",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/",
+      "source": "https://sim.animahealth.com/hospital/",
+      "bytes": 545,
+      "upstreamSha256": "0e748c9261fd368cc1dce58bf4148e8bd3bd5dc5325b457b4ad7b135a5e142df",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/record-attribution-BiUIju20.css",
+      "source": "https://sim.animahealth.com/control/assets/record-attribution-BiUIju20.css",
+      "bytes": 379,
+      "upstreamSha256": "6cf08eb840d96fc860b446dbd14845e8eb7c958d474b8ac7b4319ff7d636ed40",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/record-attribution-DcbMQMTq.js",
+      "source": "https://sim.animahealth.com/control/assets/record-attribution-DcbMQMTq.js",
+      "bytes": 1903,
+      "upstreamSha256": "52601221029f58b3388bd46080520f4410fc848c94af3c46ee8abbc7c00c5e04",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/record-attribution-BiUIju20.css",
+      "source": "https://sim.animahealth.com/hospital/assets/record-attribution-BiUIju20.css",
+      "bytes": 379,
+      "upstreamSha256": "6cf08eb840d96fc860b446dbd14845e8eb7c958d474b8ac7b4319ff7d636ed40",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/product-brand-C66U_yzH.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/product-brand-C66U_yzH.css",
+      "bytes": 950,
+      "upstreamSha256": "79a6cd71216dc5fccf6f5044c5bf651fcbf81188385ca18da50c225499616429",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/documents/",
+      "source": "https://sim.animahealth.com/gp/documents/",
+      "bytes": 527,
+      "upstreamSha256": "dca8220d10a43e805bc8d6794afd8523ea4100df10ebe43b647108b3c84ca05c",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/systems-CRcbVuI2.js",
+      "source": "https://sim.animahealth.com/community/assets/systems-CRcbVuI2.js",
+      "bytes": 104974,
+      "upstreamSha256": "a6213341b50b06e6a58219722956b4335d61193bec148d8fa791a81decb02214",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/home-workspace-D2O-7ACC.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/home-workspace-D2O-7ACC.js",
+      "bytes": 10270,
+      "upstreamSha256": "dd9526531f932a49cb830ddd718f3733a33d0324bb3b074f5c6d3f8f72592463",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/index-B3tGnViK.css",
+      "source": "https://sim.animahealth.com/gp/assets/index-B3tGnViK.css",
+      "bytes": 86838,
+      "upstreamSha256": "40da367be68557e9d0943d8e50f11e4492e3cd4a9d42c8bc14e3bab0edc05f93",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/plan-exploration-DOPgfWRR.css",
+      "source": "https://sim.animahealth.com/wearables/assets/plan-exploration-DOPgfWRR.css",
+      "bytes": 1183,
+      "upstreamSha256": "aad0f20dc896c573952fbaa3bb07ed2d5441afc9eba7f9c9b62346f9983b5b64",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/pharmacy-workspace-InErYnjJ.js",
+      "source": "https://sim.animahealth.com/community/assets/pharmacy-workspace-InErYnjJ.js",
+      "bytes": 36558,
+      "upstreamSha256": "727bcd1aae3a9f9e1e9b019181a00f6d89debc85a648c707318c2d946ad69602",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/telephony-workspace-KaEY6_WF.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/telephony-workspace-KaEY6_WF.js",
+      "bytes": 54667,
+      "upstreamSha256": "d094b03e1ff3fd905115cbb8775c1f069a621b30d3c2dbeed3d2cbbd2f26db4a",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/document-workspace-DARuS1bs.css",
+      "source": "https://sim.animahealth.com/gp/assets/document-workspace-DARuS1bs.css",
+      "bytes": 12576,
+      "upstreamSha256": "2a21ea138b1742d962e58e1d8fb33db3a4bf648434e351ba26c0bcb5121a9a6b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/plan-exploration-DOPgfWRR.css",
+      "source": "https://sim.animahealth.com/hospital/assets/plan-exploration-DOPgfWRR.css",
+      "bytes": 1183,
+      "upstreamSha256": "aad0f20dc896c573952fbaa3bb07ed2d5441afc9eba7f9c9b62346f9983b5b64",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/record-attribution-BiUIju20.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/record-attribution-BiUIju20.css",
+      "bytes": 379,
+      "upstreamSha256": "6cf08eb840d96fc860b446dbd14845e8eb7c958d474b8ac7b4319ff7d636ed40",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/pharmacy-workspace-CGiwxIpx.css",
+      "source": "https://sim.animahealth.com/gp/assets/pharmacy-workspace-CGiwxIpx.css",
+      "bytes": 14621,
+      "upstreamSha256": "068fb87cc8ec082cdca0afa86c6ab8ce71ac5c565ef8df97c7b1ebb5b03491bd",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/systems-C0T_f8i5.js",
+      "source": "https://sim.animahealth.com/gp/assets/systems-C0T_f8i5.js",
+      "bytes": 104974,
+      "upstreamSha256": "1627b5b3a2071a4aed9bb2a1f0be85953a2673553b036e7960416474b84270e8",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/record-attribution-BiUIju20.css",
+      "source": "https://sim.animahealth.com/community/assets/record-attribution-BiUIju20.css",
+      "bytes": 379,
+      "upstreamSha256": "6cf08eb840d96fc860b446dbd14845e8eb7c958d474b8ac7b4319ff7d636ed40",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/home-workspace-DQ_0WBo-.js",
+      "source": "https://sim.animahealth.com/wearables/assets/home-workspace-DQ_0WBo-.js",
+      "bytes": 10270,
+      "upstreamSha256": "6aaee27f44bbb7e44158c09d155c51d57b71da16c55a50087a1fea987c1d5aec",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/pharmacy-workspace-CKZw37U6.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/pharmacy-workspace-CKZw37U6.js",
+      "bytes": 36558,
+      "upstreamSha256": "43929245aa8e198fecd0ed79f5711a754a27a48f3b602060f392e72a1be80f7a",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/care-workspaces-BI9TE_dV.js",
+      "source": "https://sim.animahealth.com/hospital/assets/care-workspaces-BI9TE_dV.js",
+      "bytes": 17891,
+      "upstreamSha256": "a4a7b3ef35c34b0b7e5fd2e4e66eb907535cf9a0ade7d7bb232316b6faf25a97",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/document-workspace-lne4oUXu.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/document-workspace-lne4oUXu.js",
+      "bytes": 16653,
+      "upstreamSha256": "c8a67c4cddca9a155c86a7aac7f38e045f3f0a3e5487e6e33b8ed6566fcdaff7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/telephony-workspace-scquSPMu.css",
+      "source": "https://sim.animahealth.com/wearables/assets/telephony-workspace-scquSPMu.css",
+      "bytes": 10637,
+      "upstreamSha256": "663ca9f6a7e8969e87e01d58f7ffc7030311908451e2e3fac14e1a04722b60d7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/record-attribution-BiUIju20.css",
+      "source": "https://sim.animahealth.com/wearables/assets/record-attribution-BiUIju20.css",
+      "bytes": 379,
+      "upstreamSha256": "6cf08eb840d96fc860b446dbd14845e8eb7c958d474b8ac7b4319ff7d636ed40",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/systems-DR1w4Obh.css",
+      "source": "https://sim.animahealth.com/wearables/assets/systems-DR1w4Obh.css",
+      "bytes": 28693,
+      "upstreamSha256": "5d65e6fca991c655a969f76fd71a8abc0d4f97af61d07f98e3c01510329a1239",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/plan-exploration-MRAg2vnX.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/plan-exploration-MRAg2vnX.js",
+      "bytes": 4044,
+      "upstreamSha256": "7e610d962fee093451e62615c16efb44f73844576971145e4f6932e3389fde67",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/index-BZtm2W1c.js",
+      "source": "https://sim.animahealth.com/gp/assets/index-BZtm2W1c.js",
+      "bytes": 382402,
+      "upstreamSha256": "54e43a01179c3887efc028db60172f39e497e5f8881ccd0c55e0a0d7178c5b9d",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/pharmacy-workspace-C55Vs4St.js",
+      "source": "https://sim.animahealth.com/hospital/assets/pharmacy-workspace-C55Vs4St.js",
+      "bytes": 36558,
+      "upstreamSha256": "5a6d798ac9e2861f9cc7935ee924999830ee4badfff36455c21e9534f0cd5542",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/product-brand-C66U_yzH.css",
+      "source": "https://sim.animahealth.com/control/assets/product-brand-C66U_yzH.css",
+      "bytes": 950,
+      "upstreamSha256": "79a6cd71216dc5fccf6f5044c5bf651fcbf81188385ca18da50c225499616429",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/messaging-workspace-CTBgapxF.js",
+      "source": "https://sim.animahealth.com/gp/assets/messaging-workspace-CTBgapxF.js",
+      "bytes": 18981,
+      "upstreamSha256": "30013b9646fff000ff9ce9089a2bba0915be6dff7ea98e3816788e8b98989a7b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/systems-DR1w4Obh.css",
+      "source": "https://sim.animahealth.com/hospital/assets/systems-DR1w4Obh.css",
+      "bytes": 28693,
+      "upstreamSha256": "5d65e6fca991c655a969f76fd71a8abc0d4f97af61d07f98e3c01510329a1239",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/care-workspaces-Dvn3zYVw.js",
+      "source": "https://sim.animahealth.com/gp/assets/care-workspaces-Dvn3zYVw.js",
+      "bytes": 17891,
+      "upstreamSha256": "e83ce88d3bc6de04c4c60df0d92ccfa6d214b467cddce05deb0f8314c7121bb7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/messaging-workspace-BmdS2Xjw.js",
+      "source": "https://sim.animahealth.com/community/assets/messaging-workspace-BmdS2Xjw.js",
+      "bytes": 18981,
+      "upstreamSha256": "383ba72551aa69bb6b2dd95998497533c0108e5d10ea4d5a308f4671dd0e07e0",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/product-brand-C66U_yzH.css",
+      "source": "https://sim.animahealth.com/gp/assets/product-brand-C66U_yzH.css",
+      "bytes": 950,
+      "upstreamSha256": "79a6cd71216dc5fccf6f5044c5bf651fcbf81188385ca18da50c225499616429",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/messaging-workspace-Dfjvtjex.css",
+      "source": "https://sim.animahealth.com/control/assets/messaging-workspace-Dfjvtjex.css",
+      "bytes": 14222,
+      "upstreamSha256": "16d11e9f82850439e7592d195628e581b6248033a595e9ca90d5fc048e22e5b4",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/telephony-workspace-BQA4T3m9.js",
+      "source": "https://sim.animahealth.com/wearables/assets/telephony-workspace-BQA4T3m9.js",
+      "bytes": 54667,
+      "upstreamSha256": "60c8c436bd867ec47d9c206ad48b43567a0a57c77a6747bc84ca594d2b9ffb25",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/index-B3tGnViK.css",
+      "source": "https://sim.animahealth.com/hospital/assets/index-B3tGnViK.css",
+      "bytes": 86838,
+      "upstreamSha256": "40da367be68557e9d0943d8e50f11e4492e3cd4a9d42c8bc14e3bab0edc05f93",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/product-brand-C66U_yzH.css",
+      "source": "https://sim.animahealth.com/community/assets/product-brand-C66U_yzH.css",
+      "bytes": 950,
+      "upstreamSha256": "79a6cd71216dc5fccf6f5044c5bf651fcbf81188385ca18da50c225499616429",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/record-attribution-BEyj-Sh9.js",
+      "source": "https://sim.animahealth.com/community/assets/record-attribution-BEyj-Sh9.js",
+      "bytes": 1903,
+      "upstreamSha256": "a7f359a8e27368c1e496aec6aab8dfc701857e16dd28b3ac899f7cb206c84273",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/index-B3tGnViK.css",
+      "source": "https://sim.animahealth.com/control/assets/index-B3tGnViK.css",
+      "bytes": 86838,
+      "upstreamSha256": "40da367be68557e9d0943d8e50f11e4492e3cd4a9d42c8bc14e3bab0edc05f93",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/systems-DR1w4Obh.css",
+      "source": "https://sim.animahealth.com/gp/assets/systems-DR1w4Obh.css",
+      "bytes": 28693,
+      "upstreamSha256": "5d65e6fca991c655a969f76fd71a8abc0d4f97af61d07f98e3c01510329a1239",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/index-Cu_0zaBt.js",
+      "source": "https://sim.animahealth.com/hospital/assets/index-Cu_0zaBt.js",
+      "bytes": 382414,
+      "upstreamSha256": "5054c562b9ab2284a8c3824af2395f2cd0640cb742303bb573e3f9f4281b9f6f",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/care-workspaces-B3WrrUI_.js",
+      "source": "https://sim.animahealth.com/wearables/assets/care-workspaces-B3WrrUI_.js",
+      "bytes": 17891,
+      "upstreamSha256": "4d637ff7a646526bb1f911ce1fe66914bdd47f22a5a0e3b75f37712d67038586",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/care-workspaces-DPf3zwam.js",
+      "source": "https://sim.animahealth.com/control/assets/care-workspaces-DPf3zwam.js",
+      "bytes": 17891,
+      "upstreamSha256": "eea7a771e73e017cea2b80dcd0b88bb1d4ba50b0cba28705193d16101e60b44f",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/plan-exploration-DOPgfWRR.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/plan-exploration-DOPgfWRR.css",
+      "bytes": 1183,
+      "upstreamSha256": "aad0f20dc896c573952fbaa3bb07ed2d5441afc9eba7f9c9b62346f9983b5b64",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/telephony-workspace-scquSPMu.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/telephony-workspace-scquSPMu.css",
+      "bytes": 10637,
+      "upstreamSha256": "663ca9f6a7e8969e87e01d58f7ffc7030311908451e2e3fac14e1a04722b60d7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/home-workspace-BeE8I5sV.js",
+      "source": "https://sim.animahealth.com/control/assets/home-workspace-BeE8I5sV.js",
+      "bytes": 10270,
+      "upstreamSha256": "198e8fefb28a3b3ef2cafbe5ef903e8e2851b6e6fdc5328faac7ff788ded48d7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/plan-exploration-BIMdFgFh.js",
+      "source": "https://sim.animahealth.com/wearables/assets/plan-exploration-BIMdFgFh.js",
+      "bytes": 4044,
+      "upstreamSha256": "5420159a369e25c6460104558fe8181a97aabe8dd36ec019c154c5ea4d6520c5",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/pharmacy-workspace-B9O0--Mh.js",
+      "source": "https://sim.animahealth.com/gp/assets/pharmacy-workspace-B9O0--Mh.js",
+      "bytes": 36558,
+      "upstreamSha256": "ee2c1c96eaac55f5ebe8e405bf9c4bbc1f12f7155eb2c412cac08a717bed39fb",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/messaging-workspace-Dfjvtjex.css",
+      "source": "https://sim.animahealth.com/gp/assets/messaging-workspace-Dfjvtjex.css",
+      "bytes": 14222,
+      "upstreamSha256": "16d11e9f82850439e7592d195628e581b6248033a595e9ca90d5fc048e22e5b4",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/product-brand-C66U_yzH.css",
+      "source": "https://sim.animahealth.com/hospital/assets/product-brand-C66U_yzH.css",
+      "bytes": 950,
+      "upstreamSha256": "79a6cd71216dc5fccf6f5044c5bf651fcbf81188385ca18da50c225499616429",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/plan-exploration-DYIwuzc9.js",
+      "source": "https://sim.animahealth.com/hospital/assets/plan-exploration-DYIwuzc9.js",
+      "bytes": 4044,
+      "upstreamSha256": "08344b431cd3e396e5c5ec7ef9fa71443a94693e87340067dff2b186b4cb8ede",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/index-B3tGnViK.css",
+      "source": "https://sim.animahealth.com/pharmacy/assets/index-B3tGnViK.css",
+      "bytes": 86838,
+      "upstreamSha256": "40da367be68557e9d0943d8e50f11e4492e3cd4a9d42c8bc14e3bab0edc05f93",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/messaging-workspace-Dfjvtjex.css",
+      "source": "https://sim.animahealth.com/hospital/assets/messaging-workspace-Dfjvtjex.css",
+      "bytes": 14222,
+      "upstreamSha256": "16d11e9f82850439e7592d195628e581b6248033a595e9ca90d5fc048e22e5b4",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/pharmacy-workspace-CUZpJ0pS.js",
+      "source": "https://sim.animahealth.com/control/assets/pharmacy-workspace-CUZpJ0pS.js",
+      "bytes": 36558,
+      "upstreamSha256": "53d28edd41d227b99c8dfbdfe24d2ee18aad84aa163b90f1fe8bcb4d7b08c10e",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/",
+      "source": "https://sim.animahealth.com/gp/",
+      "bytes": 527,
+      "upstreamSha256": "dca8220d10a43e805bc8d6794afd8523ea4100df10ebe43b647108b3c84ca05c",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/telephony-workspace-scquSPMu.css",
+      "source": "https://sim.animahealth.com/community/assets/telephony-workspace-scquSPMu.css",
+      "bytes": 10637,
+      "upstreamSha256": "663ca9f6a7e8969e87e01d58f7ffc7030311908451e2e3fac14e1a04722b60d7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/product-brand-DILmbmP3.js",
+      "source": "https://sim.animahealth.com/control/assets/product-brand-DILmbmP3.js",
+      "bytes": 1245,
+      "upstreamSha256": "9fd6780e1830801288867d5c1ace5de7cfa6b22408d94a0adcf4a736be3f55e3",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/telephony-workspace-arACSQqf.js",
+      "source": "https://sim.animahealth.com/hospital/assets/telephony-workspace-arACSQqf.js",
+      "bytes": 54667,
+      "upstreamSha256": "9d77b53c872bd57ff1e27fa07b00339f2d1baff4fbf47093e3bf822e85bd38a7",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/systems-DR1w4Obh.css",
+      "source": "https://sim.animahealth.com/control/assets/systems-DR1w4Obh.css",
+      "bytes": 28693,
+      "upstreamSha256": "5d65e6fca991c655a969f76fd71a8abc0d4f97af61d07f98e3c01510329a1239",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/care-workspaces-C89Pcuuu.js",
+      "source": "https://sim.animahealth.com/community/assets/care-workspaces-C89Pcuuu.js",
+      "bytes": 17891,
+      "upstreamSha256": "44a39ff5789fc331d6e135ab0c0b68323176d913c91e5018317d80702b6544bc",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/document-workspace-BpNeQKIN.js",
+      "source": "https://sim.animahealth.com/control/assets/document-workspace-BpNeQKIN.js",
+      "bytes": 16653,
+      "upstreamSha256": "f9e97dc71a1fb5c71629e0eb0916597af1601db5e3469d778495fb32fec9026d",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/index-uqy-a2bU.js",
+      "source": "https://sim.animahealth.com/control/assets/index-uqy-a2bU.js",
+      "bytes": 382412,
+      "upstreamSha256": "800d2d678bc3d21678a4cb0b8413a58eafc627ca10fe7fc2aa2f1c14048a7d4e",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/gp/assets/record-attribution-h8G_85WI.js",
+      "source": "https://sim.animahealth.com/gp/assets/record-attribution-h8G_85WI.js",
+      "bytes": 1903,
+      "upstreamSha256": "5838ac897c341c450ae53613e547c1536a396bce6db1a7f42311e0bb680064e2",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/pharmacy-workspace-CGiwxIpx.css",
+      "source": "https://sim.animahealth.com/wearables/assets/pharmacy-workspace-CGiwxIpx.css",
+      "bytes": 14621,
+      "upstreamSha256": "068fb87cc8ec082cdca0afa86c6ab8ce71ac5c565ef8df97c7b1ebb5b03491bd",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/product-brand-CBwqxdJa.js",
+      "source": "https://sim.animahealth.com/wearables/assets/product-brand-CBwqxdJa.js",
+      "bytes": 1245,
+      "upstreamSha256": "5320dd6175ab9d71ba2d3422b6717b0e2c29f1bf1d863aa709a8870a39f204ca",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/document-workspace-DARuS1bs.css",
+      "source": "https://sim.animahealth.com/wearables/assets/document-workspace-DARuS1bs.css",
+      "bytes": 12576,
+      "upstreamSha256": "2a21ea138b1742d962e58e1d8fb33db3a4bf648434e351ba26c0bcb5121a9a6b",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/product-brand-BGNvbCqF.js",
+      "source": "https://sim.animahealth.com/hospital/assets/product-brand-BGNvbCqF.js",
+      "bytes": 1245,
+      "upstreamSha256": "7e48a6308f4c60466be1486d3bf321185a036f148662987ea749b18f36cf1829",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/control/assets/plan-exploration-CLY5Gqss.js",
+      "source": "https://sim.animahealth.com/control/assets/plan-exploration-CLY5Gqss.js",
+      "bytes": 4044,
+      "upstreamSha256": "432a97a45fc366627916201208795e7931651837bdb33d17a8580910e87ce530",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/",
+      "source": "https://sim.animahealth.com/community/",
+      "bytes": 548,
+      "upstreamSha256": "89adf10c063d668681050b7fa4b656bbcdda24cffbdedb9463f7ea2f1e369d27",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/product-brand-DCmfIM6Y.js",
+      "source": "https://sim.animahealth.com/community/assets/product-brand-DCmfIM6Y.js",
+      "bytes": 1245,
+      "upstreamSha256": "358fe4d89b26d560d4485eb764235037fbf6346b583d4de7a5d232e7cd630200",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/assets/pharmacy-workspace-Cle2myCN.js",
+      "source": "https://sim.animahealth.com/wearables/assets/pharmacy-workspace-Cle2myCN.js",
+      "bytes": 36558,
+      "upstreamSha256": "fe0b9fb1dca0ec0aec13ea64e0c58767f03be901763d81e4c89d85abc97fbd32",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/wearables/",
+      "source": "https://sim.animahealth.com/wearables/",
+      "bytes": 548,
+      "upstreamSha256": "60024cc0a39080022745b6af169a1348cd1e1efe23229b10273cc770b3304103",
+      "localBootstrap": true,
+      "cached": true
+    },
+    {
+      "path": "/pharmacy/assets/messaging-workspace-BBrFDOvm.js",
+      "source": "https://sim.animahealth.com/pharmacy/assets/messaging-workspace-BBrFDOvm.js",
+      "bytes": 18981,
+      "upstreamSha256": "b78bd6a9502eafe2fd2f80412631b8e9db51337a35dbc4ba13e97aa77c5d4577",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/hospital/assets/record-attribution-D5ROZLU-.js",
+      "source": "https://sim.animahealth.com/hospital/assets/record-attribution-D5ROZLU-.js",
+      "bytes": 1903,
+      "upstreamSha256": "fed2fb7105ee0de334aefd0b26b208a714e64c809379643cfd66a44c16e876ab",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/community/assets/index-C8ES41BW.js",
+      "source": "https://sim.animahealth.com/community/assets/index-C8ES41BW.js",
+      "bytes": 382416,
+      "upstreamSha256": "e2e67a27b24fd111f885b82a754469b9ca55101629ba336b0f8f55075908c48f",
+      "localBootstrap": false,
+      "cached": true
+    },
+    {
+      "path": "/cis2/",
+      "source": "https://sim.animahealth.com/cis2/",
+      "bytes": 14765,
+      "upstreamSha256": "210ed73fa2c10e6f7528cb63c763aeed0cad8ede624f975eb44c23270852a876",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/community-care.svg",
+      "source": "https://sim.animahealth.com/control/brands/community-care.svg",
+      "bytes": 280,
+      "upstreamSha256": "8fb82938de97626b1d2face9fc62e9d369dcb112d871f283f17af1fc39bb2db4",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/document-inbox.svg",
+      "source": "https://sim.animahealth.com/control/brands/document-inbox.svg",
+      "bytes": 300,
+      "upstreamSha256": "b77f76f48e45bcd914fb590960f1c2d932e8adcab92d28bc01da6deed9afda25",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/gp-records.svg",
+      "source": "https://sim.animahealth.com/control/brands/gp-records.svg",
+      "bytes": 309,
+      "upstreamSha256": "0f3cfea29d2a6298578ed9a94631aefae4a121ad34121cface060eacbe6addbe",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/home-health.svg",
+      "source": "https://sim.animahealth.com/control/brands/home-health.svg",
+      "bytes": 311,
+      "upstreamSha256": "62c79789ea71368ca714a154620120262b64bc62f65de70a53d2e422bfce64ca",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/hospital-epr.svg",
+      "source": "https://sim.animahealth.com/control/brands/hospital-epr.svg",
+      "bytes": 299,
+      "upstreamSha256": "b9da83cbfe99ea60bd39c5e4e8c8fefbaa1c093e7b42f5ef632f42177b406cff",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/messagey.svg",
+      "source": "https://sim.animahealth.com/control/brands/messagey.svg",
+      "bytes": 278,
+      "upstreamSha256": "b2a8990d8306fd547b3a2c43b94318d157766bd35cec2a648fe0f7300df9eb73",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/pharmacy.svg",
+      "source": "https://sim.animahealth.com/control/brands/pharmacy.svg",
+      "bytes": 312,
+      "upstreamSha256": "bd1a4a84b931adfae0cb6d4d968dbda8f4361fdf2a61f978abd4a62c4c343ab7",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/reception-calls.svg",
+      "source": "https://sim.animahealth.com/control/brands/reception-calls.svg",
+      "bytes": 319,
+      "upstreamSha256": "814ba5036a7cb10e338e6028824e9a2565c0569f8bbe6a4f072feddeda14998e",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/brands/staff-identity.svg",
+      "source": "https://sim.animahealth.com/control/brands/staff-identity.svg",
+      "bytes": 366,
+      "upstreamSha256": "d0e919a77ea3dec91974fd5c6b46e81f560d310a598ecb1c1e4f9ee479e3228e",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/arrived-community.jpg",
+      "source": "https://sim.animahealth.com/control/world/arrived-community.jpg",
+      "bytes": 349847,
+      "upstreamSha256": "fe9ad03c6fe6f78326425775874f1dfeb43ed3706291cee8643469436ac830f9",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/arrived-home.jpg",
+      "source": "https://sim.animahealth.com/control/world/arrived-home.jpg",
+      "bytes": 345449,
+      "upstreamSha256": "c1ebe506d2c8e830d0621e40b09e2093dda3b047652060f1240e7ab3ead523ba",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/arrived-hospital.jpg",
+      "source": "https://sim.animahealth.com/control/world/arrived-hospital.jpg",
+      "bytes": 336163,
+      "upstreamSha256": "635ff6c76c4885349a6d9fa5dcc5771efbe2eeee81aa98a022c34c4b814c5a99",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/arrived-pharmacy.jpg",
+      "source": "https://sim.animahealth.com/control/world/arrived-pharmacy.jpg",
+      "bytes": 340873,
+      "upstreamSha256": "f33d4e87f4a916c6db34b4ed439e8efaf181bfb8e6d987f2e428b87beeb3a0f8",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/arrived-practice.jpg",
+      "source": "https://sim.animahealth.com/control/world/arrived-practice.jpg",
+      "bytes": 346692,
+      "upstreamSha256": "3f531f077ce153eac6e151387d24c42c7c54c1ea555583e8f9a4829fb2e5902b",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/neighbourhood-loop.mp4",
+      "source": "https://sim.animahealth.com/control/world/neighbourhood-loop.mp4",
+      "bytes": 3820960,
+      "upstreamSha256": "6d01429e6f7fad4b2f83e4b6228a4d7c22ab0e4b18c6e9c80cb03a0f90c2f54a",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/neighbourhood-v2.5f600ac647e4.webp",
+      "source": "https://sim.animahealth.com/control/world/neighbourhood-v2.5f600ac647e4.webp",
+      "bytes": 559352,
+      "upstreamSha256": "5f600ac647e422200851065a52e88ee95d988e11ad1bb9a965b8f380e73a8ccb",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/return-community.mp4",
+      "source": "https://sim.animahealth.com/control/world/return-community.mp4",
+      "bytes": 2775994,
+      "upstreamSha256": "056379d9b196b14a86b015d9faedd7636279f20c0a757061afbd5faa844644bb",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/return-home.mp4",
+      "source": "https://sim.animahealth.com/control/world/return-home.mp4",
+      "bytes": 2796631,
+      "upstreamSha256": "457168b2ef1cc6a6eedb2cd36157d54b6ef991a1e6eb257ecfabebb8c7fbf724",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/return-hospital.mp4",
+      "source": "https://sim.animahealth.com/control/world/return-hospital.mp4",
+      "bytes": 2721550,
+      "upstreamSha256": "e6aac80905fa89264ab79323f921681765228f0f90426a52907e7c674a3100bc",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/return-pharmacy.mp4",
+      "source": "https://sim.animahealth.com/control/world/return-pharmacy.mp4",
+      "bytes": 2787059,
+      "upstreamSha256": "24a155ba899fca0c55256da55240130807d0e7e05f8aea9ed0dd3b946144c7b8",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/return-practice.mp4",
+      "source": "https://sim.animahealth.com/control/world/return-practice.mp4",
+      "bytes": 2828751,
+      "upstreamSha256": "c7001bce221d8be2ee8f47c562030036fd4c365114879a6153a4778a6853bbc5",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/zoom-community.mp4",
+      "source": "https://sim.animahealth.com/control/world/zoom-community.mp4",
+      "bytes": 2883495,
+      "upstreamSha256": "f2fcc8b09533680b5e7c40ae63134c186f650608287e318e67d5abf974b41bca",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/zoom-home.mp4",
+      "source": "https://sim.animahealth.com/control/world/zoom-home.mp4",
+      "bytes": 2878204,
+      "upstreamSha256": "c988cab395e789ba5f6a89bcff37895b4137f4043453d819dddd7de34fade660",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/zoom-hospital.mp4",
+      "source": "https://sim.animahealth.com/control/world/zoom-hospital.mp4",
+      "bytes": 2803246,
+      "upstreamSha256": "aa2b111dc2d1e2ef48b6fa3cb85411318d90c7beaafa986507da70c29d350f37",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/zoom-pharmacy.mp4",
+      "source": "https://sim.animahealth.com/control/world/zoom-pharmacy.mp4",
+      "bytes": 2858645,
+      "upstreamSha256": "0923713ef76bcb43d90219b18937cec7739634d5c16a4e5eade0a2ea94c68c83",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/control/world/zoom-practice.mp4",
+      "source": "https://sim.animahealth.com/control/world/zoom-practice.mp4",
+      "bytes": 2871942,
+      "upstreamSha256": "fbb68a929e39afa822149238b45d11cd3a42589663830585feeadb103debb4ff",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/",
+      "source": "https://sim.animahealth.com/docs/",
+      "bytes": 12007,
+      "upstreamSha256": "65e3db1cfbdaac5463b96db1b6a8f0e50babef76e91b98fb0cb62efc78e0ffd5",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/control/world/riverside-xp.e7c13383bdca.webp",
+      "source": "https://sim.animahealth.com/control/world/riverside-xp.e7c13383bdca.webp",
+      "bytes": 194522,
+      "upstreamSha256": "e7c13383bdca09cc693b59cba3f4679de5317e6487095a1056fb9af6dbf494d1",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/api/",
+      "source": "https://sim.animahealth.com/docs/api/",
+      "bytes": 19133,
+      "upstreamSha256": "b2e409500957eadaa5c36cca78c44696c798a989d4c089cc61f648032878b83e",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/appointments/",
+      "source": "https://sim.animahealth.com/docs/appointments/",
+      "bytes": 9976,
+      "upstreamSha256": "1ea94e16791c4ac69987c71148c9d66607da158016ee3fbaa3525a3bed265bf1",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/css/styles.6c9349d9.css",
+      "source": "https://sim.animahealth.com/docs/assets/css/styles.6c9349d9.css",
+      "bytes": 79420,
+      "upstreamSha256": "6825ba8372fce1c837d843e8e48c79c51db67e5fbe7a7a7b15751fd295bd7fca",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/main.14c29d9b.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/main.14c29d9b.js",
+      "bytes": 462668,
+      "upstreamSha256": "05e8ddfceaa471e26e0d52604c8401e3c194b2686682b54cfa01a2227e39445c",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/runtime~main.810d121d.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/runtime~main.810d121d.js",
+      "bytes": 5047,
+      "upstreamSha256": "eb3c9eca16a8e952e3a51ab44a486c1f322a3bcfb5daae56c90f0165aaf7688b",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/challenges/",
+      "source": "https://sim.animahealth.com/docs/challenges/",
+      "bytes": 13420,
+      "upstreamSha256": "02c326634b0acc9f1b219fb9ca54854be984deaaf5760ad205f19312c63efade",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/clinical-records/",
+      "source": "https://sim.animahealth.com/docs/clinical-records/",
+      "bytes": 10722,
+      "upstreamSha256": "909b0bd021886d8161b74c20785a534bbd25682d9502906ba2be384acf09652c",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/community/",
+      "source": "https://sim.animahealth.com/docs/community/",
+      "bytes": 8473,
+      "upstreamSha256": "52d4f092066e8ce39381a90ababf2b03f96e1596885f7e12a98cdbf75f74851a",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/data/",
+      "source": "https://sim.animahealth.com/docs/data/",
+      "bytes": 11575,
+      "upstreamSha256": "343c61213b456f7ae308d50d66837a445384799116ce1f30454a4f6dd4a43dfd",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/documents/",
+      "source": "https://sim.animahealth.com/docs/documents/",
+      "bytes": 13683,
+      "upstreamSha256": "c38ab38665dfa6f4ba88566af90d36597f122fef0afa73300dc1e5bda0fa14ad",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/explorer/",
+      "source": "https://sim.animahealth.com/docs/explorer/",
+      "bytes": 1709,
+      "upstreamSha256": "e14400868cf278349d029f2a77e7ea466fefd46e9bc5a807f24995758aa511fe",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/fhir/",
+      "source": "https://sim.animahealth.com/docs/fhir/",
+      "bytes": 13272,
+      "upstreamSha256": "9eaca82cdb79686a8fe01fafd2e653f002fc9ffab386d0ce755dbbc88bfc2f02",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/handbook.json",
+      "source": "https://sim.animahealth.com/docs/handbook.json",
+      "bytes": 85330,
+      "upstreamSha256": "1a4cd2b5667f82bed461d173cedc92ffed2d8bc89c9b0626906e0768d8334e59",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/home/",
+      "source": "https://sim.animahealth.com/docs/home/",
+      "bytes": 13220,
+      "upstreamSha256": "a025e38de56dbb87470e0bf94c84d1769ef1a4d1cab4fba969ee0e2e6abebcc3",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/hospital/",
+      "source": "https://sim.animahealth.com/docs/hospital/",
+      "bytes": 11390,
+      "upstreamSha256": "9f2b4ba41997456e8294fc638ef0d68629fe7a5ac0fa2925779e148986e90dc5",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/identity/",
+      "source": "https://sim.animahealth.com/docs/identity/",
+      "bytes": 9571,
+      "upstreamSha256": "7bbd4cf8afafe96d3106bd287af1153769dfdde3c8fd0197de1a861df220a8e4",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/legacy/",
+      "source": "https://sim.animahealth.com/docs/legacy/",
+      "bytes": 7934,
+      "upstreamSha256": "72c72a2fc0183e2425b6fec44a84fe91d4a20663e49d4f8baf6c3ef29fd47c4d",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/messaging/",
+      "source": "https://sim.animahealth.com/docs/messaging/",
+      "bytes": 11292,
+      "upstreamSha256": "15c96a3e62ddddd64b933a035b1bff6a2db8b18cf8ed580232e46d36ba62e180",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/organisers/",
+      "source": "https://sim.animahealth.com/docs/organisers/",
+      "bytes": 14375,
+      "upstreamSha256": "0e707ccf72713464bf71276cae41d5e9edf81863f3acba3347631fbebcd9876d",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/pharmacy/",
+      "source": "https://sim.animahealth.com/docs/pharmacy/",
+      "bytes": 14131,
+      "upstreamSha256": "1e5e5c771dad4c2bdca12eae5db1ff07926ca77f0a9108618c4f638c04cde6dc",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/population/",
+      "source": "https://sim.animahealth.com/docs/population/",
+      "bytes": 10577,
+      "upstreamSha256": "b280c29b4a1a1d69b17a7ce716a5f287d5e8ce0279ad7b71c29684bc8f6f73b6",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/quickstart/",
+      "source": "https://sim.animahealth.com/docs/quickstart/",
+      "bytes": 12915,
+      "upstreamSha256": "8ea64f752a11d1c7b182ec8fdc24ec6725f917cb0aa8e6f0c3efd90d10fca59f",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/systemtwo/",
+      "source": "https://sim.animahealth.com/docs/systemtwo/",
+      "bytes": 14317,
+      "upstreamSha256": "89a330cfe1cfeea4b0cbff584af2b4dc38b9060523c231756a1dd90aeb040c81",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/team-access/",
+      "source": "https://sim.animahealth.com/docs/team-access/",
+      "bytes": 10613,
+      "upstreamSha256": "fca5692cb8759acded61c1aacaabbda10e9959478c9cff1175f8efafb5e581ff",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/ten-year-plan/",
+      "source": "https://sim.animahealth.com/docs/ten-year-plan/",
+      "bytes": 11651,
+      "upstreamSha256": "eacb0fe833922c9949b5f0996384927bc211e0a8e2016e347176b99a2e3ccf9f",
+      "localBootstrap": true,
+      "cached": false
+    },
+    {
+      "path": "/docs/explorer/explorer.css",
+      "source": "https://sim.animahealth.com/docs/explorer/explorer.css",
+      "bytes": 1098,
+      "upstreamSha256": "15b5d2424742d884d98936f24a0ca7c65c217241d250c6dca55dddf99f779b19",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/explorer/explorer.js",
+      "source": "https://sim.animahealth.com/docs/explorer/explorer.js",
+      "bytes": 512,
+      "upstreamSha256": "438d29b3bbb5f3e16bb13704b44c1b2e9106ca84389b511b2b0e5dccacd8f93e",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/explorer/swagger-ui-bundle.js",
+      "source": "https://sim.animahealth.com/docs/explorer/swagger-ui-bundle.js",
+      "bytes": 1552209,
+      "upstreamSha256": "a7e344f2770b2f07527ce828e0951626983b8f2dcdb7a826689c0232023f995b",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/explorer/swagger-ui.css",
+      "source": "https://sim.animahealth.com/docs/explorer/swagger-ui.css",
+      "bytes": 185784,
+      "upstreamSha256": "d7f39f764aa18c7b47dd05b9af5613e373e4ac0f3557c2693d52d0abc2464d76",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/a94703ab.50277479.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/a94703ab.50277479.js",
+      "bytes": 12503,
+      "upstreamSha256": "4868e8c79b3313d57b2ac27d772b676cd3becd55e4e20774a746599796e1d166",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/ee3de370.e3ec2557.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/ee3de370.e3ec2557.js",
+      "bytes": 8815,
+      "upstreamSha256": "8aad7325f5aea1469bddc197cb46cd510e042b4231da3064b303c7230c3dae50",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/a7bd4aaa.a33c065f.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/a7bd4aaa.a33c065f.js",
+      "bytes": 736,
+      "upstreamSha256": "2c86f62d4c047ba7ebd458620b0981e34edd05266b56b05e00377c86974dbd2f",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/6dc605ea.9565411f.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/6dc605ea.9565411f.js",
+      "bytes": 8986,
+      "upstreamSha256": "32dd2635ac15390581a93ae96ad890a8922eeb2573d8acd44e8cbb905c0bd350",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/a14a98e0.52ed4288.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/a14a98e0.52ed4288.js",
+      "bytes": 5924,
+      "upstreamSha256": "ece69df01fdb1705d3c212fbfc92022b8c568bbc7657b49ee59815cbe3b78a14",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/7aa86af4.0b89c1a9.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/7aa86af4.0b89c1a9.js",
+      "bytes": 8872,
+      "upstreamSha256": "f7118eb7845551ea9205e1cc58f8f78f73d38889ec0273fc5cb578acf857c727",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/11b43341.d33e0919.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/11b43341.d33e0919.js",
+      "bytes": 6186,
+      "upstreamSha256": "ef4959d4aa2fefa5735d6a3955b16384ce1681000d5879bf1ea54ebdd152e8e5",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/4698a737.fe48f460.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/4698a737.fe48f460.js",
+      "bytes": 7261,
+      "upstreamSha256": "bc33139931728cd23be663bd0ea8e99a9dc6708e94f1a582aa6434e869a286b4",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/af71f2a0.0cf2d2bb.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/af71f2a0.0cf2d2bb.js",
+      "bytes": 5081,
+      "upstreamSha256": "78694f87902b7a4ac57d5dafca9f782253e918a4e41c346e49198aa92bdfda37",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/3b74bfaf.5c0cf46d.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/3b74bfaf.5c0cf46d.js",
+      "bytes": 7347,
+      "upstreamSha256": "f4b29c74dd8582f069e04f00ba3bcce8b6b7864f5d0774a3334233cbbdb0d79e",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/383.3038b310.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/383.3038b310.js",
+      "bytes": 1271,
+      "upstreamSha256": "ac6064c053655d52b9e6c19070bbc181b081673b50b8b6965a03ce942b18a86e",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/17896441.61abe628.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/17896441.61abe628.js",
+      "bytes": 43271,
+      "upstreamSha256": "c19e98c0ee6fe808ea18872b4ab1fd8bf51560398e82ebc86d2502072d4e50db",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/e34519aa.42f3fda7.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/e34519aa.42f3fda7.js",
+      "bytes": 7313,
+      "upstreamSha256": "6ae431bda7fe6c3d2cd9903e9709a40414fd4de8960a13cfecc655e0c57ff136",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/da950808.f8a843d5.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/da950808.f8a843d5.js",
+      "bytes": 4400,
+      "upstreamSha256": "3bb0841cb8ac5c7738a220365ae9f6a0e730fd1609520134a3640cab9ea19702",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/d11ededd.01ce27ad.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/d11ededd.01ce27ad.js",
+      "bytes": 17085,
+      "upstreamSha256": "cfcd123fb05e84e89737a247f43545ddd1db6eb4c94606ff1c83c668fb621e9f",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/041fa011.f32b5b6e.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/041fa011.f32b5b6e.js",
+      "bytes": 7794,
+      "upstreamSha256": "ed856b23a55401d8dabeb5cb4e3b696045924784e2d7a3f2683ea1c245c48177",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/d05f4f80.e6fc1d1e.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/d05f4f80.e6fc1d1e.js",
+      "bytes": 5520,
+      "upstreamSha256": "c717dffd50bb6ab0192b346c47128ce675fb7cea6fe561ee512302bc0a12ab7c",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/6d3adb61.7de43132.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/6d3adb61.7de43132.js",
+      "bytes": 7098,
+      "upstreamSha256": "21529a2e68a4041226cef789d0f6ceecca2e22101e711a2bd7a1444d9f6e6c49",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/e29c80e5.249bc768.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/e29c80e5.249bc768.js",
+      "bytes": 6393,
+      "upstreamSha256": "8ac22b5fd5138be579cba0efb0b563a292c8a52b449024a8c6c78eae443b798f",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/c0755ab1.638593a4.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/c0755ab1.638593a4.js",
+      "bytes": 7773,
+      "upstreamSha256": "c69de2d7a40e30e3cd5ea5863d9e144c96f39228cb9bacb75826eff87e7799e6",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/40e93d48.0d928c9b.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/40e93d48.0d928c9b.js",
+      "bytes": 3298,
+      "upstreamSha256": "815237effbfe4eaeaea2cc7427f2440709d75696e435ccec240cd971c640f6af",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/5e95c892.2015cfdb.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/5e95c892.2015cfdb.js",
+      "bytes": 339,
+      "upstreamSha256": "80502ac48ee8d32653d167b2ba198e87c6045396788fdec3b4b4db9db177dfe3",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/36b790b4.eaa2b04a.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/36b790b4.eaa2b04a.js",
+      "bytes": 9269,
+      "upstreamSha256": "c228eab4ba5f07f1975afd16c1ecf560dad1128ecf74b1e5e5f97ef718217c4b",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/aba21aa0.c1625ebb.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/aba21aa0.c1625ebb.js",
+      "bytes": 175,
+      "upstreamSha256": "95d5c1a4fdeb8b3583dc45e5e7169798e5e997ac3d055a3d7e8436b713754736",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/4e65c3b3.90ec8a3c.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/4e65c3b3.90ec8a3c.js",
+      "bytes": 8441,
+      "upstreamSha256": "9b36da3f604e1fefa73a46c95760ced4b7757aff916691299b2344b0f8fe866c",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/821.8583fe77.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/821.8583fe77.js",
+      "bytes": 955,
+      "upstreamSha256": "90713a89ac24ecef72d061fe9df12435dbc37079381880973a0fd35b4556d089",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/21620376.28f0caef.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/21620376.28f0caef.js",
+      "bytes": 5106,
+      "upstreamSha256": "fc9c50d8c5bc3be417d6eb44c59176539ea2355e5856562bbbb79a19dadb1d84",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/68d9d1f2.7128ec2f.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/68d9d1f2.7128ec2f.js",
+      "bytes": 6243,
+      "upstreamSha256": "27fe531a049ba5f8926375debf9172a5a4d9ffe2ea0b472f48976f67740a3458",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/2f3a94fd.fbbb5d95.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/2f3a94fd.fbbb5d95.js",
+      "bytes": 11617,
+      "upstreamSha256": "e743438f04f980b4b2ad0c04f3af8d2ca1070499c2c969d1de8199031f57f30a",
+      "localBootstrap": false,
+      "cached": false
+    },
+    {
+      "path": "/docs/assets/js/912f6d99.6a491a00.js",
+      "source": "https://sim.animahealth.com/docs/assets/js/912f6d99.6a491a00.js",
+      "bytes": 7701,
+      "upstreamSha256": "966419d61253e3c559e8ed134ccd0a1ccba0291e359d8902138b3b489e1468a4",
+      "localBootstrap": false,
+      "cached": false
+    }
+  ],
+  "failures": []
+}

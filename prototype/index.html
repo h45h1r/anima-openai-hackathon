@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GP Records · Consent research</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%233456a1'/%3E%3Cpath d='M14 6h4v8h8v4h-8v8h-4v-8H6v-4h8z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/reference/gp-original.css">
+  <link rel="stylesheet" href="/screens/records.css">
+  <link rel="stylesheet" href="/screens/appointments.css">
+  <link rel="stylesheet" href="/screens/documents-messages.css" data-correspondence-styles>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body class="immersive-app">
+  <section class="system-ui immersive-ehr systemtwo" id="app">
+    <header class="practice-window-title"><strong>GP Records</strong><span>Riverside Practice · Research copy</span><a href="https://sim.animahealth.com/gp/" target="_blank" rel="noreferrer">Original simulator ↗</a><small>SIMULATION</small></header>
+    <nav class="practice-menubar" id="menu" aria-label="Practice menu"></nav>
+    <div class="ehr-toolbar practice-iconbar" id="toolbar"></div>
+    <div class="ehr-searchbar"><form id="search-form"><label for="patient-search">Find patient</label><input id="patient-search" placeholder="Name or SIM identifier" autocomplete="off"><button>Search</button></form><div id="search-results" hidden></div><button class="consent-launch" id="consent-launch">Patient consent <span>Preview</span></button></div>
+    <div class="practice-patient-strip" id="patient-strip"><strong>Loading patient…</strong></div>
+    <div id="load-error" role="alert" hidden></div>
+    <div class="ehr-body"><div class="ehr-main"><nav class="practice-record-tree" id="record-tree" aria-label="Patient record sections"></nav><main class="ehr-content" id="screen" aria-live="polite"></main></div></div>
+    <footer class="ehr-statusbar"><span id="record-status">Connecting to the simulator…</span><span>Read-only research prototype</span></footer>
+  </section>
+  <footer class="workspace-status"><label>Data source <select id="data-mode"><option value="live">Live simulator</option><option value="snapshot">Captured snapshot · 12 Sep 2026</option></select></label><button id="reload">Refresh records</button><span id="clock"></span><span class="synthetic-label">FICTIONAL PATIENT DATA</span></footer>
+  <dialog id="detail-dialog"><header><h2 id="detail-title"></h2><button id="close-detail" aria-label="Close record">×</button></header><div id="detail-content"></div></dialog>
+  <dialog id="consent-dialog"><header><div><p class="eyebrow">CONSENT LAYER · DESIGN PREVIEW</p><h2>Patient sharing controls</h2></div><button id="close-consent" aria-label="Close consent preview">×</button></header><div id="consent-content"></div></dialog>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

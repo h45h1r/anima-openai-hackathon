@@ -1,0 +1,977 @@
+{
+  "capturedAt": "2026-09-12T11:43:00.755Z",
+  "method": "Inspect same-origin app HTML and referenced JS/CSS; extract literal API paths and templates. No guessed privileged paths or auth bypass.",
+  "files": [
+    {
+      "path": "/control/",
+      "status": 200,
+      "bytes": 494
+    },
+    {
+      "path": "/gp/",
+      "status": 200,
+      "bytes": 479
+    },
+    {
+      "path": "/gp/documents/",
+      "status": 200,
+      "bytes": 479
+    },
+    {
+      "path": "/gp/messages/",
+      "status": 200,
+      "bytes": 479
+    },
+    {
+      "path": "/gp/telephony/",
+      "status": 200,
+      "bytes": 479
+    },
+    {
+      "path": "/hospital/",
+      "status": 200,
+      "bytes": 497
+    },
+    {
+      "path": "/pharmacy/",
+      "status": 200,
+      "bytes": 497
+    },
+    {
+      "path": "/community/",
+      "status": 200,
+      "bytes": 500
+    },
+    {
+      "path": "/wearables/",
+      "status": 200,
+      "bytes": 500
+    },
+    {
+      "path": "/wearables/messages/",
+      "status": 200,
+      "bytes": 500
+    },
+    {
+      "path": "/control/assets/index-uqy-a2bU.js",
+      "status": 200,
+      "bytes": 382412
+    },
+    {
+      "path": "/control/assets/index-B3tGnViK.css",
+      "status": 200,
+      "bytes": 86838
+    },
+    {
+      "path": "/gp/assets/index-BZtm2W1c.js",
+      "status": 200,
+      "bytes": 382402
+    },
+    {
+      "path": "/gp/assets/index-B3tGnViK.css",
+      "status": 200,
+      "bytes": 86838
+    },
+    {
+      "path": "/hospital/assets/index-Cu_0zaBt.js",
+      "status": 200,
+      "bytes": 382414
+    },
+    {
+      "path": "/hospital/assets/index-B3tGnViK.css",
+      "status": 200,
+      "bytes": 86838
+    },
+    {
+      "path": "/pharmacy/assets/index-Bf5G1RC_.js",
+      "status": 200,
+      "bytes": 382414
+    },
+    {
+      "path": "/pharmacy/assets/index-B3tGnViK.css",
+      "status": 200,
+      "bytes": 86838
+    },
+    {
+      "path": "/community/assets/index-C8ES41BW.js",
+      "status": 200,
+      "bytes": 382416
+    },
+    {
+      "path": "/community/assets/index-B3tGnViK.css",
+      "status": 200,
+      "bytes": 86838
+    },
+    {
+      "path": "/wearables/assets/index--RtVaVMc.js",
+      "status": 200,
+      "bytes": 382416
+    },
+    {
+      "path": "/wearables/assets/index-B3tGnViK.css",
+      "status": 200,
+      "bytes": 86838
+    },
+    {
+      "path": "/control/assets/messaging-workspace-OWXLwRNc.js",
+      "status": 200,
+      "bytes": 18981
+    },
+    {
+      "path": "/control/assets/product-brand-DILmbmP3.js",
+      "status": 200,
+      "bytes": 1245
+    },
+    {
+      "path": "/control/assets/product-brand-C66U_yzH.css",
+      "status": 200,
+      "bytes": 950
+    },
+    {
+      "path": "/control/assets/messaging-workspace-Dfjvtjex.css",
+      "status": 200,
+      "bytes": 14222
+    },
+    {
+      "path": "/control/assets/telephony-workspace-DnMVblMH.js",
+      "status": 200,
+      "bytes": 54667
+    },
+    {
+      "path": "/control/assets/telephony-workspace-scquSPMu.css",
+      "status": 200,
+      "bytes": 10637
+    },
+    {
+      "path": "/control/assets/document-workspace-BpNeQKIN.js",
+      "status": 200,
+      "bytes": 16653
+    },
+    {
+      "path": "/control/assets/record-attribution-DcbMQMTq.js",
+      "status": 200,
+      "bytes": 1903
+    },
+    {
+      "path": "/control/assets/record-attribution-BiUIju20.css",
+      "status": 200,
+      "bytes": 379
+    },
+    {
+      "path": "/control/assets/document-workspace-DARuS1bs.css",
+      "status": 200,
+      "bytes": 12576
+    },
+    {
+      "path": "/control/assets/pharmacy-workspace-CUZpJ0pS.js",
+      "status": 200,
+      "bytes": 36558
+    },
+    {
+      "path": "/control/assets/pharmacy-workspace-CGiwxIpx.css",
+      "status": 200,
+      "bytes": 14621
+    },
+    {
+      "path": "/control/assets/systems-B1uh_yTI.js",
+      "status": 200,
+      "bytes": 104974
+    },
+    {
+      "path": "/control/assets/systems-DR1w4Obh.css",
+      "status": 200,
+      "bytes": 28693
+    },
+    {
+      "path": "/control/assets/care-workspaces-DPf3zwam.js",
+      "status": 200,
+      "bytes": 17891
+    },
+    {
+      "path": "/control/assets/home-workspace-BeE8I5sV.js",
+      "status": 200,
+      "bytes": 10270
+    },
+    {
+      "path": "/control/assets/plan-exploration-CLY5Gqss.js",
+      "status": 200,
+      "bytes": 4044
+    },
+    {
+      "path": "/control/assets/plan-exploration-DOPgfWRR.css",
+      "status": 200,
+      "bytes": 1183
+    },
+    {
+      "path": "/gp/assets/messaging-workspace-CTBgapxF.js",
+      "status": 200,
+      "bytes": 18981
+    },
+    {
+      "path": "/gp/assets/product-brand-DjIUSgRA.js",
+      "status": 200,
+      "bytes": 1245
+    },
+    {
+      "path": "/gp/assets/product-brand-C66U_yzH.css",
+      "status": 200,
+      "bytes": 950
+    },
+    {
+      "path": "/gp/assets/messaging-workspace-Dfjvtjex.css",
+      "status": 200,
+      "bytes": 14222
+    },
+    {
+      "path": "/gp/assets/telephony-workspace-DJjENUC8.js",
+      "status": 200,
+      "bytes": 54667
+    },
+    {
+      "path": "/gp/assets/telephony-workspace-scquSPMu.css",
+      "status": 200,
+      "bytes": 10637
+    },
+    {
+      "path": "/gp/assets/document-workspace-CYOOfCR3.js",
+      "status": 200,
+      "bytes": 16653
+    },
+    {
+      "path": "/gp/assets/record-attribution-h8G_85WI.js",
+      "status": 200,
+      "bytes": 1903
+    },
+    {
+      "path": "/gp/assets/record-attribution-BiUIju20.css",
+      "status": 200,
+      "bytes": 379
+    },
+    {
+      "path": "/gp/assets/document-workspace-DARuS1bs.css",
+      "status": 200,
+      "bytes": 12576
+    },
+    {
+      "path": "/gp/assets/pharmacy-workspace-B9O0--Mh.js",
+      "status": 200,
+      "bytes": 36558
+    },
+    {
+      "path": "/gp/assets/pharmacy-workspace-CGiwxIpx.css",
+      "status": 200,
+      "bytes": 14621
+    },
+    {
+      "path": "/gp/assets/systems-C0T_f8i5.js",
+      "status": 200,
+      "bytes": 104974
+    },
+    {
+      "path": "/gp/assets/systems-DR1w4Obh.css",
+      "status": 200,
+      "bytes": 28693
+    },
+    {
+      "path": "/gp/assets/care-workspaces-Dvn3zYVw.js",
+      "status": 200,
+      "bytes": 17891
+    },
+    {
+      "path": "/gp/assets/home-workspace-CN53t3-Z.js",
+      "status": 200,
+      "bytes": 10270
+    },
+    {
+      "path": "/gp/assets/plan-exploration-uOF-LgiW.js",
+      "status": 200,
+      "bytes": 4044
+    },
+    {
+      "path": "/gp/assets/plan-exploration-DOPgfWRR.css",
+      "status": 200,
+      "bytes": 1183
+    },
+    {
+      "path": "/hospital/assets/messaging-workspace-1Lk2JgNj.js",
+      "status": 200,
+      "bytes": 18981
+    },
+    {
+      "path": "/hospital/assets/product-brand-BGNvbCqF.js",
+      "status": 200,
+      "bytes": 1245
+    },
+    {
+      "path": "/hospital/assets/product-brand-C66U_yzH.css",
+      "status": 200,
+      "bytes": 950
+    },
+    {
+      "path": "/hospital/assets/messaging-workspace-Dfjvtjex.css",
+      "status": 200,
+      "bytes": 14222
+    },
+    {
+      "path": "/hospital/assets/telephony-workspace-arACSQqf.js",
+      "status": 200,
+      "bytes": 54667
+    },
+    {
+      "path": "/hospital/assets/telephony-workspace-scquSPMu.css",
+      "status": 200,
+      "bytes": 10637
+    },
+    {
+      "path": "/hospital/assets/document-workspace-mK9MbrKu.js",
+      "status": 200,
+      "bytes": 16653
+    },
+    {
+      "path": "/hospital/assets/record-attribution-D5ROZLU-.js",
+      "status": 200,
+      "bytes": 1903
+    },
+    {
+      "path": "/hospital/assets/record-attribution-BiUIju20.css",
+      "status": 200,
+      "bytes": 379
+    },
+    {
+      "path": "/hospital/assets/document-workspace-DARuS1bs.css",
+      "status": 200,
+      "bytes": 12576
+    },
+    {
+      "path": "/hospital/assets/pharmacy-workspace-C55Vs4St.js",
+      "status": 200,
+      "bytes": 36558
+    },
+    {
+      "path": "/hospital/assets/pharmacy-workspace-CGiwxIpx.css",
+      "status": 200,
+      "bytes": 14621
+    },
+    {
+      "path": "/hospital/assets/systems-7MLcCY0D.js",
+      "status": 200,
+      "bytes": 104974
+    },
+    {
+      "path": "/hospital/assets/systems-DR1w4Obh.css",
+      "status": 200,
+      "bytes": 28693
+    },
+    {
+      "path": "/hospital/assets/care-workspaces-BI9TE_dV.js",
+      "status": 200,
+      "bytes": 17891
+    },
+    {
+      "path": "/hospital/assets/home-workspace-Cx_vIiUa.js",
+      "status": 200,
+      "bytes": 10270
+    },
+    {
+      "path": "/hospital/assets/plan-exploration-DYIwuzc9.js",
+      "status": 200,
+      "bytes": 4044
+    },
+    {
+      "path": "/hospital/assets/plan-exploration-DOPgfWRR.css",
+      "status": 200,
+      "bytes": 1183
+    },
+    {
+      "path": "/pharmacy/assets/messaging-workspace-BBrFDOvm.js",
+      "status": 200,
+      "bytes": 18981
+    },
+    {
+      "path": "/pharmacy/assets/product-brand-CuTQAtko.js",
+      "status": 200,
+      "bytes": 1245
+    },
+    {
+      "path": "/pharmacy/assets/product-brand-C66U_yzH.css",
+      "status": 200,
+      "bytes": 950
+    },
+    {
+      "path": "/pharmacy/assets/messaging-workspace-Dfjvtjex.css",
+      "status": 200,
+      "bytes": 14222
+    },
+    {
+      "path": "/pharmacy/assets/telephony-workspace-KaEY6_WF.js",
+      "status": 200,
+      "bytes": 54667
+    },
+    {
+      "path": "/pharmacy/assets/telephony-workspace-scquSPMu.css",
+      "status": 200,
+      "bytes": 10637
+    },
+    {
+      "path": "/pharmacy/assets/document-workspace-lne4oUXu.js",
+      "status": 200,
+      "bytes": 16653
+    },
+    {
+      "path": "/pharmacy/assets/record-attribution-OQq-oYVJ.js",
+      "status": 200,
+      "bytes": 1903
+    },
+    {
+      "path": "/pharmacy/assets/record-attribution-BiUIju20.css",
+      "status": 200,
+      "bytes": 379
+    },
+    {
+      "path": "/pharmacy/assets/document-workspace-DARuS1bs.css",
+      "status": 200,
+      "bytes": 12576
+    },
+    {
+      "path": "/pharmacy/assets/pharmacy-workspace-CKZw37U6.js",
+      "status": 200,
+      "bytes": 36558
+    },
+    {
+      "path": "/pharmacy/assets/pharmacy-workspace-CGiwxIpx.css",
+      "status": 200,
+      "bytes": 14621
+    },
+    {
+      "path": "/pharmacy/assets/systems-Brf2gtMy.js",
+      "status": 200,
+      "bytes": 104974
+    },
+    {
+      "path": "/pharmacy/assets/systems-DR1w4Obh.css",
+      "status": 200,
+      "bytes": 28693
+    },
+    {
+      "path": "/pharmacy/assets/care-workspaces-B3-CcfJ7.js",
+      "status": 200,
+      "bytes": 17891
+    },
+    {
+      "path": "/pharmacy/assets/home-workspace-D2O-7ACC.js",
+      "status": 200,
+      "bytes": 10270
+    },
+    {
+      "path": "/pharmacy/assets/plan-exploration-MRAg2vnX.js",
+      "status": 200,
+      "bytes": 4044
+    },
+    {
+      "path": "/pharmacy/assets/plan-exploration-DOPgfWRR.css",
+      "status": 200,
+      "bytes": 1183
+    },
+    {
+      "path": "/community/assets/messaging-workspace-BmdS2Xjw.js",
+      "status": 200,
+      "bytes": 18981
+    },
+    {
+      "path": "/community/assets/product-brand-DCmfIM6Y.js",
+      "status": 200,
+      "bytes": 1245
+    },
+    {
+      "path": "/community/assets/product-brand-C66U_yzH.css",
+      "status": 200,
+      "bytes": 950
+    },
+    {
+      "path": "/community/assets/messaging-workspace-Dfjvtjex.css",
+      "status": 200,
+      "bytes": 14222
+    },
+    {
+      "path": "/community/assets/telephony-workspace-BbDDEG53.js",
+      "status": 200,
+      "bytes": 54667
+    },
+    {
+      "path": "/community/assets/telephony-workspace-scquSPMu.css",
+      "status": 200,
+      "bytes": 10637
+    },
+    {
+      "path": "/community/assets/document-workspace-gD7uRDK8.js",
+      "status": 200,
+      "bytes": 16653
+    },
+    {
+      "path": "/community/assets/record-attribution-BEyj-Sh9.js",
+      "status": 200,
+      "bytes": 1903
+    },
+    {
+      "path": "/community/assets/record-attribution-BiUIju20.css",
+      "status": 200,
+      "bytes": 379
+    },
+    {
+      "path": "/community/assets/document-workspace-DARuS1bs.css",
+      "status": 200,
+      "bytes": 12576
+    },
+    {
+      "path": "/community/assets/pharmacy-workspace-InErYnjJ.js",
+      "status": 200,
+      "bytes": 36558
+    },
+    {
+      "path": "/community/assets/pharmacy-workspace-CGiwxIpx.css",
+      "status": 200,
+      "bytes": 14621
+    },
+    {
+      "path": "/community/assets/systems-CRcbVuI2.js",
+      "status": 200,
+      "bytes": 104974
+    },
+    {
+      "path": "/community/assets/systems-DR1w4Obh.css",
+      "status": 200,
+      "bytes": 28693
+    },
+    {
+      "path": "/community/assets/care-workspaces-C89Pcuuu.js",
+      "status": 200,
+      "bytes": 17891
+    },
+    {
+      "path": "/community/assets/home-workspace-6Yyr8E9_.js",
+      "status": 200,
+      "bytes": 10270
+    },
+    {
+      "path": "/community/assets/plan-exploration-Bt-RhEwp.js",
+      "status": 200,
+      "bytes": 4044
+    },
+    {
+      "path": "/community/assets/plan-exploration-DOPgfWRR.css",
+      "status": 200,
+      "bytes": 1183
+    },
+    {
+      "path": "/wearables/assets/messaging-workspace-B6nm1y9H.js",
+      "status": 200,
+      "bytes": 18981
+    },
+    {
+      "path": "/wearables/assets/product-brand-CBwqxdJa.js",
+      "status": 200,
+      "bytes": 1245
+    },
+    {
+      "path": "/wearables/assets/product-brand-C66U_yzH.css",
+      "status": 200,
+      "bytes": 950
+    },
+    {
+      "path": "/wearables/assets/messaging-workspace-Dfjvtjex.css",
+      "status": 200,
+      "bytes": 14222
+    },
+    {
+      "path": "/wearables/assets/telephony-workspace-BQA4T3m9.js",
+      "status": 200,
+      "bytes": 54667
+    },
+    {
+      "path": "/wearables/assets/telephony-workspace-scquSPMu.css",
+      "status": 200,
+      "bytes": 10637
+    },
+    {
+      "path": "/wearables/assets/document-workspace-C2GNFJSF.js",
+      "status": 200,
+      "bytes": 16653
+    },
+    {
+      "path": "/wearables/assets/record-attribution-C_yth9i6.js",
+      "status": 200,
+      "bytes": 1903
+    },
+    {
+      "path": "/wearables/assets/record-attribution-BiUIju20.css",
+      "status": 200,
+      "bytes": 379
+    },
+    {
+      "path": "/wearables/assets/document-workspace-DARuS1bs.css",
+      "status": 200,
+      "bytes": 12576
+    },
+    {
+      "path": "/wearables/assets/pharmacy-workspace-Cle2myCN.js",
+      "status": 200,
+      "bytes": 36558
+    },
+    {
+      "path": "/wearables/assets/pharmacy-workspace-CGiwxIpx.css",
+      "status": 200,
+      "bytes": 14621
+    },
+    {
+      "path": "/wearables/assets/systems-BCRK2OAR.js",
+      "status": 200,
+      "bytes": 104974
+    },
+    {
+      "path": "/wearables/assets/systems-DR1w4Obh.css",
+      "status": 200,
+      "bytes": 28693
+    },
+    {
+      "path": "/wearables/assets/care-workspaces-B3WrrUI_.js",
+      "status": 200,
+      "bytes": 17891
+    },
+    {
+      "path": "/wearables/assets/home-workspace-DQ_0WBo-.js",
+      "status": 200,
+      "bytes": 10270
+    },
+    {
+      "path": "/wearables/assets/plan-exploration-BIMdFgFh.js",
+      "status": 200,
+      "bytes": 4044
+    },
+    {
+      "path": "/wearables/assets/plan-exploration-DOPgfWRR.css",
+      "status": 200,
+      "bytes": 1183
+    }
+  ],
+  "endpoints": [
+    {
+      "path": "/api/clock",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/control/agents",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/control/incidents",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/control/incidents/all",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/control/teams",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/control/teams/${encodeURIComponent",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/control/teams/delete",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/keys",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${a}/actions",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${e.mode}/actions",
+      "sources": [
+        "/control/assets/document-workspace-BpNeQKIN.js",
+        "/gp/assets/document-workspace-CYOOfCR3.js",
+        "/hospital/assets/document-workspace-mK9MbrKu.js",
+        "/pharmacy/assets/document-workspace-lne4oUXu.js",
+        "/community/assets/document-workspace-gD7uRDK8.js",
+        "/wearables/assets/document-workspace-C2GNFJSF.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${e.mode}/documents",
+      "sources": [
+        "/control/assets/document-workspace-BpNeQKIN.js",
+        "/gp/assets/document-workspace-CYOOfCR3.js",
+        "/hospital/assets/document-workspace-mK9MbrKu.js",
+        "/pharmacy/assets/document-workspace-lne4oUXu.js",
+        "/community/assets/document-workspace-gD7uRDK8.js",
+        "/wearables/assets/document-workspace-C2GNFJSF.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${e}/actions",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${e}/view?patient=${encodeURIComponent",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${n}/actions",
+      "sources": [
+        "/control/assets/messaging-workspace-OWXLwRNc.js",
+        "/gp/assets/messaging-workspace-CTBgapxF.js",
+        "/hospital/assets/messaging-workspace-1Lk2JgNj.js",
+        "/pharmacy/assets/messaging-workspace-BBrFDOvm.js",
+        "/community/assets/messaging-workspace-BmdS2Xjw.js",
+        "/wearables/assets/messaging-workspace-B6nm1y9H.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${n}/messaging-workspace${t?",
+      "sources": [
+        "/control/assets/messaging-workspace-OWXLwRNc.js",
+        "/gp/assets/messaging-workspace-CTBgapxF.js",
+        "/hospital/assets/messaging-workspace-1Lk2JgNj.js",
+        "/pharmacy/assets/messaging-workspace-BBrFDOvm.js",
+        "/community/assets/messaging-workspace-BmdS2Xjw.js",
+        "/wearables/assets/messaging-workspace-B6nm1y9H.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${r}/actions",
+      "sources": [
+        "/control/assets/systems-B1uh_yTI.js",
+        "/gp/assets/systems-C0T_f8i5.js",
+        "/hospital/assets/systems-7MLcCY0D.js",
+        "/pharmacy/assets/systems-Brf2gtMy.js",
+        "/community/assets/systems-CRcbVuI2.js",
+        "/wearables/assets/systems-BCRK2OAR.js"
+      ]
+    },
+    {
+      "path": "/api/sites/${w?",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/sites/control/view?world=${encodeURIComponent",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/sites/gp/actions",
+      "sources": [
+        "/control/assets/systems-B1uh_yTI.js",
+        "/gp/assets/systems-C0T_f8i5.js",
+        "/hospital/assets/systems-7MLcCY0D.js",
+        "/pharmacy/assets/systems-Brf2gtMy.js",
+        "/community/assets/systems-CRcbVuI2.js",
+        "/wearables/assets/systems-BCRK2OAR.js"
+      ]
+    },
+    {
+      "path": "/api/sites/gp/appointments?date=${o}",
+      "sources": [
+        "/control/assets/systems-B1uh_yTI.js",
+        "/gp/assets/systems-C0T_f8i5.js",
+        "/hospital/assets/systems-7MLcCY0D.js",
+        "/pharmacy/assets/systems-Brf2gtMy.js",
+        "/community/assets/systems-CRcbVuI2.js",
+        "/wearables/assets/systems-BCRK2OAR.js"
+      ]
+    },
+    {
+      "path": "/api/sites/gp/patients?q=${encodeURIComponent",
+      "sources": [
+        "/control/assets/systems-B1uh_yTI.js",
+        "/gp/assets/systems-C0T_f8i5.js",
+        "/hospital/assets/systems-7MLcCY0D.js",
+        "/pharmacy/assets/systems-Brf2gtMy.js",
+        "/community/assets/systems-CRcbVuI2.js",
+        "/wearables/assets/systems-BCRK2OAR.js"
+      ]
+    },
+    {
+      "path": "/api/sites/hospital/actions",
+      "sources": [
+        "/control/assets/systems-B1uh_yTI.js",
+        "/gp/assets/systems-C0T_f8i5.js",
+        "/hospital/assets/systems-7MLcCY0D.js",
+        "/pharmacy/assets/systems-Brf2gtMy.js",
+        "/community/assets/systems-CRcbVuI2.js",
+        "/wearables/assets/systems-BCRK2OAR.js"
+      ]
+    },
+    {
+      "path": "/api/sites/hospital/attendances",
+      "sources": [
+        "/control/assets/systems-B1uh_yTI.js",
+        "/gp/assets/systems-C0T_f8i5.js",
+        "/hospital/assets/systems-7MLcCY0D.js",
+        "/pharmacy/assets/systems-Brf2gtMy.js",
+        "/community/assets/systems-CRcbVuI2.js",
+        "/wearables/assets/systems-BCRK2OAR.js"
+      ]
+    },
+    {
+      "path": "/api/sites/hospital/patients?q=",
+      "sources": [
+        "/control/assets/systems-B1uh_yTI.js",
+        "/gp/assets/systems-C0T_f8i5.js",
+        "/hospital/assets/systems-7MLcCY0D.js",
+        "/pharmacy/assets/systems-Brf2gtMy.js",
+        "/community/assets/systems-CRcbVuI2.js",
+        "/wearables/assets/systems-BCRK2OAR.js"
+      ]
+    },
+    {
+      "path": "/api/sites/hospital/view?limit=200&offset=",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/sites/pharmacy/actions",
+      "sources": [
+        "/control/assets/pharmacy-workspace-CUZpJ0pS.js",
+        "/gp/assets/pharmacy-workspace-B9O0--Mh.js",
+        "/hospital/assets/pharmacy-workspace-C55Vs4St.js",
+        "/pharmacy/assets/pharmacy-workspace-CKZw37U6.js",
+        "/community/assets/pharmacy-workspace-InErYnjJ.js",
+        "/wearables/assets/pharmacy-workspace-Cle2myCN.js"
+      ]
+    },
+    {
+      "path": "/api/sites/pharmacy/pharmacy-workspace",
+      "sources": [
+        "/control/assets/pharmacy-workspace-CUZpJ0pS.js",
+        "/gp/assets/pharmacy-workspace-B9O0--Mh.js",
+        "/hospital/assets/pharmacy-workspace-C55Vs4St.js",
+        "/pharmacy/assets/pharmacy-workspace-CKZw37U6.js",
+        "/community/assets/pharmacy-workspace-InErYnjJ.js",
+        "/wearables/assets/pharmacy-workspace-Cle2myCN.js"
+      ]
+    },
+    {
+      "path": "/api/team",
+      "sources": [
+        "/control/assets/index-uqy-a2bU.js",
+        "/gp/assets/index-BZtm2W1c.js",
+        "/hospital/assets/index-Cu_0zaBt.js",
+        "/pharmacy/assets/index-Bf5G1RC_.js",
+        "/community/assets/index-C8ES41BW.js",
+        "/wearables/assets/index--RtVaVMc.js"
+      ]
+    },
+    {
+      "path": "/api/telephony/live",
+      "sources": [
+        "/control/assets/telephony-workspace-DnMVblMH.js",
+        "/gp/assets/telephony-workspace-DJjENUC8.js",
+        "/hospital/assets/telephony-workspace-arACSQqf.js",
+        "/pharmacy/assets/telephony-workspace-KaEY6_WF.js",
+        "/community/assets/telephony-workspace-BbDDEG53.js",
+        "/wearables/assets/telephony-workspace-BQA4T3m9.js"
+      ]
+    }
+  ]
+}

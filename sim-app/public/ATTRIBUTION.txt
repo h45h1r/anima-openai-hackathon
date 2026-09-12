@@ -1,0 +1,16 @@
+Local Anima NHS simulation interface copy
+
+Original interface, compiled application code, documentation, brand artwork,
+map artwork and animation: https://sim.animahealth.com/
+Captured 12 September 2026 for the user's local hackathon prototype.
+
+Original compiled JavaScript, CSS and media files are preserved byte-for-byte.
+Original HTML entry pages contain a local bootstrap script before application
+scripts. The bootstrap sets a local-only demo identity and adds a Local copy
+badge to the existing footer. No upstream API key is included in these files.
+The local root index redirects to the original control application route.
+
+asset-manifest.json records each original source URL, its upstream SHA-256,
+local path, byte count and whether the file came from the earlier local cache.
+Upstream content remains attributable to its original authors. This copy does
+not claim ownership of the original product, branding, or documentation.

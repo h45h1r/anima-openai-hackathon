@@ -1,6 +1,5 @@
 # Secrets — never commit
-.env
-.env.*
+.env*
 !.env.example
 **/.env
 **/.env.*
@@ -18,9 +17,26 @@ dist/
 build/
 coverage/
 .vite/
+.next/
+.vercel/
 *.tsbuildinfo
 
-# Local runtime
+# Local runtime / dumps
 **/data/
 *.log
+*.dump
+*.sql.gz
 .DS_Store
+.playwright-mcp/
+prototype/.cache/
+test-results/
+
+# Browser captures are local evidence; keep the images referenced by docs.
+docs/research/screenshots/*
+!docs/research/screenshots/gp-records-original.png
+!docs/research/screenshots/gp-journal-integrated.png
+!docs/research/screenshots/gp-appointments-integrated.png
+!docs/research/screenshots/documents-prototype.png
+!docs/research/screenshots/messages-prototype.png
+!docs/research/screenshots/kindred-circle-connected.png
+!docs/research/screenshots/kindred-gp-consent-connected.png

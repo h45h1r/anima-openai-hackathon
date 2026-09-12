@@ -1,0 +1,383 @@
+{
+  "verifiedAt": "2026-09-12T11:48:26.252Z",
+  "database": "anima_sim_replica_20260912",
+  "world": "team-8942268fa18a",
+  "results": {
+    "patients": {
+      "total": 50000,
+      "directory": 50000,
+      "demographics": 50000
+    },
+    "pages": [
+      {
+        "collection": "community",
+        "pages": 1,
+        "imported": 28,
+        "source_total": 28
+      },
+      {
+        "collection": "demographics",
+        "pages": 500,
+        "imported": 50000,
+        "source_total": 50000
+      },
+      {
+        "collection": "diagnostics",
+        "pages": 1,
+        "imported": 363,
+        "source_total": 363
+      },
+      {
+        "collection": "directory",
+        "pages": 1667,
+        "imported": 50000,
+        "source_total": 50000
+      },
+      {
+        "collection": "gp",
+        "pages": 750,
+        "imported": 374916,
+        "source_total": 374916
+      },
+      {
+        "collection": "hospital",
+        "pages": 1,
+        "imported": 450,
+        "source_total": 450
+      },
+      {
+        "collection": "patient",
+        "pages": 1,
+        "imported": 50,
+        "source_total": 51
+      },
+      {
+        "collection": "pharmacy",
+        "pages": 1,
+        "imported": 158,
+        "source_total": 158
+      },
+      {
+        "collection": "referrals",
+        "pages": 1,
+        "imported": 15,
+        "source_total": 15
+      },
+      {
+        "collection": "wearables",
+        "pages": 1,
+        "imported": 24,
+        "source_total": 24
+      }
+    ],
+    "resources": [
+      {
+        "site": "community",
+        "total": 28
+      },
+      {
+        "site": "diagnostics",
+        "total": 363
+      },
+      {
+        "site": "gp",
+        "total": 374916
+      },
+      {
+        "site": "hospital",
+        "total": 450
+      },
+      {
+        "site": "patient",
+        "total": 50
+      },
+      {
+        "site": "pharmacy",
+        "total": 158
+      },
+      {
+        "site": "referrals",
+        "total": 15
+      },
+      {
+        "site": "wearables",
+        "total": 24
+      }
+    ],
+    "uniqueResources": 375140,
+    "missingPatientReferences": 0,
+    "resourceKinds": [
+      {
+        "kind": "encounter",
+        "total": 273300
+      },
+      {
+        "kind": "ehr-record",
+        "total": 50000
+      },
+      {
+        "kind": "appointment",
+        "total": 49488
+      },
+      {
+        "kind": "observation",
+        "total": 1561
+      },
+      {
+        "kind": "report",
+        "total": 361
+      },
+      {
+        "kind": "task",
+        "total": 98
+      },
+      {
+        "kind": "pharmacy-quote",
+        "total": 90
+      },
+      {
+        "kind": "discharge-summary",
+        "total": 61
+      },
+      {
+        "kind": "appointment-session",
+        "total": 42
+      },
+      {
+        "kind": "pharmacy-product",
+        "total": 30
+      },
+      {
+        "kind": "pharmacy-movement",
+        "total": 30
+      },
+      {
+        "kind": "conversation",
+        "total": 12
+      },
+      {
+        "kind": "capacity",
+        "total": 12
+      },
+      {
+        "kind": "telephone-call",
+        "total": 8
+      },
+      {
+        "kind": "hospital-attendance",
+        "total": 8
+      },
+      {
+        "kind": "staff",
+        "total": 8
+      },
+      {
+        "kind": "pharmacy-referral",
+        "total": 3
+      },
+      {
+        "kind": "message",
+        "total": 3
+      },
+      {
+        "kind": "message-template",
+        "total": 3
+      },
+      {
+        "kind": "device",
+        "total": 2
+      },
+      {
+        "kind": "request",
+        "total": 2
+      },
+      {
+        "kind": "robot",
+        "total": 1
+      },
+      {
+        "kind": "disposition",
+        "total": 1
+      },
+      {
+        "kind": "choice",
+        "total": 1
+      },
+      {
+        "kind": "care-package",
+        "total": 1
+      },
+      {
+        "kind": "surgery",
+        "total": 1
+      },
+      {
+        "kind": "maternity-episode",
+        "total": 1
+      },
+      {
+        "kind": "dental-recall",
+        "total": 1
+      },
+      {
+        "kind": "document",
+        "total": 1
+      },
+      {
+        "kind": "pharmacy-basket",
+        "total": 1
+      },
+      {
+        "kind": "bed",
+        "total": 1
+      },
+      {
+        "kind": "theatre-slot",
+        "total": 1
+      },
+      {
+        "kind": "prescription",
+        "total": 1
+      },
+      {
+        "kind": "referral",
+        "total": 1
+      },
+      {
+        "kind": "care-plan",
+        "total": 1
+      },
+      {
+        "kind": "mental-health-plan",
+        "total": 1
+      },
+      {
+        "kind": "genomic-test",
+        "total": 1
+      },
+      {
+        "kind": "screening",
+        "total": 1
+      },
+      {
+        "kind": "handover",
+        "total": 1
+      }
+    ],
+    "blockedEndpoints": [
+      {
+        "endpoint": "/api/control/snapshot",
+        "status": 403,
+        "body": {
+          "error": "Connect with a valid operator token in Organiser controls. A team API key cannot unlock organiser access."
+        }
+      },
+      {
+        "endpoint": "/api/sites/legacy/view",
+        "status": 501,
+        "body": {
+          "error": "Use /browser/legacy after creating a team browser session."
+        }
+      },
+      {
+        "endpoint": "/api/sites/wearables/devices?limit=500&offset=0",
+        "status": 404,
+        "body": {
+          "error": "Unknown API endpoint"
+        }
+      },
+      {
+        "endpoint": "/api/sites/wearables/readings?limit=500&offset=0",
+        "status": 404,
+        "body": {
+          "error": "Unknown API endpoint"
+        }
+      }
+    ],
+    "legacyDocuments": 1,
+    "organizations": 4,
+    "events": 0,
+    "databaseSize": {
+      "bytes": "765941439",
+      "display": "730 MB"
+    },
+    "patientSamples": [
+      {
+        "patient_id": "SIM-000001",
+        "name": "Amira Khan",
+        "birth_date": "1952-05-11T23:00:00.000Z",
+        "conditions": [
+          "Heart failure",
+          "CKD"
+        ],
+        "needs": [
+          "Home visit",
+          "Carer involvement"
+        ]
+      },
+      {
+        "patient_id": "SIM-025000",
+        "name": "Rowan E. Mitchell",
+        "birth_date": "1946-05-19T23:00:00.000Z",
+        "conditions": [
+          "Osteoarthritis"
+        ],
+        "needs": [
+          "Transport",
+          "telephone preferred"
+        ]
+      },
+      {
+        "patient_id": "SIM-050000",
+        "name": "Ada X. Robinson",
+        "birth_date": "1967-08-04T23:00:00.000Z",
+        "conditions": [
+          "Osteoarthritis"
+        ],
+        "needs": [
+          "Carer involvement",
+          "app preferred"
+        ]
+      }
+    ]
+  },
+  "errors": [],
+  "completeForEnumeratedCollections": true,
+  "isFullBackendDatabaseDump": false,
+  "clockStart": {
+    "now": 1789200000000,
+    "speed": 60,
+    "events": [],
+    "paused": true
+  },
+  "clockEnd": {
+    "now": 1789200000000,
+    "speed": 60,
+    "events": [],
+    "paused": true
+  },
+  "caveats": [
+    "API-accessible data replica, not the original PostgreSQL schema or a transactional pg_dump of the simulator.",
+    "Full-world snapshot, hidden scheduled jobs and full historical event logs require organiser/database access.",
+    "Patient view reports 51 but returns 50 visible records; a failed-delivery conversation is omitted from that projection and remains available in the GP messaging data.",
+    "Public wearable device/reading routes returned 404 during replication; device and observation data are present in the wearable service view.",
+    "PDS demographic pages reuse the complete, validated same-day capture from this team world.",
+    "The source API provides no multi-request snapshot isolation. Counts and observed versions are preserved; concurrent edits cannot be ruled out."
+  ],
+  "backup": {
+    "path": "replica/data/anima_sim_replica_20260912.dump",
+    "bytes": 30129541,
+    "restoredIntoTemporaryDatabase": true,
+    "restoredTableCounts": {
+      "patients": 50000,
+      "resource_projections": 376004,
+      "events": 0,
+      "endpoint_responses": 57,
+      "import_pages": 2924,
+      "legacy_documents": 1,
+      "worlds": 1
+    },
+    "restoredUniqueResources": 375140,
+    "checkedAt": "2026-09-12T11:51:17.302Z"
+  }
+}

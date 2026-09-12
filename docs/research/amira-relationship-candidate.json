@@ -1,0 +1,30 @@
+{
+  "patientId": "SIM-000001",
+  "patientName": "Amira Khan",
+  "relativeName": null,
+  "relativePatientId": null,
+  "relationshipHint": "daughter",
+  "status": "unverified_candidate",
+  "consentGranted": false,
+  "sourceEndpoint": "/api/sites/gp/view?patient=SIM-000001&offset=0&limit=100",
+  "evidence": [
+    {
+      "recordId": "r-3664",
+      "version": 1,
+      "field": "data.text",
+      "text": "Lives alone in a ground-floor flat. Her daughter visits after work. Enjoys tending pots outside her front door.\nWhat matters to me: Stay at home with a clear contact for help"
+    },
+    {
+      "recordId": "r-3666",
+      "version": 1,
+      "field": "data.text",
+      "text": "Amira described getting tired on the walk to the shops. Her daughter asked for appointments to be grouped on one day."
+    },
+    {
+      "recordId": "r-3668",
+      "version": 1,
+      "field": "data.text",
+      "text": "Amira wants to return home. Her daughter can collect a prescription but cannot attend during working hours. Home support arrangements remain to be confirmed."
+    }
+  ]
+}
