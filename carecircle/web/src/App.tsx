@@ -75,7 +75,11 @@ function Shell({ children }: { children: React.ReactNode }) {
             <button className="secondary" type="button" onClick={() => app.refreshContext()}>
               Retry
             </button>
-          ) : null}
+          ) : (
+            <button className="secondary" type="button" onClick={() => void app.connect({ baseUrl: app.session?.animaBaseUrl })}>
+              Retry connect
+            </button>
+          )}
         </div>
       ) : null}
 

@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { api, askViaWebSocket } from './api';
+import { api, ApiError, AskClientError, askViaWebSocket, isTransportFailure } from './api';
 
 export interface SessionView {
   sessionId: string;
@@ -250,23 +250,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           memoriesWritten: res.run?.memoriesWritten || [],
         }));
         return;
-      } catch {
-        // REST fallback when WS unavailable
+      } catch (wsErr) {
+        // Semantic WS errors (wrong viewer, no patient, consent, Anima) — surface, do not REST-retry.
+        if (wsErr instanceof AskClientError || !isTransportFailure(wsErr)) {
+          const message = wsErr instanceof Error ? wsErr.message : 'Ask failed';
+          setState((s) => ({
+            ...s,
+            askStatus: null,
+            askStreamText: '',
+            askTransport: 'ws',
+            error: message,
+          }));
+          throw wsErr instanceof Error ? wsErr : new Error(message);
+        }
+        // Transport-only: fall back to REST
         setState((s) => ({ ...s, askStatus: 'Falling back to REST…', askTransport: 'rest' }));
-        const res = await api<any>('/api/ask', {
-          method: 'POST',
-          sessionId: sid,
-          body: JSON.stringify({ patientId, viewerId, question }),
-        });
-        setState((s) => ({
-          ...s,
-          lastAnswer: res.run,
-          suggestions: res.suggestions || s.suggestions,
-          askStatus: null,
-          askStreamText: '',
-          askTransport: 'rest',
-          memoriesWritten: res.run?.memoriesWritten || res.memoriesWritten || [],
-        }));
+        try {
+          const res = await api<any>('/api/ask', {
+            method: 'POST',
+            sessionId: sid,
+            body: JSON.stringify({ patientId, viewerId, question }),
+          });
+          setState((s) => ({
+            ...s,
+            lastAnswer: res.run,
+            suggestions: res.suggestions || s.suggestions,
+            askStatus: null,
+            askStreamText: '',
+            askTransport: 'rest',
+            memoriesWritten: res.run?.memoriesWritten || res.memoriesWritten || [],
+          }));
+        } catch (restErr) {
+          const message =
+            restErr instanceof ApiError
+              ? restErr.message
+              : restErr instanceof Error
+                ? restErr.message
+                : 'Ask failed';
+          setState((s) => ({
+            ...s,
+            askStatus: null,
+            askStreamText: '',
+            error: message,
+          }));
+          throw restErr instanceof Error ? restErr : new Error(message);
+        }
       }
     },
     [sid, state.session?.selectedPatientId, state.session?.activeViewerId],
@@ -275,16 +303,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const saveConsent = useCallback(
     async (viewerId: string, updates: Record<string, boolean>) => {
       if (!state.session?.selectedPatientId || !state.policy) return;
-      const res = await api<any>(`/api/consent/${state.session.selectedPatientId}`, {
-        method: 'PUT',
-        sessionId: sid,
-        body: JSON.stringify({
-          viewerId,
-          updates,
-          expectedVersion: state.policy.policyVersion,
-        }),
-      });
-      setState((s) => ({ ...s, policy: res.policy, lastAnswer: null }));
+      try {
+        const res = await api<any>(`/api/consent/${state.session.selectedPatientId}`, {
+          method: 'PUT',
+          sessionId: sid,
+          body: JSON.stringify({
+            viewerId,
+            updates,
+            expectedVersion: state.policy.policyVersion,
+          }),
+        });
+        setState((s) => ({ ...s, policy: res.policy, lastAnswer: null, error: null }));
+      } catch (err) {
+        setState((s) => ({
+          ...s,
+          error: err instanceof Error ? err.message : 'Consent update failed',
+        }));
+        throw err;
+      }
     },
     [sid, state.session?.selectedPatientId, state.policy],
   );

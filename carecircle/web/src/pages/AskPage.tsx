@@ -56,7 +56,19 @@ export default function AskPage() {
           </div>
         ) : null}
 
-        {localError ? <div className="error-banner">{localError}</div> : null}
+        {localError ? (
+          <div className="error-banner">
+            {localError}{' '}
+            <button
+              type="button"
+              className="secondary"
+              disabled={busy || !question.trim()}
+              onClick={() => void submit(question.trim() || 'What is recorded in my care?')}
+            >
+              Retry
+            </button>
+          </div>
+        ) : null}
         {busy ? (
           <div className="info-banner">
             {app.askStatus || 'Retrieving evidence and checking consent…'}

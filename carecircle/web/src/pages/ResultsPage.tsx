@@ -5,6 +5,7 @@ import { useApp } from '../lib/state';
 export default function ResultsPage() {
   const app = useApp();
   const measurements = app.context?.measurements || [];
+  const [retrying, setRetrying] = useState(false);
   const byAnalyte = useMemo(() => {
     const map = new Map<string, any[]>();
     for (const m of measurements) {
@@ -24,9 +25,6 @@ export default function ResultsPage() {
   }, [measurements]);
   const [selected, setSelected] = useState<string | null>(null);
 
-  // Family viewers: context may include measurements; enforce consent in UI + ask path.
-  // Context returns all measurements currently — consent filtering happens on ask.
-  // For Results page, filter client display using policy grants for honesty.
   const viewerId = app.session?.activeViewerId || 'patient';
   const viewer = app.policy?.viewers?.find((v: any) => v.viewerId === viewerId);
   const canSeeLabs =
@@ -38,13 +36,22 @@ export default function ResultsPage() {
     (app.policy?.disclosures || []).filter((d: any) => d.state === 'held').map((d: any) => d.resourceId),
   );
 
+  async function retry() {
+    setRetrying(true);
+    try {
+      await app.refreshContext();
+    } finally {
+      setRetrying(false);
+    }
+  }
+
   if (!canSeeLabs) {
     return (
       <div className="panel">
         <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>Results</h1>
         <div className="info-banner">
-          Laboratory results are outside this viewer&apos;s CareCircle access. Switch to the patient or update People and
-          access.
+          Consent blocks this — laboratory results are outside this viewer&apos;s CareCircle access. Switch to the
+          patient or update People and access.
         </div>
       </div>
     );
@@ -62,11 +69,25 @@ export default function ResultsPage() {
   return (
     <div className="panel stack">
       <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>Results</h1>
-      <p className="muted">Exact values from Anima-derived measurements. Reference bands are illustrative simulator intervals.</p>
+      <p className="muted">
+        Exact values from Anima-derived measurements. Reference bands are illustrative simulator intervals.
+      </p>
+      {app.status === 'error' ? (
+        <div className="error-banner">
+          {app.error || 'Results failed to load.'}{' '}
+          <button type="button" className="secondary" disabled={retrying} onClick={() => void retry()}>
+            {retrying ? 'Retrying…' : 'Retry'}
+          </button>
+        </div>
+      ) : null}
       {!visible.length ? (
         <div className="info-banner">
-          No numeric result history was normalised from the live patient view
-          {measurements.length ? ' (values may be held for disclosure)' : ''}.
+          {measurements.length
+            ? 'Held result — values are held for disclosure (or filtered). Clear holds below, or switch viewer.'
+            : 'No numeric result history was normalised from the live patient view.'}{' '}
+          <button type="button" className="secondary" disabled={retrying} onClick={() => void retry()}>
+            {retrying ? 'Refreshing…' : 'Retry'}
+          </button>
         </div>
       ) : (
         <>

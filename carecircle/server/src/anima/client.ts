@@ -132,7 +132,9 @@ export class AnimaClient {
       const ms = Date.now() - started;
       this.lastTrace.push({ requestId, method, path: redact(url.pathname), ms });
       throw new AnimaClientError(
-        err instanceof Error ? err.message : 'Anima unreachable',
+        err instanceof Error && /abort/i.test(err.message)
+          ? 'Anima request timed out'
+          : 'Anima unreachable',
         'unavailable',
       );
     } finally {

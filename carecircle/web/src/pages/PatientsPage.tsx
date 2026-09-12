@@ -59,7 +59,30 @@ export default function PatientsPage() {
         />
       </label>
       {loading ? <div className="info-banner">Searching live directory…</div> : null}
-      {error ? <div className="error-banner">{error}</div> : null}
+      {error ? (
+        <div className="error-banner">
+          {error}{' '}
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => {
+              setQ((q0) => q0 + '');
+              setError(null);
+              setLoading(true);
+              void app
+                .searchPatients(debounced)
+                .then((res) => {
+                  setItems(res.items || []);
+                  setTotal(res.total ?? res.items?.length ?? 0);
+                })
+                .catch((err) => setError(err instanceof Error ? err.message : 'Search failed'))
+                .finally(() => setLoading(false));
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
       {!loading && !error && items.length === 0 ? (
         <div className="info-banner">No patients matched. Keep editing the search.</div>
       ) : null}

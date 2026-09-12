@@ -29,8 +29,12 @@ export default function PeoplePage() {
   const effective = { ...grants, ...draft };
 
   async function save() {
-    await app.saveConsent(target, draft);
-    setDraft({});
+    try {
+      await app.saveConsent(target, draft);
+      setDraft({});
+    } catch {
+      // error surfaced in app banner
+    }
   }
 
   return (

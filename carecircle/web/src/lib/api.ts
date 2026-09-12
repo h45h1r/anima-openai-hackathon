@@ -5,9 +5,31 @@ export class ApiError extends Error {
     message: string,
     public status: number,
     public body?: unknown,
+    public code?: string,
   ) {
     super(message);
+    this.name = 'ApiError';
   }
+}
+
+/** Semantic Ask/WS failures should not trigger REST fallback. */
+export class AskClientError extends Error {
+  constructor(
+    message: string,
+    public code?: string,
+    public transport: 'ws' | 'rest' = 'ws',
+  ) {
+    super(message);
+    this.name = 'AskClientError';
+  }
+}
+
+export function isTransportFailure(err: unknown): boolean {
+  if (err instanceof AskClientError) {
+    return !err.code || err.code === 'transport';
+  }
+  if (!(err instanceof Error)) return true;
+  return /WebSocket|timed out|closed before|connection failed|Failed to fetch|NetworkError/i.test(err.message);
 }
 
 export async function api<T>(
@@ -20,7 +42,12 @@ export async function api<T>(
     ...(opts.headers as Record<string, string> | undefined),
   };
   if (opts.sessionId) headers['x-carecircle-session'] = opts.sessionId;
-  const res = await fetch(`${API_BASE}${path}`, { ...opts, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...opts, headers });
+  } catch {
+    throw new ApiError('Anima unreachable — retry.', 503, null, 'unavailable');
+  }
   const text = await res.text();
   let body: unknown = null;
   try {
@@ -29,13 +56,36 @@ export async function api<T>(
     body = text;
   }
   if (!res.ok) {
+    const obj = typeof body === 'object' && body ? (body as Record<string, unknown>) : null;
     const msg =
-      typeof body === 'object' && body && 'message' in body
-        ? String((body as { message: string }).message)
-        : `Request failed (${res.status})`;
-    throw new ApiError(msg, res.status, body);
+      (obj && typeof obj.message === 'string' && obj.message) ||
+      (obj && typeof obj.error === 'string' ? humanizeCode(String(obj.error)) : null) ||
+      `Request failed (${res.status})`;
+    throw new ApiError(msg, res.status, body, obj && typeof obj.error === 'string' ? obj.error : undefined);
   }
   return body as T;
+}
+
+function humanizeCode(code: string): string {
+  const map: Record<string, string> = {
+    missing_session: 'Connect to Anima first.',
+    disconnected: 'Not connected — reconnect to Anima.',
+    unauthorized: 'Permission denied — check your Anima API key.',
+    forbidden: 'Permission denied for this Anima action.',
+    not_found: 'Patient or resource not found in live Anima.',
+    patient_not_in_world: 'Patient not found in live Anima search. Return to search.',
+    patient_mismatch: 'Selected patient does not match this request.',
+    viewer_mismatch: 'Wrong viewer — use the viewer switcher (identity claims are ignored).',
+    question_required: 'Enter a question before asking.',
+    no_patient: 'Select a patient first.',
+    unknown_viewer: 'Unknown viewer for this CareCircle.',
+    only_patient_may_edit_consent: 'Consent blocks this — only the patient viewer can edit access.',
+    consent_conflict: 'Consent update conflict — refresh and try again.',
+    unavailable: 'Anima unreachable — retry.',
+    booking_not_submitted: 'Booking not submitted (API limitation or rejected slot).',
+    internal: 'Something went wrong in CareCircle — retry.',
+  };
+  return map[code] || `Request failed (${code})`;
 }
 
 export type AskWsEvent =
@@ -60,7 +110,7 @@ function wsUrl(path: string): string {
   return `${proto}//${window.location.host}${path}`;
 }
 
-/** Prefer WebSocket streaming; throw to let caller fall back to REST. */
+/** Prefer WebSocket streaming; throw AskClientError for semantic failures, Error for transport. */
 export function askViaWebSocket(
   input: {
     sessionId: string;
@@ -117,7 +167,7 @@ export function askViaWebSocket(
         onEvent(event);
         if (event.type === 'error') {
           window.clearTimeout(timer);
-          fail(new Error(event.message));
+          fail(new AskClientError(event.message || humanizeCode(event.code || 'internal'), event.code, 'ws'));
           return;
         }
         if (event.type === 'final') {

@@ -17,8 +17,28 @@ import {
   updateGrants,
   type ConsentPolicyState,
 } from './consent/policy.js';
+import {
+  animaStatusForKind,
+  humanMessage,
+  humanizeAnimaError,
+  type CareCircleErrorCode,
+} from './errors.js';
 import { CareCircleStore } from './store/store.js';
 import type { InformationClass } from './types/domain.js';
+
+function jsonError(
+  res: express.Response,
+  status: number,
+  code: CareCircleErrorCode,
+  extras?: Record<string, unknown>,
+) {
+  return res.status(status).json({
+    error: code,
+    message: humanMessage(code),
+    liveData: false,
+    ...extras,
+  });
+}
 
 const dataDir = path.resolve(rootDir, process.env.CARE_CIRCLE_DATA_DIR || './data');
 const store = new CareCircleStore(dataDir);
@@ -40,12 +60,12 @@ function sessionId(req: express.Request): string | undefined {
 function requireSession(req: express.Request, res: express.Response) {
   const id = sessionId(req);
   if (!id) {
-    res.status(401).json({ error: 'missing_session', message: 'Connect to Anima first.' });
+    jsonError(res, 401, 'missing_session');
     return null;
   }
   const session = store.getSession(id);
   if (!session?.animaApiKey) {
-    res.status(401).json({ error: 'disconnected', message: 'Simulator session missing or disconnected.' });
+    jsonError(res, 401, 'disconnected');
     return null;
   }
   return session;
@@ -83,9 +103,7 @@ app.post('/api/connect', async (req, res) => {
       joinMeta = joined;
     }
     if (!apiKey) {
-      return res.status(400).json({
-        error: 'missing_key',
-        message: 'Provide apiKey, or teamName, or set ANIMA_API_KEY / ANIMA_TEAM_NAME.',
+      return jsonError(res, 400, 'missing_key', {
         needed: ['ANIMA_API_KEY or connect UI apiKey', 'optional ANIMA_TEAM_NAME', 'optional OPENAI_API_KEY'],
       });
     }
@@ -152,7 +170,7 @@ app.post('/api/patients/select', async (req, res) => {
   const session = requireSession(req, res);
   if (!session) return;
   const patientId = String(req.body.patientId || '');
-  if (!patientId) return res.status(400).json({ error: 'patientId required' });
+  if (!patientId) return jsonError(res, 400, 'no_patient');
   try {
     const client = clientFor(session);
     // Verify patient exists via search by ID — never trust client alone
@@ -160,10 +178,7 @@ app.post('/api/patients/select', async (req, res) => {
     const { items } = normalisePatientSearchResponse(raw);
     const match = items.find((p) => p.id === patientId);
     if (!match) {
-      return res.status(404).json({
-        error: 'patient_not_in_world',
-        message: `Patient ${patientId} was not returned by live Anima search. Return to search.`,
-      });
+      return jsonError(res, 404, 'patient_not_in_world');
     }
     store.updateSession(session.sessionId, {
       selectedPatientId: match.id,
@@ -189,7 +204,7 @@ app.get('/api/patients/:patientId/context', async (req, res) => {
   const session = requireSession(req, res);
   if (!session) return;
   if (session.selectedPatientId !== req.params.patientId) {
-    return res.status(409).json({ error: 'patient_mismatch', message: 'Selected patient does not match session.' });
+    return jsonError(res, 409, 'patient_mismatch');
   }
   try {
     const client = clientFor(session);
@@ -241,10 +256,10 @@ app.post('/api/viewer', (req, res) => {
   if (!session) return;
   const viewerId = String(req.body.viewerId || '');
   const patientId = session.selectedPatientId;
-  if (!patientId) return res.status(400).json({ error: 'no_patient' });
+  if (!patientId) return jsonError(res, 400, 'no_patient');
   const policy = store.ensurePolicy(patientId, session.selectedPatientName || patientId);
   if (!policy.viewers.some((v) => v.viewerId === viewerId)) {
-    return res.status(400).json({ error: 'unknown_viewer' });
+    return jsonError(res, 400, 'unknown_viewer');
   }
   store.updateSession(session.sessionId, { activeViewerId: viewerId });
   res.json({ session: store.publicSessionView(store.getSession(session.sessionId)!), policy: publicPolicy(policy) });
@@ -254,7 +269,7 @@ app.get('/api/consent/:patientId', (req, res) => {
   const session = requireSession(req, res);
   if (!session) return;
   if (session.selectedPatientId !== req.params.patientId) {
-    return res.status(409).json({ error: 'patient_mismatch' });
+    return jsonError(res, 409, 'patient_mismatch');
   }
   const policy = store.ensurePolicy(req.params.patientId, session.selectedPatientName || req.params.patientId);
   res.json({ policy: publicPolicy(policy) });
@@ -264,10 +279,10 @@ app.put('/api/consent/:patientId', (req, res) => {
   const session = requireSession(req, res);
   if (!session) return;
   if (session.selectedPatientId !== req.params.patientId) {
-    return res.status(409).json({ error: 'patient_mismatch' });
+    return jsonError(res, 409, 'patient_mismatch');
   }
   if (session.activeViewerId !== 'patient') {
-    return res.status(403).json({ error: 'only_patient_may_edit_consent' });
+    return jsonError(res, 403, 'only_patient_may_edit_consent');
   }
   try {
     const policy = store.ensurePolicy(req.params.patientId, session.selectedPatientName || req.params.patientId);
@@ -279,8 +294,8 @@ app.put('/api/consent/:patientId', (req, res) => {
     const next = updateGrants(policy, viewerId, updates || {}, Number(expectedVersion), 'patient');
     store.savePolicy(next);
     res.json({ policy: publicPolicy(next) });
-  } catch (err) {
-    res.status(409).json({ error: 'consent_conflict', message: err instanceof Error ? err.message : 'conflict' });
+  } catch {
+    return jsonError(res, 409, 'consent_conflict');
   }
 });
 
@@ -288,7 +303,7 @@ app.post('/api/disclosure/:patientId', (req, res) => {
   const session = requireSession(req, res);
   if (!session) return;
   if (session.selectedPatientId !== req.params.patientId) {
-    return res.status(409).json({ error: 'patient_mismatch' });
+    return jsonError(res, 409, 'patient_mismatch');
   }
   const { resourceId, state } = req.body as { resourceId: string; state: 'held' | 'cleared' };
   let policy = store.ensurePolicy(req.params.patientId, session.selectedPatientName || req.params.patientId);
@@ -304,17 +319,14 @@ app.post('/api/ask', async (req, res) => {
   const question = String(req.body.question || '').trim();
   const viewerId = String(req.body.viewerId || session.activeViewerId);
   if (!patientId || session.selectedPatientId !== patientId) {
-    return res.status(409).json({ error: 'patient_mismatch', message: 'Bind a patient before asking.' });
+    return jsonError(res, 409, patientId ? 'patient_mismatch' : 'no_patient');
   }
-  if (!question) return res.status(400).json({ error: 'question_required' });
+  if (!question) return jsonError(res, 400, 'question_required');
 
   // Reject identity manipulation via body vs session: session viewer wins unless explicitly switched via /api/viewer
   const authenticatedViewer = session.activeViewerId;
   if (viewerId !== authenticatedViewer) {
-    return res.status(400).json({
-      error: 'viewer_mismatch',
-      message: 'Viewer must match session. Use the viewer switcher; natural-language identity claims are ignored.',
-    });
+    return jsonError(res, 400, 'viewer_mismatch');
   }
 
   try {
@@ -373,11 +385,11 @@ app.post('/api/appointments/request', async (req, res) => {
     return res.json({
       stage: 'awaiting_confirmation',
       notice:
-        'Appointment assistance prepared a request only. Provide confirmBook=true with exact sessionId, sessionVersion, startsAt to attempt book_appointment.',
+        'Slots and preferences only — booking not submitted. Confirm an exact slot (confirmBook + sessionId, sessionVersion, startsAt) to attempt book_appointment.',
       draft: { reason, preference, slot },
     });
   }
-  if (!session.selectedPatientId) return res.status(400).json({ error: 'no_patient' });
+  if (!session.selectedPatientId) return jsonError(res, 400, 'no_patient');
   try {
     const client = clientFor(session);
     const result = await client.postAction(
@@ -398,6 +410,12 @@ app.post('/api/appointments/request', async (req, res) => {
       result,
     });
   } catch (err) {
+    if (err instanceof AnimaClientError) {
+      return jsonError(res, animaStatusForKind(err.kind), 'booking_not_submitted', {
+        animaStatus: err.status,
+        animaDetail: err.kind,
+      });
+    }
     respondAnimaError(res, err);
   }
 });
@@ -428,7 +446,7 @@ app.post('/api/demo/reset', (req, res) => {
 
 app.get('/api/runs', (req, res) => {
   const session = requireSession(req, res);
-  if (!session?.selectedPatientId) return res.status(400).json({ error: 'no_patient' });
+  if (!session?.selectedPatientId) return jsonError(res, 400, 'no_patient');
   res.json({ runs: store.listRuns(session.selectedPatientId) });
 });
 
@@ -522,7 +540,7 @@ async function loadContext(
     }
   }
   if (!siteResources.length && errors.length) {
-    throw new AnimaClientError(errors.map((e) => `${e.site}: ${e.message}`).join('; '), 'unavailable');
+    throw new AnimaClientError(humanMessage('unavailable'), 'unavailable');
   }
   store.updateSession(session.sessionId, { lastSyncAt: new Date().toISOString() });
   return buildClinicalContext({ patientId, siteResources, errors });
@@ -560,29 +578,16 @@ function detectAndHoldNewResults(
 
 function respondAnimaError(res: express.Response, err: unknown) {
   if (err instanceof AnimaClientError) {
-    const status =
-      err.kind === 'unauthorized'
-        ? 401
-        : err.kind === 'forbidden'
-          ? 403
-          : err.kind === 'not_found'
-            ? 404
-            : err.kind === 'conflict'
-              ? 409
-              : err.kind === 'bad_request'
-                ? 400
-                : err.kind === 'malformed'
-                  ? 502
-                  : 503;
-    return res.status(status).json({
-      error: err.kind,
-      message: err.message,
+    const code: CareCircleErrorCode = err.kind;
+    return res.status(animaStatusForKind(err.kind)).json({
+      error: code,
+      message: humanizeAnimaError(err),
       animaStatus: err.status,
       liveData: false,
     });
   }
   console.error(err);
-  res.status(500).json({ error: 'internal', message: err instanceof Error ? err.message : 'unknown' });
+  return jsonError(res, 500, 'internal');
 }
 
 function cryptoRandom() {
@@ -640,30 +645,31 @@ wss.on('connection', (socket: WebSocket, req) => {
         question?: string;
       };
       if (msg.type && msg.type !== 'ask') {
-        send({ type: 'error', message: 'unsupported_message', code: 'bad_request' });
+        send({ type: 'error', message: humanMessage('unsupported_message'), code: 'unsupported_message' });
         return;
       }
       const sessionKey = msg.sessionId || sid;
       const session = sessionKey ? store.getSession(sessionKey) : undefined;
       if (!session?.animaApiKey) {
-        send({ type: 'error', message: 'Connect to Anima first.', code: 'disconnected' });
+        send({ type: 'error', message: humanMessage('disconnected'), code: 'disconnected' });
         return;
       }
       const patientId = String(msg.patientId || session.selectedPatientId || '');
       const question = String(msg.question || '').trim();
       const viewerId = String(msg.viewerId || session.activeViewerId);
       if (!patientId || session.selectedPatientId !== patientId) {
-        send({ type: 'error', message: 'Bind a patient before asking.', code: 'patient_mismatch' });
+        const code = patientId ? 'patient_mismatch' : 'no_patient';
+        send({ type: 'error', message: humanMessage(code), code });
         return;
       }
       if (!question) {
-        send({ type: 'error', message: 'question_required', code: 'bad_request' });
+        send({ type: 'error', message: humanMessage('question_required'), code: 'question_required' });
         return;
       }
       if (viewerId !== session.activeViewerId) {
         send({
           type: 'error',
-          message: 'Viewer must match session. Use the viewer switcher.',
+          message: humanMessage('viewer_mismatch'),
           code: 'viewer_mismatch',
         });
         return;
@@ -688,13 +694,12 @@ wss.on('connection', (socket: WebSocket, req) => {
         suggestions,
       });
     } catch (err) {
-      const message =
-        err instanceof AnimaClientError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : 'Ask failed';
-      send({ type: 'error', message, code: err instanceof AnimaClientError ? err.kind : 'internal' });
+      if (err instanceof AnimaClientError) {
+        send({ type: 'error', message: humanizeAnimaError(err), code: err.kind });
+        return;
+      }
+      console.error(err);
+      send({ type: 'error', message: humanMessage('internal'), code: 'internal' });
     }
   });
 });

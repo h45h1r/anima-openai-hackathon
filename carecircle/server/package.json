@@ -7,8 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "test": "tsx --test evals/consent.test.ts evals/agent.test.ts",
-    "eval": "tsx --test evals/consent.test.ts evals/agent.test.ts"
+    "test": "tsx --test evals/consent.test.ts evals/agent.test.ts evals/errors.test.ts",
+    "eval": "tsx --test evals/consent.test.ts evals/agent.test.ts evals/errors.test.ts"
   },
   "dependencies": {
     "@animahealth/adk": "^0.6.0",
