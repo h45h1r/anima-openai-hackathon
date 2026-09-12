@@ -117,6 +117,7 @@ export function askViaWebSocket(
     patientId: string;
     viewerId: string;
     question: string;
+    history?: { role: 'user' | 'assistant'; content: string }[];
   },
   onEvent: (event: AskWsEvent) => void,
 ): Promise<{ run: any; suggestions?: string[] }> {
@@ -152,6 +153,7 @@ export function askViaWebSocket(
           patientId: input.patientId,
           viewerId: input.viewerId,
           question: input.question,
+          history: input.history || [],
         }),
       );
     };

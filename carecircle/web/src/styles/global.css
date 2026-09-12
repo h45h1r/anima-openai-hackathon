@@ -213,6 +213,45 @@ textarea { min-height: 96px; resize: vertical; }
   width: 100%;
 }
 .list-item:hover { border-color: #9ecbbb; }
+.list-item:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.ask-thread {
+  display: grid;
+  gap: 0.75rem;
+  max-height: min(58vh, 640px);
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+.thread-bubble {
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 0.55rem;
+}
+.thread-bubble.user {
+  background: #eef6f3;
+  margin-left: 1.5rem;
+}
+.thread-bubble.assistant {
+  background: rgba(255,255,255,0.85);
+  margin-right: 0.5rem;
+}
+.thread-role {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.context-card {
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+}
 
 .chip {
   display: inline-flex;

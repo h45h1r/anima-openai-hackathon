@@ -47,10 +47,13 @@ import {
   buildVisualisation,
   catalogueEvidence,
   clarifyAppointment,
+  isFollowUpQuestion,
   prefersShortPlain,
   proseFromFacts,
   proseMatchesFacts,
   sanitizeAnswerCitations,
+  selectLabMeasurements,
+  type ChatTurn,
 } from './grounding.js';
 import {
   ScopedMemoryService,
@@ -66,6 +69,8 @@ export type RunAgentInput = {
   policy: ConsentPolicyState;
   viewerId: string;
   question: string;
+  /** Recent user/assistant turns for this patient+viewer (not clinical memory). */
+  history?: ChatTurn[];
   openaiApiKey?: string;
   openaiModel?: string;
   memory: ScopedMemoryService;
@@ -399,7 +404,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         }
       }
 
-      const visualisationSpec = buildVisualisation(input.question, bag.allowedMeasurements);
+      const visualisationSpec = buildVisualisation(input.question, bag.allowedMeasurements, input.history);
       const memoryPref = bag.memoriesUsed
         .filter((m) => m.metadata.kind === 'preference' || m.metadata.kind === 'clarification' || m.metadata.kind === 'greeting')
         .map((m) => m.content)
@@ -414,6 +419,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         visualisationSpec,
         appointmentAssist: bag.appointmentAssist,
         memoriesHint: memoryPref || undefined,
+        history: input.history,
       });
 
       ctx.state.update({
@@ -474,17 +480,25 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           bag.memoriesUsed.map((m) => m.content).join(' '),
           input.question,
         );
+        const followUp = isFollowUpQuestion(input.question, input.history);
+        const labFocus = selectLabMeasurements(input.question, bag.allowedMeasurements, input.history);
+        const recentHistory = (input.history || []).slice(-6);
         const prompt = [
           `Authenticated viewer: ${input.viewerId} (${viewerRole}).`,
           `Patient: ${input.context.patientId}.`,
           `Memories: ${JSON.stringify(bag.memoriesUsed.map((m) => ({ kind: m.metadata.kind, text: m.content })))}.`,
+          recentHistory.length
+            ? `RECENT_TURNS (same patient+viewer; follow-ups refer to these):\n${JSON.stringify(recentHistory)}`
+            : `RECENT_TURNS: []`,
           `STRUCTURED_FACTS (authoritative — every number in your answer must appear here):`,
           JSON.stringify(facts),
           `Draft answer (fallback): ${bag.answer?.answer || ''}`,
           `Question: ${input.question}`,
-          short
-            ? `Style: short plain language, 3–6 sentences max. No full panel dump. No cheerleading closer.`
-            : `Style: concise. Prefer highlights over a full dump unless asked.`,
+          followUp || labFocus.focused
+            ? `Style: answer THIS question only. If it is a follow-up, do not repeat the full prior panel — focus on the asked analytes/topic (${labFocus.topicIds.join(', ') || 'as asked'}).`
+            : short
+              ? `Style: short plain language, 3–6 sentences max. No full panel dump. No cheerleading closer.`
+              : `Style: concise. Prefer highlights over a full dump unless asked.`,
           `Rewrite using ONLY the structured facts above. Do not introduce any number not listed in STRUCTURED_FACTS.`,
         ].join('\n');
 
@@ -618,6 +632,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             patientId: input.context.patientId,
             draft: bag.answer!,
             memories: bag.memoriesUsed,
+            history: input.history,
             onToken: (t) => emit({ type: 'token', text: t }),
           });
           if (refined && bag.answer) {
@@ -846,6 +861,7 @@ async function refineWithResponsesApi(input: {
   patientId: string;
   draft: AgentAnswer;
   memories: CareCircleMemoryItem[];
+  history?: ChatTurn[];
   onToken?: (text: string) => void;
 }): Promise<{ answer: string; uncertainty?: string } | null> {
   const { STATIC_SYSTEM_PROMPT } = await import('./prompts.js');
@@ -873,11 +889,12 @@ async function refineWithResponsesApi(input: {
             viewerRole: input.viewerRole,
             patientId: input.patientId,
             memories: input.memories.map((m) => ({ kind: m.metadata.kind, text: m.content })),
+            recentTurns: (input.history || []).slice(-6),
             facts: input.draft.facts,
             draftAnswer: input.draft.answer,
             question: input.question,
             instruction:
-              'Rephrase STRUCTURED facts only. Every number must appear in facts. Short plain language if memories ask for it. No cheerleading. Return JSON only: {answer, uncertainty}',
+              'Rephrase STRUCTURED facts only. Every number must appear in facts. Answer the latest question; for follow-ups do not dump the full prior panel. Short plain language if memories ask for it. No cheerleading. Return JSON only: {answer, uncertainty}',
           }),
         },
       ],

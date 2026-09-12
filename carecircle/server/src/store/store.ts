@@ -5,6 +5,7 @@ import type { ConsentPolicyState } from '../consent/policy.js';
 import { createDefaultPolicy } from '../consent/policy.js';
 import type { AgentRunResult, ToolObservation } from '../types/domain.js';
 import type { CareCircleMemoryItem } from '../agent/memoryStore.js';
+import type { ChatTurn } from '../agent/grounding.js';
 
 export interface SessionState {
   sessionId: string;
@@ -30,6 +31,8 @@ export interface CareCircleStoreData {
   toolLog: ToolObservation[];
   /** Viewer+patient scoped UX memories (never raw protected clinical dumps). */
   memories: CareCircleMemoryItem[];
+  /** Short ask threads keyed by sessionId::patientId::viewerId */
+  chatTurns: Record<string, ChatTurn[]>;
 }
 
 export class CareCircleStore {
@@ -47,9 +50,10 @@ export class CareCircleStore {
         runs: loaded.runs || [],
         toolLog: loaded.toolLog || [],
         memories: loaded.memories || [],
+        chatTurns: loaded.chatTurns || {},
       };
     } else {
-      this.data = { sessions: {}, policies: {}, runs: [], toolLog: [], memories: [] };
+      this.data = { sessions: {}, policies: {}, runs: [], toolLog: [], memories: [], chatTurns: {} };
       this.persist();
     }
   }
@@ -117,11 +121,48 @@ export class CareCircleStore {
       delete this.data.policies[patientId];
       this.data.runs = this.data.runs.filter((r) => r.patientId !== patientId);
       this.data.memories = (this.data.memories || []).filter((m) => m.metadata.patientId !== patientId);
+      for (const key of Object.keys(this.data.chatTurns || {})) {
+        if (key.includes(`::${patientId}::`)) delete this.data.chatTurns[key];
+      }
     } else {
       this.data.policies = {};
       this.data.runs = [];
       this.data.toolLog = [];
       this.data.memories = [];
+      this.data.chatTurns = {};
+    }
+    this.persist();
+  }
+
+  private chatKey(sessionId: string, patientId: string, viewerId: string) {
+    return `${sessionId}::${patientId}::${viewerId}`;
+  }
+
+  getChatTurns(sessionId: string, patientId: string, viewerId: string): ChatTurn[] {
+    return [...(this.data.chatTurns?.[this.chatKey(sessionId, patientId, viewerId)] || [])];
+  }
+
+  appendChatTurns(sessionId: string, patientId: string, viewerId: string, turns: ChatTurn[]) {
+    if (!this.data.chatTurns) this.data.chatTurns = {};
+    const key = this.chatKey(sessionId, patientId, viewerId);
+    const next = [...(this.data.chatTurns[key] || []), ...turns].slice(-16);
+    this.data.chatTurns[key] = next;
+    this.persist();
+    return next;
+  }
+
+  clearChatTurns(sessionId: string, patientId?: string, viewerId?: string) {
+    if (!this.data.chatTurns) return;
+    if (!patientId) {
+      for (const key of Object.keys(this.data.chatTurns)) {
+        if (key.startsWith(`${sessionId}::`)) delete this.data.chatTurns[key];
+      }
+    } else if (!viewerId) {
+      for (const key of Object.keys(this.data.chatTurns)) {
+        if (key.startsWith(`${sessionId}::${patientId}::`)) delete this.data.chatTurns[key];
+      }
+    } else {
+      delete this.data.chatTurns[this.chatKey(sessionId, patientId, viewerId)];
     }
     this.persist();
   }

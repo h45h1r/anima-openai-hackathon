@@ -334,18 +334,28 @@ app.post('/api/ask', async (req, res) => {
     const context = await loadContext(client, patientId, session);
     const policy = store.ensurePolicy(patientId, session.selectedPatientName || patientId);
     detectAndHoldNewResults(session.sessionId, patientId, context, policy);
+    const clientHistory = sanitizeHistory(req.body.history);
+    const history = mergeHistory(
+      store.getChatTurns(session.sessionId, patientId, authenticatedViewer),
+      clientHistory,
+    );
     const run = await runAgentQuestion({
       client,
       context,
       policy: store.getPolicy(patientId)!,
       viewerId: authenticatedViewer,
       question,
+      history,
       openaiApiKey: process.env.OPENAI_API_KEY,
       openaiModel: process.env.OPENAI_MODEL,
       memory: memoryService,
       onConsentUpdate: (next) => store.savePolicy(next),
     });
     store.addRun(run);
+    store.appendChatTurns(session.sessionId, patientId, authenticatedViewer, [
+      { role: 'user', content: question },
+      { role: 'assistant', content: run.answer.answer },
+    ]);
     res.json({
       freshness: context.fetchedAt,
       run,
@@ -599,18 +609,24 @@ async function executeAsk(input: {
   patientId: string;
   viewerId: string;
   question: string;
+  history?: { role: 'user' | 'assistant'; content: string }[];
   onEvent?: (event: AskStreamEvent) => void;
 }) {
   const client = clientFor(input.session);
   const context = await loadContext(client, input.patientId, input.session);
   const policy = store.ensurePolicy(input.patientId, input.session.selectedPatientName || input.patientId);
   detectAndHoldNewResults(input.session.sessionId, input.patientId, context, policy);
+  const history = mergeHistory(
+    store.getChatTurns(input.session.sessionId, input.patientId, input.viewerId),
+    sanitizeHistory(input.history),
+  );
   const run = await runAgentQuestion({
     client,
     context,
     policy: store.getPolicy(input.patientId)!,
     viewerId: input.viewerId,
     question: input.question,
+    history,
     openaiApiKey: process.env.OPENAI_API_KEY,
     openaiModel: process.env.OPENAI_MODEL,
     memory: memoryService,
@@ -618,8 +634,35 @@ async function executeAsk(input: {
     onEvent: input.onEvent,
   });
   store.addRun(run);
+  store.appendChatTurns(input.session.sessionId, input.patientId, input.viewerId, [
+    { role: 'user', content: input.question },
+    { role: 'assistant', content: run.answer.answer },
+  ]);
   const suggestions = suggestionsForViewer(context, store.getPolicy(input.patientId)!, input.viewerId);
   return { context, run, suggestions };
+}
+
+function sanitizeHistory(raw: unknown): { role: 'user' | 'assistant'; content: string }[] {
+  if (!Array.isArray(raw)) return [];
+  const out: { role: 'user' | 'assistant'; content: string }[] = [];
+  for (const item of raw.slice(-8)) {
+    if (!item || typeof item !== 'object') continue;
+    const role = (item as { role?: string }).role;
+    const content = String((item as { content?: string }).content || '').trim();
+    if ((role === 'user' || role === 'assistant') && content && content.length < 4000) {
+      out.push({ role, content });
+    }
+  }
+  return out;
+}
+
+/** Prefer longer client-provided thread when present; else stored turns. Cap at 6 prior turns. */
+function mergeHistory(
+  stored: { role: 'user' | 'assistant'; content: string }[],
+  client: { role: 'user' | 'assistant'; content: string }[],
+) {
+  const base = client.length >= stored.length ? client : stored;
+  return base.slice(-6);
 }
 
 const server = http.createServer(app);
@@ -643,6 +686,7 @@ wss.on('connection', (socket: WebSocket, req) => {
         patientId?: string;
         viewerId?: string;
         question?: string;
+        history?: { role: 'user' | 'assistant'; content: string }[];
       };
       if (msg.type && msg.type !== 'ask') {
         send({ type: 'error', message: humanMessage('unsupported_message'), code: 'unsupported_message' });
@@ -681,6 +725,7 @@ wss.on('connection', (socket: WebSocket, req) => {
         patientId,
         viewerId,
         question,
+        history: msg.history,
         onEvent: (event) => {
           // final is sent once below with suggestions
           if (event.type !== 'final') send(event);

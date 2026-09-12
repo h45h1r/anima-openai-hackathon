@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp, type PatientSummary } from '../lib/state';
 
@@ -10,35 +10,53 @@ export default function PatientsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openingId, setOpeningId] = useState<string | null>(null);
+  const searchPatients = app.searchPatients;
+  const openingRef = useRef(false);
 
-  const debounced = useMemo(() => q, [q]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const t = setTimeout(async () => {
+  const runSearch = useCallback(
+    async (query: string) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await app.searchPatients(debounced);
-        if (!cancelled) {
-          setItems(res.items || []);
-          setTotal(res.total ?? res.items?.length ?? 0);
-        }
+        const res = await searchPatients(query);
+        setItems(res.items || []);
+        setTotal(res.total ?? res.items?.length ?? 0);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Search failed');
+        setError(err instanceof Error ? err.message : 'Search failed');
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
+    },
+    [searchPatients],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      if (cancelled) return;
+      void runSearch(q);
     }, 280);
     return () => {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [debounced, app]);
+  }, [q, runSearch]);
 
   async function choose(id: string) {
-    await app.selectPatient(id);
-    nav(`/patient/${id}/ask`);
+    if (openingRef.current || openingId) return;
+    openingRef.current = true;
+    setOpeningId(id);
+    setError(null);
+    try {
+      await app.selectPatient(id);
+      nav(`/patient/${id}/ask`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not open patient');
+    } finally {
+      openingRef.current = false;
+      setOpeningId(null);
+    }
   }
 
   return (
@@ -56,39 +74,33 @@ export default function PatientsPage() {
           onChange={(e) => setQ(e.target.value)}
           placeholder="Try Amira or SIM-000001"
           aria-label="Search patients"
+          disabled={Boolean(openingId)}
         />
       </label>
-      {loading ? <div className="info-banner">Searching live directory…</div> : null}
+      {loading && !openingId ? <div className="info-banner">Searching live directory…</div> : null}
+      {openingId ? <div className="info-banner">Opening patient…</div> : null}
       {error ? (
         <div className="error-banner">
           {error}{' '}
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => {
-              setQ((q0) => q0 + '');
-              setError(null);
-              setLoading(true);
-              void app
-                .searchPatients(debounced)
-                .then((res) => {
-                  setItems(res.items || []);
-                  setTotal(res.total ?? res.items?.length ?? 0);
-                })
-                .catch((err) => setError(err instanceof Error ? err.message : 'Search failed'))
-                .finally(() => setLoading(false));
-            }}
-          >
+          <button type="button" className="secondary" onClick={() => void runSearch(q)}>
             Retry
           </button>
         </div>
       ) : null}
-      {!loading && !error && items.length === 0 ? (
+      {!loading && !error && !openingId && items.length === 0 ? (
         <div className="info-banner">No patients matched. Keep editing the search.</div>
       ) : null}
       <div className="list" role="list">
         {items.map((p) => (
-          <button key={p.id} type="button" className="list-item" onClick={() => choose(p.id)} role="listitem">
+          <button
+            key={p.id}
+            type="button"
+            className="list-item"
+            onClick={() => void choose(p.id)}
+            role="listitem"
+            disabled={Boolean(openingId)}
+            aria-busy={openingId === p.id}
+          >
             <div>
               <strong>{p.name}</strong>
               <div className="muted small">
@@ -98,11 +110,13 @@ export default function PatientsPage() {
                 <div className="muted small">{p.conditions.slice(0, 3).join(' · ')}</div>
               ) : null}
             </div>
-            <span className="chip">Open</span>
+            <span className="chip">{openingId === p.id ? 'Opening…' : 'Open'}</span>
           </button>
         ))}
       </div>
-      <p className="muted small">Showing {items.length} of {total} (page size 30).</p>
+      <p className="muted small">
+        Showing {items.length} of {total} (page size 30).
+      </p>
     </div>
   );
 }

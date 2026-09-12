@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { api, ApiError, AskClientError, askViaWebSocket, isTransportFailure } from './api';
 
 export interface SessionView {
@@ -26,6 +26,13 @@ export interface PatientSummary {
   goals: string[];
 }
 
+export type AskThreadMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  run?: any;
+};
+
 export interface AppState {
   session: SessionView | null;
   patient: PatientSummary | null;
@@ -35,6 +42,7 @@ export interface AppState {
   status: 'disconnected' | 'connecting' | 'connected' | 'patient_loading' | 'ready' | 'error';
   error: string | null;
   lastAnswer: any | null;
+  askThread: AskThreadMessage[];
   sourceOpen: any | null;
   askStatus: string | null;
   askStreamText: string;
@@ -55,10 +63,15 @@ interface AppContextValue extends AppState {
   openSource: (source: any | null) => void;
   resetDemo: () => Promise<void>;
   clearError: () => void;
+  clearAskThread: () => void;
 }
 
 const Ctx = createContext<AppContextValue | null>(null);
 const SESSION_KEY = 'carecircle.sessionId';
+
+function threadKey(patientId?: string, viewerId?: string) {
+  return `${patientId || ''}::${viewerId || ''}`;
+}
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>({
@@ -70,6 +83,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     status: 'disconnected',
     error: null,
     lastAnswer: null,
+    askThread: [],
     sourceOpen: null,
     askStatus: null,
     askStreamText: '',
@@ -78,6 +92,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const sid = state.session?.sessionId || localStorage.getItem(SESSION_KEY);
+  const selectLock = useRef(false);
+  const threadScope = useRef('');
 
   const connect = useCallback(async (input: { apiKey?: string; teamName?: string; baseUrl?: string }) => {
     setState((s) => ({ ...s, status: 'connecting', error: null }));
@@ -87,6 +103,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify(input),
       });
       localStorage.setItem(SESSION_KEY, res.session.sessionId);
+      threadScope.current = '';
       setState((s) => ({
         ...s,
         session: res.session,
@@ -94,6 +111,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         patient: null,
         context: null,
         lastAnswer: null,
+        askThread: [],
       }));
     } catch (err) {
       setState((s) => ({
@@ -118,13 +136,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const selectPatient = useCallback(
     async (patientId: string) => {
-      setState((s) => ({ ...s, status: 'patient_loading', error: null, lastAnswer: null }));
+      if (selectLock.current) return;
+      selectLock.current = true;
+      setState((s) => ({
+        ...s,
+        status: 'patient_loading',
+        error: null,
+        lastAnswer: null,
+        askThread: [],
+      }));
       try {
         const res = await api<any>('/api/patients/select', {
           method: 'POST',
           sessionId: sid,
           body: JSON.stringify({ patientId }),
         });
+        threadScope.current = threadKey(res.session?.selectedPatientId || patientId, res.session?.activeViewerId || 'patient');
         setState((s) => ({
           ...s,
           status: 'ready',
@@ -133,15 +160,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           policy: res.policy,
           context: res.context,
           suggestions: [],
+          askThread: [],
+          lastAnswer: null,
         }));
-        const ctx = await api<any>(`/api/patients/${patientId}/context?viewerId=patient`, { sessionId: sid });
-        setState((s) => ({
-          ...s,
-          context: ctx.context,
-          policy: ctx.policy,
-          suggestions: ctx.suggestions || [],
-          session: s.session ? { ...s.session, lastSyncAt: ctx.freshness } : s.session,
-        }));
+        // Context refresh is best-effort; selection already succeeded with embedded context.
+        try {
+          const ctx = await api<any>(`/api/patients/${patientId}/context?viewerId=patient`, { sessionId: sid });
+          setState((s) => ({
+            ...s,
+            context: ctx.context,
+            policy: ctx.policy,
+            suggestions: ctx.suggestions || [],
+            session: s.session ? { ...s.session, lastSyncAt: ctx.freshness } : s.session,
+          }));
+        } catch {
+          /* keep select response context */
+        }
       } catch (err) {
         setState((s) => ({
           ...s,
@@ -149,6 +183,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           error: err instanceof Error ? err.message : 'Patient load failed',
         }));
         throw err;
+      } finally {
+        selectLock.current = false;
       }
     },
     [sid],
@@ -187,7 +223,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sessionId: sid,
         body: JSON.stringify({ viewerId }),
       });
-      setState((s) => ({ ...s, session: res.session, policy: res.policy, lastAnswer: null }));
+      const nextKey = threadKey(res.session?.selectedPatientId, viewerId);
+      const resetThread = threadScope.current !== nextKey;
+      threadScope.current = nextKey;
+      setState((s) => ({
+        ...s,
+        session: res.session,
+        policy: res.policy,
+        lastAnswer: null,
+        askThread: resetThread ? [] : s.askThread,
+      }));
       if (res.session.selectedPatientId) {
         const ctx = await api<any>(
           `/api/patients/${res.session.selectedPatientId}/context?viewerId=${viewerId}`,
@@ -209,18 +254,53 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!state.session?.selectedPatientId || !sid) throw new Error('Select a patient first');
       const patientId = state.session.selectedPatientId;
       const viewerId = state.session.activeViewerId;
+      const scope = threadKey(patientId, viewerId);
+      if (threadScope.current !== scope) {
+        threadScope.current = scope;
+      }
+
+      const history = state.askThread
+        .filter((m) => m.text.trim())
+        .slice(-6)
+        .map((m) => ({ role: m.role, content: m.text }));
+
+      const userMsg: AskThreadMessage = {
+        id: `u_${Date.now()}`,
+        role: 'user',
+        text: question,
+      };
+
       setState((s) => ({
         ...s,
         askStatus: 'Connecting…',
         askStreamText: '',
         askTransport: null,
         memoriesWritten: [],
-        lastAnswer: null,
+        askThread: [...s.askThread, userMsg],
       }));
+
+      const finishOk = (res: { run: any; suggestions?: string[] }, transport: 'ws' | 'rest') => {
+        const assistant: AskThreadMessage = {
+          id: `a_${res.run?.runId || Date.now()}`,
+          role: 'assistant',
+          text: res.run?.answer?.answer || '',
+          run: res.run,
+        };
+        setState((s) => ({
+          ...s,
+          lastAnswer: res.run,
+          suggestions: res.suggestions || s.suggestions,
+          askStatus: null,
+          askStreamText: '',
+          askTransport: transport,
+          memoriesWritten: res.run?.memoriesWritten || [],
+          askThread: [...s.askThread, assistant],
+        }));
+      };
 
       try {
         const res = await askViaWebSocket(
-          { sessionId: sid, patientId, viewerId, question },
+          { sessionId: sid, patientId, viewerId, question, history },
           (event) => {
             if (event.type === 'status') {
               setState((s) => ({ ...s, askStatus: event.message, askTransport: 'ws' }));
@@ -240,18 +320,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             }
           },
         );
-        setState((s) => ({
-          ...s,
-          lastAnswer: res.run,
-          suggestions: res.suggestions || s.suggestions,
-          askStatus: null,
-          askStreamText: '',
-          askTransport: 'ws',
-          memoriesWritten: res.run?.memoriesWritten || [],
-        }));
+        finishOk(res, 'ws');
         return;
       } catch (wsErr) {
-        // Semantic WS errors (wrong viewer, no patient, consent, Anima) — surface, do not REST-retry.
         if (wsErr instanceof AskClientError || !isTransportFailure(wsErr)) {
           const message = wsErr instanceof Error ? wsErr.message : 'Ask failed';
           setState((s) => ({
@@ -260,26 +331,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             askStreamText: '',
             askTransport: 'ws',
             error: message,
+            // Keep the user turn so they can retry; remove only if empty thread edge case.
           }));
           throw wsErr instanceof Error ? wsErr : new Error(message);
         }
-        // Transport-only: fall back to REST
         setState((s) => ({ ...s, askStatus: 'Falling back to REST…', askTransport: 'rest' }));
         try {
           const res = await api<any>('/api/ask', {
             method: 'POST',
             sessionId: sid,
-            body: JSON.stringify({ patientId, viewerId, question }),
+            body: JSON.stringify({ patientId, viewerId, question, history }),
           });
-          setState((s) => ({
-            ...s,
-            lastAnswer: res.run,
-            suggestions: res.suggestions || s.suggestions,
-            askStatus: null,
-            askStreamText: '',
-            askTransport: 'rest',
-            memoriesWritten: res.run?.memoriesWritten || res.memoriesWritten || [],
-          }));
+          finishOk(res, 'rest');
         } catch (restErr) {
           const message =
             restErr instanceof ApiError
@@ -297,7 +360,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     },
-    [sid, state.session?.selectedPatientId, state.session?.activeViewerId],
+    [sid, state.session?.selectedPatientId, state.session?.activeViewerId, state.askThread],
   );
 
   const saveConsent = useCallback(
@@ -355,6 +418,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await refreshContext();
   }, [sid, refreshContext]);
 
+  const clearAskThread = useCallback(() => {
+    setState((s) => ({ ...s, askThread: [], lastAnswer: null, askStreamText: '' }));
+  }, []);
+
   const value = useMemo<AppContextValue>(
     () => ({
       ...state,
@@ -370,6 +437,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       openSource: (source) => setState((s) => ({ ...s, sourceOpen: source })),
       resetDemo,
       clearError: () => setState((s) => ({ ...s, error: null })),
+      clearAskThread,
     }),
     [
       state,
@@ -383,6 +451,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setDisclosure,
       advanceClock,
       resetDemo,
+      clearAskThread,
     ],
   );
 

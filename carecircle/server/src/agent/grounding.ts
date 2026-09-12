@@ -15,10 +15,99 @@ import type {
 import type { EvidenceItem } from '../consent/policy.js';
 
 const LAB_Q =
-  /\b(result|results|blood|lab|labs|lft|egfr|alt|alp|hba1c|haemoglobin|hemoglobin|panel|analyte|creatinine|sodium|potassium)\b/i;
+  /\b(result|results|blood|lab|labs|lft|egfr|alt|alp|hba1c|haemoglobin|hemoglobin|panel|analyte|creatinine|sodium|potassium|kidney|renal|u&e|electrolyte|fbc|wbc|platelet|bilirubin|albumin|gfr)\b/i;
 const TREND_Q = /\b(trend|chart|graph|changed|over time|history|compare|how has)\b/i;
 const APPT_Q = /\b(appoint(ment)?s?|book(ing)?|slots?|diary|afternoon|prefer)\b/i;
 const DOC_Q = /\b(discharge|handover|document|letter|summary|next step|follow.?up task)\b/i;
+const FOLLOWUP_Q =
+  /^(what about|how about|and (?:the |my |what about )?|explain (?:that|this|it)|tell me more|why (?:is|was|that)|simpler|more simply|in plain|can you (?:clarify|expand)|also[, ]|what does that)/i;
+
+/** Topic → analyte / panel matchers so “kidney” ≠ full FBC dump. More specific topics first. */
+const LAB_TOPICS: { id: string; re: RegExp; analyte: RegExp }[] = [
+  {
+    id: 'potassium',
+    re: /\b(potassium|k\+)\b/i,
+    analyte: /potassium/i,
+  },
+  {
+    id: 'hba1c',
+    re: /\b(hba1c|a1c|diabetes|glucose|sugar)\b/i,
+    analyte: /hba1c|a1c|glucose|diabetes/i,
+  },
+  {
+    id: 'kidney',
+    re: /\b(kidney|renal|u\s*&\s*e|uande|electrolyte|egfr|gfr|creatinine|urea|sodium|na\+)\b/i,
+    analyte: /egfr|gfr|creatinine|urea|sodium|potassium|electrolyte|kidney|renal|u.?e/i,
+  },
+  {
+    id: 'lft',
+    re: /\b(lft|liver|alt|alp|bilirubin|albumin|ast|ggt)\b/i,
+    analyte: /alt|alp|bilirubin|albumin|ast|ggt|liver|lft/i,
+  },
+  {
+    id: 'fbc',
+    re: /\b(fbc|full blood|haemoglobin|hemoglobin|wbc|white cell|platelet|rbc|haematocrit|hematocrit)\b/i,
+    analyte: /haemoglobin|hemoglobin|white.?cell|wbc|platelet|rbc|haematocrit|hematocrit|fbc|full blood/i,
+  },
+];
+
+export type ChatTurn = { role: 'user' | 'assistant'; content: string };
+
+export function isFollowUpQuestion(question: string, history?: ChatTurn[]): boolean {
+  const q = question.trim();
+  if (!q) return false;
+  if (FOLLOWUP_Q.test(q)) return true;
+  if (history && history.length > 0 && q.length < 48 && !/\b(explain|latest|blood|appoint|book)\b/i.test(q)) {
+    return true;
+  }
+  return false;
+}
+
+/** Resolve which lab measurements answer this question (and prior turn, for follow-ups). */
+export function selectLabMeasurements(
+  question: string,
+  measurements: Measurement[],
+  history?: ChatTurn[],
+): { selected: Measurement[]; topicIds: string[]; focused: boolean } {
+  if (!measurements.length) return { selected: [], topicIds: [], focused: false };
+  const blob = [
+    question,
+    ...(history || [])
+      .slice(-4)
+      .map((t) => t.content)
+      .reverse(),
+  ].join('\n');
+
+  // Prefer the first (most specific) topic matched in the current question.
+  const currentTopic = LAB_TOPICS.find((t) => t.re.test(question));
+  const historyTopic =
+    !currentTopic && isFollowUpQuestion(question, history)
+      ? LAB_TOPICS.find((t) => t.re.test(blob))
+      : undefined;
+  const topics = currentTopic ? [currentTopic] : historyTopic ? [historyTopic] : [];
+
+  if (topics.length) {
+    const analyteRe = new RegExp(topics.map((t) => t.analyte.source).join('|'), 'i');
+    const selected = measurements.filter(
+      (m) => analyteRe.test(m.displayName) || analyteRe.test(m.analyteId) || analyteRe.test(m.informationClass || ''),
+    );
+    // Topic was explicit — never fall back to an unrelated full panel dump.
+    return { selected, topicIds: topics.map((t) => t.id), focused: true };
+  }
+
+  // Named single analyte (e.g. “what about ALT”)
+  const byAnalyte = groupByAnalyte(measurements);
+  for (const [, series] of byAnalyte) {
+    const name = series[0].displayName.toLowerCase();
+    const id = series[0].analyteId.toLowerCase();
+    if (question.toLowerCase().includes(id) || question.toLowerCase().includes(name) || nameTokensMatch(question.toLowerCase(), name)) {
+      return { selected: series, topicIds: [id], focused: true };
+    }
+  }
+
+  // Generic blood/results ask → latest panel day (unfocused overview)
+  return { selected: measurements, topicIds: [], focused: false };
+}
 
 export function catalogueEvidence(ctx: ClinicalContext): EvidenceItem[] {
   const items: EvidenceItem[] = [];
@@ -109,12 +198,18 @@ export function buildPermittedPack(input: {
   };
 }
 
-export function buildVisualisation(question: string, measurements: Measurement[]): VisualisationSpec | undefined {
+export function buildVisualisation(
+  question: string,
+  measurements: Measurement[],
+  history?: ChatTurn[],
+): VisualisationSpec | undefined {
   if (!measurements.length) return undefined;
   const q = question.toLowerCase();
   const wantsTrend = TREND_Q.test(q);
+  const focused = selectLabMeasurements(question, measurements, history);
+  const pool = focused.focused && focused.selected.length ? focused.selected : measurements;
   const byAnalyte = new Map<string, Measurement[]>();
-  for (const m of measurements) {
+  for (const m of pool) {
     const list = byAnalyte.get(m.analyteId) || [];
     list.push(m);
     byAnalyte.set(m.analyteId, list);
@@ -130,6 +225,11 @@ export function buildVisualisation(question: string, measurements: Measurement[]
       named = true;
       break;
     }
+  }
+  // Topic focus (e.g. kidney) with a single dominant analyte series → chart that.
+  if (!named && focused.focused && byAnalyte.size === 1) {
+    chosen = [...byAnalyte.values()][0];
+    named = true;
   }
 
   // Only visualise when the analyte is named, or the user clearly asks for a trend.
@@ -202,6 +302,7 @@ export function buildDeterministicAnswer(input: {
   visualisationSpec?: VisualisationSpec;
   appointmentAssist?: AppointmentAssist;
   memoriesHint?: string;
+  history?: ChatTurn[];
 }): AgentAnswer {
   if (input.outcome === 'hold') {
     return {
@@ -231,24 +332,67 @@ export function buildDeterministicAnswer(input: {
     citations.push({ evidenceId, resourceId, title, date, service, kind });
   };
 
-  const labIntent = LAB_Q.test(input.question);
-  const short = prefersShortPlain(input.memoriesHint, input.question);
+  const followUp = isFollowUpQuestion(input.question, input.history);
+  const labIntent = LAB_Q.test(input.question) || (followUp && LAB_Q.test((input.history || []).map((t) => t.content).join(' ')));
+  const short = prefersShortPlain(input.memoriesHint, input.question) || followUp;
   const wantsFullPanel = /\b(full|every|all|complete|entire)\b.*\b(panel|result|blood|lab)/i.test(input.question);
+  const labPick = selectLabMeasurements(input.question, input.measurements, input.history);
+  const labMeasurements = labPick.selected;
 
-  if (input.measurements.length && labIntent) {
-    const latestDay = latestSampleDay(input.measurements);
-    const latestPanel = input.measurements
+  if (labIntent && labPick.focused && !labMeasurements.length) {
+    const topicLabel = labPick.topicIds.includes('kidney')
+      ? 'kidney / U&E'
+      : labPick.topicIds.includes('lft')
+        ? 'liver (LFT)'
+        : labPick.topicIds.includes('fbc')
+          ? 'full blood count'
+          : 'that topic';
+    return {
+      answer: `I do not see permitted ${topicLabel} measurements in the live record for this viewer. Try another result topic, or refresh after selecting a patient with those labs.`,
+      facts: [],
+      uncertainty: 'No matching permitted analytes for the requested topic.',
+      policyNotice: input.policyNotice,
+      citations: [],
+      appointmentAssist: input.appointmentAssist,
+    };
+  }
+
+  if (labMeasurements.length && labIntent) {
+    const latestDay = latestSampleDay(labMeasurements);
+    const latestPanel = labMeasurements
       .filter((m) => sampleDay(m.sampledAt) === latestDay)
       .sort((a, b) => a.displayName.localeCompare(b.displayName));
-    const flagged = latestPanel.filter(isOutOfRange);
-    const highlight = flagged.length ? flagged : latestPanel.slice(0, short && !wantsFullPanel ? 3 : 8);
+    // Dedupe to newest per analyte on that day
+    const byName = new Map<string, Measurement>();
+    for (const m of latestPanel) {
+      const prev = byName.get(m.analyteId);
+      if (!prev || m.sampledAt > prev.sampledAt) byName.set(m.analyteId, m);
+    }
+    const panel = [...byName.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+    const flagged = panel.filter(isOutOfRange);
+    const maxHighlight = labPick.focused ? (short ? 4 : 8) : short && !wantsFullPanel ? 3 : 8;
+    const highlight = flagged.length && !labPick.focused ? flagged : panel.slice(0, maxHighlight);
+    const valuesToShow =
+      wantsFullPanel && !labPick.focused ? panel : labPick.focused || short || followUp ? highlight : panel.slice(0, 8);
+
+    const topicLabel = labPick.topicIds.includes('kidney')
+      ? 'kidney / U&E-related'
+      : labPick.topicIds.includes('lft')
+        ? 'liver (LFT)'
+        : labPick.topicIds.includes('fbc')
+          ? 'full blood count'
+          : labPick.focused
+            ? 'requested'
+            : 'blood';
 
     facts.push({
-      text: `Latest blood results on record are from ${formatDate(latestDay)}.`,
-      evidenceIds: highlight.map((m) => m.evidenceId),
+      text: labPick.focused
+        ? `Latest ${topicLabel} results on record are from ${formatDate(latestDay)}.`
+        : `Latest blood results on record are from ${formatDate(latestDay)}.`,
+      evidenceIds: valuesToShow.map((m) => m.evidenceId),
     });
 
-    for (const m of wantsFullPanel || !short ? latestPanel : highlight) {
+    for (const m of valuesToShow) {
       const range =
         m.referenceLow !== undefined || m.referenceHigh !== undefined
           ? ` (illustrative range ${m.referenceLow ?? '—'}–${m.referenceHigh ?? '—'} ${m.unit})`
@@ -262,7 +406,7 @@ export function buildDeterministicAnswer(input: {
     }
 
     // Prior value for the primary highlighted analyte (longest series or first flagged).
-    const primary = pickPrimaryAnalyte(input.measurements, input.question, flagged[0]);
+    const primary = pickPrimaryAnalyte(labMeasurements, input.question, flagged[0] || valuesToShow[0]);
     if (primary) {
       const sorted = [...primary].sort((a, b) => a.sampledAt.localeCompare(b.sampledAt));
       if (sorted.length >= 2) {
@@ -276,14 +420,16 @@ export function buildDeterministicAnswer(input: {
       }
     }
 
-    // Lab-related resources only (skip discharge/appointment noise).
-    for (const ev of rankEvents(input.question, input.events, { labIntent: true }).slice(0, 3)) {
-      if (!isLabRelatedEvent(ev)) continue;
-      facts.push({
-        text: formatEventFact(ev),
-        evidenceIds: [ev.evidenceId],
-      });
-      cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+    // Lab-related resources only — skip on focused follow-ups to avoid repeating the full panel dump.
+    if (!labPick.focused || !followUp) {
+      for (const ev of rankEvents(input.question, input.events, { labIntent: true }).slice(0, labPick.focused ? 1 : 3)) {
+        if (!isLabRelatedEvent(ev)) continue;
+        facts.push({
+          text: formatEventFact(ev),
+          evidenceIds: [ev.evidenceId],
+        });
+        cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+      }
     }
   } else {
     const relevantEvents = rankEvents(input.question, input.events, {
@@ -342,7 +488,11 @@ export function buildDeterministicAnswer(input: {
   const answer =
     input.appointmentAssist && APPT_Q.test(input.question)
       ? input.appointmentAssist.notice
-      : proseFromFacts(facts, { short, labIntent, memoriesHint: input.memoriesHint });
+      : proseFromFacts(facts, {
+          short,
+          labIntent,
+          memoriesHint: input.memoriesHint,
+        });
 
   return {
     answer,
@@ -367,11 +517,12 @@ export function proseFromFacts(
   const lines = facts.map((f) => f.text);
 
   if (opts?.labIntent) {
-    const dateLine = lines.find((l) => /latest blood results on record/i.test(l));
+    const dateLine = lines.find((l) => /latest .+ results on record/i.test(l));
     const valueLines = lines.filter((l) => /: .+/.test(l) && !/previous |illustrative range|on record/i.test(l));
     const prev = lines.find((l) => /^Previous /i.test(l));
     const flagged = valueLines.filter((l) => /outside illustrative range/i.test(l));
     const ok = valueLines.filter((l) => !/outside illustrative range/i.test(l));
+    const focused = /kidney|u&e|liver|full blood count|requested/i.test(dateLine || '');
 
     const parts: string[] = [];
     if (dateLine) parts.push(dateLine.replace(/\.$/, ''));
@@ -384,7 +535,7 @@ export function proseFromFacts(
       );
     }
     if (ok.length) {
-      const sample = ok.slice(0, short ? 2 : 4).map(stripFactChrome);
+      const sample = ok.slice(0, short || focused ? 4 : 4).map(stripFactChrome);
       parts.push(
         flagged.length
           ? `Other noted values include ${sample.join('; ')}.`
@@ -392,7 +543,7 @@ export function proseFromFacts(
       );
     }
     if (prev && !short) parts.push(prev);
-    if (short) {
+    if (short && !focused) {
       return `${parts.slice(0, 4).join(' ')} Ask if you want the full panel.`;
     }
     return parts.join(' ');

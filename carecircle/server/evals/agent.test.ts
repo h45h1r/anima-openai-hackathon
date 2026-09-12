@@ -118,6 +118,55 @@ function apptResource(): AnimaResource {
   };
 }
 
+function kidneyResource(): AnimaResource {
+  return {
+    id: 'res-ue-1',
+    patientId,
+    kind: 'lab_result',
+    title: 'U&E panel',
+    status: 'final',
+    owner: 'gp',
+    visibleTo: ['gp', 'hospital'],
+    priority: 'routine',
+    createdAt: Date.parse('2026-09-11T11:00:00Z'),
+    data: {
+      panelId: 'ue',
+      results: [
+        {
+          name: 'Creatinine',
+          code: 'creatinine',
+          value: 88,
+          unit: 'umol/L',
+          sampleDate: '2026-09-11',
+          previous: 90,
+          previousDate: '2026-08-01',
+          low: 45,
+          high: 104,
+        },
+        {
+          name: 'eGFR',
+          code: 'egfr',
+          value: 72,
+          unit: 'mL/min/1.73m2',
+          sampleDate: '2026-09-11',
+          low: 60,
+          high: 200,
+        },
+        {
+          name: 'Potassium',
+          code: 'potassium',
+          value: 4.2,
+          unit: 'mmol/L',
+          sampleDate: '2026-09-11',
+          low: 3.5,
+          high: 5.3,
+        },
+      ],
+    },
+    version: 1,
+  };
+}
+
 function memory() {
   return new ScopedMemoryService();
 }
@@ -373,5 +422,54 @@ describe('grounding and visualisation', () => {
     const named = buildVisualisation('How has ALT changed over time?', ctx.measurements);
     assert.ok(named);
     assert.ok(named!.points!.every((p) => p.label === 'ALT'));
+  });
+
+  it('routes kidney follow-ups away from a full FBC/LFT dump', () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource(), bloodResultResource(), kidneyResource()] }],
+    });
+    const overview = buildDeterministicAnswer({
+      question: 'Explain my latest blood tests',
+      outcome: 'allow',
+      measurements: ctx.measurements,
+      events: ctx.events,
+    });
+    assert.ok(overview.facts.some((f) => /ALT|Haemoglobin|blood results/i.test(f.text)));
+
+    const kidney = buildDeterministicAnswer({
+      question: 'What about my kidney results?',
+      outcome: 'allow',
+      measurements: ctx.measurements,
+      events: ctx.events,
+      history: [
+        { role: 'user', content: 'Explain my latest blood tests' },
+        { role: 'assistant', content: overview.answer },
+      ],
+    });
+    assert.ok(kidney.facts.some((f) => /eGFR|Creatinine|Potassium|kidney/i.test(f.text)));
+    assert.ok(!kidney.facts.some((f) => /\bALT\b|Haemoglobin/i.test(f.text)));
+    assert.ok(/kidney|U&E|eGFR|Creatinine|Potassium/i.test(kidney.answer));
+    assert.ok(!/\bALT\b/.test(kidney.answer));
+  });
+
+  it('focuses potassium follow-up on that analyte only', () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [kidneyResource(), labResource()] }],
+    });
+    const answer = buildDeterministicAnswer({
+      question: 'What about potassium?',
+      outcome: 'allow',
+      measurements: ctx.measurements,
+      events: [],
+      history: [
+        { role: 'user', content: 'Explain my latest blood tests' },
+        { role: 'assistant', content: 'Latest kidney results include eGFR 72.' },
+      ],
+    });
+    assert.ok(answer.facts.some((f) => /Potassium/i.test(f.text)));
+    assert.ok(!answer.facts.some((f) => /\bALT\b/.test(f.text)));
+    assert.ok(!answer.facts.some((f) => /Creatinine|eGFR/i.test(f.text)));
   });
 });
