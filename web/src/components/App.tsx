@@ -310,7 +310,13 @@ function Screen({
     );
   }
   if (tab === "ask") {
-    return <AskPanel state={state} viewer={viewer} care={care} onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })} />;
+    return (
+      <div className="app-main-h">
+        <div className="mx-auto h-full w-full max-w-3xl lg:py-4">
+          <AskPanel state={state} viewer={viewer} care={care} onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })} />
+        </div>
+      </div>
+    );
   }
   if (tab === "care") {
     return (
