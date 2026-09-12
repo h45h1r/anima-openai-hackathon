@@ -1,4 +1,4 @@
-# Kindred pitch: speaker notes
+# CareCircle pitch: speaker notes
 
 Seven slides, one speaker. Timings follow the brief (20 + 25 + 20 + 30 + 90 + 10 + 15 = 210 seconds, so 3:30 as briefed; if the slot is a hard 3:00, cut the demo to 60 seconds by dropping step 4's follow-up and the morning check). Every citation from the old deck lives here, not on the slides. The two extrapolations on slide 2 show their working below.
 
@@ -18,6 +18,8 @@ The three pillars are presented as one loop on the slides. They run in two codeb
 | 2. Tells her first | Disclosure gate and the three-day escalation (GP task plus landline call) | Prototype: `lib/gate.mjs` and `server.mjs`; 29 tests across `test/gate.test.mjs` (18) and `test/insights.test.mjs` (11), 29 pass; one LFT order, one clock advance and one task per run against Anima |
 | 3. Tells the right people the right way | Three sharing levels over six record categories, custom mixes, `set_sharing_level` and `update_consent` tools, NOT_SHARED enforcement inside every tool, `request_access` cards, consent mirrored to the GP consent view in one PostgreSQL transaction, the scheduled morning check, the audit rail | Kindred app: `web/` (agent tools in `web/src/lib/agent/tools.ts`, levels in `web/src/lib/levels.ts`, circle in `web/src/lib/data/circle.ts`) with the companion backend in `sim-app/` |
 
+Product name note: the slides say CareCircle; the codebase, README and design system still say Kindred. If a judge asks, they are the same product.
+
 Four honesty points that must be said if asked:
 
 - **Data enrichment.** `sim-app/enrich/enrich.mjs` rewrote the blood histories, added repeat medicines and booked an appointment for an eight-patient demo cohort, Eleanor included, in the app database (local and both Neon branches). For Eleanor it makes her white cells normal, HbA1c 51 to 48 and bilirubin 19 to 24. Slide 1's numbers (white cells 2.7, 1.6, 1.3, 2.1) come from the remote Anima world, which was not touched. A laptop whose Kindred reads from the remote sim (`SIM_BASE_URL=https://sim.animahealth.com`) shows slide 1's numbers; one that reads from the local or Neon copy shows the enriched ones. Check which before going on stage, and say "synthetic, made coherent by us" if the enriched copy is on screen.
@@ -28,7 +30,9 @@ Four honesty points that must be said if asked:
 
 ---
 
-## Slide 1: Eleanor (20 seconds)
+## Slide 1: CareCircle (20 seconds)
+
+The Eleanor card was removed from the slide on 12 Sep evening; the slide now carries only the name and tagline. Her story below is still spoken, from memory or from these notes.
 
 **Script**
 
@@ -97,7 +101,7 @@ If asked for a UK carer anxiety figure: Carers UK State of Caring 2025, 74% of c
 
 **Script**
 
-"Kindred turns every result into the right explanation and next action for every trusted person, under the patient's control. Three pillars, one loop. One: it sees it coming. A trend engine reads a year of bloods and the watch data and says improving, watch or worsening; on Eleanor's real values it flags her liver trend as worsening and her white cells as watch. Two: it tells her first. When a result lands or a trend is flagged, the gate asks one question, has she been told, and holds everything until she has been talked through it. Big news waits for her yes. If nobody tells her within three days, the agent raises a GP task and phones her landline. Three: it tells the right people the right way. Three sharing levels over six record categories, enforced inside every tool call, mirrored to her GP's consent view. Grace gets the numbers, Idris gets the logistics, Thomas gets a yes or no. Proxy access gives a person the record. Kindred gives each person their role."
+"CareCircle turns every result into the right explanation and next action for every trusted person, under the patient's control. Three pillars, one loop. One: it sees it coming. A trend engine reads a year of bloods and the watch data and says improving, watch or worsening; on Eleanor's real values it flags her liver trend as worsening and her white cells as watch. Two: it tells her first. When a result lands or a trend is flagged, the gate asks one question, has she been told, and holds everything until she has been talked through it. Big news waits for her yes. If nobody tells her within three days, the agent raises a GP task and phones her landline. Three: it tells the right people the right way. Three sharing levels over six record categories, enforced inside every tool call, mirrored to her GP's consent view. Grace gets the numbers, Idris gets the logistics, Thomas gets a yes or no. Proxy access gives a person the record. Kindred gives each person their role."
 
 **Notes**
 
@@ -196,7 +200,7 @@ Proxy access gives one person the whole record, or a practice-chosen slice of it
 
 **4. "How is this different from Annie's context panel or existing safety-netting tools?"**
 
-Those work at the point of a consultation, or rely on a clinician remembering to set a reminder. Kindred reads the trajectory continuously, so Eleanor's four low white cell counts become one "watch" card instead of four filed results; it gates disclosure, so nothing reaches the family before she has been told; it escalates when nobody acts, raising a GP task and phoning her landline after three days; and then it communicates per person under her consent, the numbers to Grace, the logistics to Idris, a yes or no to Thomas. A safety-netting tool ends when the reminder fires. This loop ends when the right people have understood.
+Those work at the point of a consultation, or rely on a clinician remembering to set a reminder. CareCircle reads the trajectory continuously, so Eleanor's four low white cell counts become one "watch" card instead of four filed results; it gates disclosure, so nothing reaches the family before she has been told; it escalates when nobody acts, raising a GP task and phoning her landline after three days; and then it communicates per person under her consent, the numbers to Grace, the logistics to Idris, a yes or no to Thomas. A safety-netting tool ends when the reminder fires. This loop ends when the right people have understood.
 
 ---
 
