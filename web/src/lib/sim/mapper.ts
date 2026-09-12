@@ -45,7 +45,12 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string)
   const surname = simPatient.name.split(" ").pop() ?? simPatient.name;
   const relatives = await sim.searchPatients(surname).then((r) => r.items).catch(() => [] as SimPatient[]);
   const practiceId = simPatient.localIds?.gp ? `SIM-${simPatient.localIds.gp.split("-")[0] === "RIV" ? "RIVERSIDE" : simPatient.localIds.gp.split("-")[0]}` : undefined;
-  const org = practiceId ? await sim.organization(practiceId).catch(() => undefined) : undefined;
+  let org = practiceId ? await sim.organization(practiceId).catch(() => undefined) : undefined;
+  if (!org && practiceId) {
+    // The local sim-app serves the ODS search but not the single-organisation read.
+    const list = await sim.organizations().catch(() => undefined);
+    org = list?.entry?.map((e) => e.resource).find((r) => r?.id === practiceId) ?? undefined;
+  }
   const practice = org?.name ?? "GP practice";
 
   const rs = view.resources.filter((r) => !r.patientId || r.patientId === patientSimId);

@@ -71,6 +71,7 @@ body {
 @media (min-width: 1024px) {
   .page { padding: 1.5rem 2rem 3rem; }
 }
+.page-wide { max-width: 90rem; }
 
 body {
   background: var(--paper);

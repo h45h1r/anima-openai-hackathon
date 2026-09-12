@@ -12,10 +12,11 @@ import Chat from "./Chat";
 import PatientHome from "./patient/PatientHome";
 import CircleOfCare from "./patient/CircleOfCare";
 import SharingLevels from "./patient/SharingLevels";
+import BodyView from "./body/BodyView";
 import FamilyHome from "./family/FamilyHome";
 import EhrView from "./clinician/EhrView";
 
-type Tab = "home" | "circle" | "family" | "kindred" | "activity" | "levels";
+type Tab = "home" | "body" | "circle" | "family" | "kindred" | "activity" | "levels";
 
 interface TabDef {
   id: Tab;
@@ -88,12 +89,14 @@ export default function App() {
     : isPatient
       ? [
           { id: "home", label: "Home", icon: <HomeIcon />, badge: pending },
+          { id: "body", label: "Body", icon: <BodyIcon /> },
           { id: "circle", label: "Circle", icon: <LockIcon size={20} /> },
           { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
         ]
       : [
           { id: "home", label: patient.shortName, icon: <HomeIcon /> },
+          { id: "body", label: "Body", icon: <BodyIcon /> },
           { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
         ];
@@ -217,6 +220,13 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
       </div>
     );
   }
+  if (tab === "body") {
+    return (
+      <div className="page page-wide">
+        <BodyView state={state} viewerId={viewer.id} onAsk={onAsk} />
+      </div>
+    );
+  }
   if (tab === "circle") {
     return (
       <div className="page">
@@ -313,6 +323,9 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, status 
   );
 }
 
+function BodyIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="4.5" r="2.5" /><path d="M8 9h8l-1 6h-6zM10 15l-1.5 6M14 15l1.5 6M8 9l-3 3M16 9l3 3" /></svg>;
+}
 function HomeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z" /></svg>;
 }

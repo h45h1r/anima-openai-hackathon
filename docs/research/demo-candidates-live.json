@@ -1,0 +1,4369 @@
+[
+ {
+  "id": "SIM-000001",
+  "name": "Amira Khan",
+  "age": 74,
+  "conditions": [
+   "Heart failure",
+   "CKD"
+  ],
+  "needs": [
+   "Home visit",
+   "Carer involvement"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel",
+   "Stay at home with a clear contact for help"
+  ],
+  "kinds": {
+   "task": 1,
+   "message": 1,
+   "ehr-record": 1,
+   "encounter": 4,
+   "observation": 2,
+   "appointment": 1,
+   "discharge-summary": 2,
+   "conversation": 1,
+   "telephone-call": 1,
+   "report": 36
+  },
+  "appointments": [
+   {
+    "title": "Practice follow-up",
+    "status": "booked",
+    "when": "2026-09-12T08:15:00+00:00",
+    "clinician": "Dr Maya Shah",
+    "mode": "in-person"
+   }
+  ],
+  "letters": [
+   {
+    "title": "Discharge summary \u00b7 monitoring handover",
+    "followUp": "Follow-up arrangements require confirmation by the receiving team."
+   },
+   {
+    "title": "Cardiology \u00b7 Monitoring handover",
+    "followUp": "The cardiology booking office will issue a follow-up appointment letter."
+   }
+  ],
+  "tasks": [
+   "Arrange post-discharge monitoring"
+  ],
+  "conversations": [
+   "Appointment confirmation"
+  ],
+  "context": [
+   "Lives alone in a ground-floor flat. Her daughter visits after work. Enjoys tending pots outside her front door.\nWhat matters to me: Stay at home with a clear contact for help"
+  ],
+  "family_mentions": [
+   "Lives alone in a ground-floor flat. Her daughter visits after work. Enjoys tending pots outside her front door. What matters to me: Stay at home with a clear contact for help",
+   "Amira described getting tired on the walk to the shops. Her daughter asked for appointments to be grouped on one day.",
+   "Amira wants to return home. Her daughter can collect a prescription but cannot attend during working hours. Home support arrangements remain to be confirmed."
+  ],
+  "trajectory": [
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 112,
+    "last": 107,
+    "ref": "45\u2013110",
+    "story": "moved IN",
+    "series": [
+     112,
+     128,
+     138,
+     136,
+     123,
+     107
+    ]
+   },
+   {
+    "analyte": "white-cell-count",
+    "name": "White cell count",
+    "first": 2.6,
+    "last": 3.5,
+    "ref": "4\u201311",
+    "story": "out throughout",
+    "series": [
+     2.6,
+     1.3,
+     0.7,
+     1,
+     2.3,
+     3.5
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 53,
+    "last": 49,
+    "ref": "60\u2013120",
+    "story": "out throughout",
+    "series": [
+     53,
+     63,
+     69,
+     68,
+     60,
+     49
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 5.6,
+    "last": 5.6,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     5.6,
+     4,
+     2.8,
+     2.8,
+     4,
+     5.6
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    53,
+    63,
+    69,
+    68,
+    60,
+    49
+   ],
+   "creatinine": [
+    112,
+    128,
+    138,
+    136,
+    123,
+    107
+   ],
+   "hba1c": [
+    40,
+    34,
+    30,
+    30,
+    34,
+    40
+   ],
+   "potassium": [
+    5.2,
+    5.5,
+    5.7,
+    5.6,
+    5.4,
+    5.1
+   ],
+   "crp": [
+    5.6,
+    4,
+    2.8,
+    2.8,
+    4,
+    5.6
+   ],
+   "white-cell-count": [
+    2.6,
+    1.3,
+    0.7,
+    1,
+    2.3,
+    3.5
+   ],
+   "neutrophils": [
+    2,
+    1,
+    0.5,
+    0.8,
+    1.7,
+    2.6
+   ],
+   "haemoglobin": [
+    157,
+    150,
+    147,
+    149,
+    155,
+    161
+   ],
+   "total-cholesterol": [
+    4,
+    3.6,
+    3.4,
+    3.5,
+    3.9,
+    4.3
+   ],
+   "albumin": [
+    45,
+    47,
+    48,
+    47,
+    45,
+    43
+   ],
+   "platelets": [
+    203,
+    167,
+    149,
+    160,
+    192,
+    227
+   ]
+  }
+ },
+ {
+  "id": "SIM-000006",
+  "name": "Eleanor Chen",
+  "age": 83,
+  "conditions": [
+   "Frailty"
+  ],
+  "needs": [
+   "Step-free access"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel",
+   "Attend local appointments with reliable transport"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 4,
+   "observation": 2,
+   "appointment": 1,
+   "discharge-summary": 1,
+   "conversation": 1,
+   "report": 36,
+   "telephone-call": 1,
+   "task": 4,
+   "test": 4
+  },
+  "appointments": [
+   {
+    "title": "Practice follow-up",
+    "status": "booked",
+    "when": "2026-09-12T08:30:00+00:00",
+    "clinician": "Nurse Alex Morgan",
+    "mode": "in-person"
+   }
+  ],
+  "letters": [
+   {
+    "title": "Renal \u00b7 Clinic discharge correspondence",
+    "followUp": "The clinic secretary will confirm the next appointment through a separate booking letter."
+   }
+  ],
+  "tasks": [
+   "Consent v2: Eleanor shares test results with Grace Chen (daughter)",
+   "CareCircle: LFT result discussed, arrange follow-up",
+   "CareCircle: LFT result discussed, arrange follow-up",
+   "CareCircle: LFT result discussed, arrange follow-up"
+  ],
+  "conversations": [
+   "Registration paperwork"
+  ],
+  "context": [
+   "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app.\nWhat matters to me: Attend local appointments with reliable transport"
+  ],
+  "family_mentions": [
+   "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app. What matters to me: Attend local appointments with reliable transport",
+   "Eleanor's husband could not drive her to a review. She asked whether appointments could be arranged locally."
+  ],
+  "trajectory": [
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 42,
+    "last": 53,
+    "ref": "45\u2013110",
+    "story": "moved IN",
+    "series": [
+     42,
+     26,
+     18,
+     23,
+     37,
+     53
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 5.9,
+    "last": 4.3,
+    "ref": "0\u20135",
+    "story": "moved IN",
+    "series": [
+     5.9,
+     7.4,
+     8,
+     7.3,
+     5.8,
+     4.3
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 1.8,
+    "last": 1.5,
+    "ref": "0\u20131.7",
+    "story": "moved IN",
+    "series": [
+     1.8,
+     2,
+     2.1,
+     2,
+     1.7,
+     1.5
+    ]
+   },
+   {
+    "analyte": "white-cell-count",
+    "name": "White cell count",
+    "first": 4.7,
+    "last": 2.1,
+    "ref": "4\u201311",
+    "story": "moved OUT",
+    "series": [
+     4.7,
+     4,
+     2.7,
+     1.6,
+     1.3,
+     2.1
+    ]
+   },
+   {
+    "analyte": "neutrophils",
+    "name": "Neutrophils",
+    "first": 3.5,
+    "last": 1.6,
+    "ref": "2\u20137.5",
+    "story": "moved OUT",
+    "series": [
+     3.5,
+     3,
+     2,
+     1.2,
+     1,
+     1.6
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 51,
+    "last": 49,
+    "ref": "20\u201341",
+    "story": "out throughout",
+    "series": [
+     51,
+     57,
+     61,
+     60,
+     55,
+     49
+    ]
+   },
+   {
+    "analyte": "bilirubin",
+    "name": "Bilirubin",
+    "first": 25,
+    "last": 25,
+    "ref": "0\u201321",
+    "story": "out throughout",
+    "series": [
+     25,
+     22,
+     19,
+     19,
+     22,
+     25
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    77,
+    67,
+    62,
+    65,
+    74,
+    84
+   ],
+   "creatinine": [
+    42,
+    26,
+    18,
+    23,
+    37,
+    53
+   ],
+   "hba1c": [
+    51,
+    57,
+    61,
+    60,
+    55,
+    49
+   ],
+   "potassium": [
+    3.5,
+    3.2,
+    3,
+    3.1,
+    3.4,
+    3.7
+   ],
+   "crp": [
+    5.9,
+    7.4,
+    8,
+    7.3,
+    5.8,
+    4.3
+   ],
+   "white-cell-count": [
+    4.7,
+    4,
+    2.7,
+    1.6,
+    1.3,
+    2.1
+   ],
+   "neutrophils": [
+    3.5,
+    3,
+    2,
+    1.2,
+    1,
+    1.6
+   ],
+   "haemoglobin": [
+    156,
+    153,
+    147,
+    141,
+    140,
+    144
+   ],
+   "total-cholesterol": [
+    3.8,
+    4.3,
+    4.4,
+    4.2,
+    3.8,
+    3.4
+   ],
+   "albumin": [
+    35,
+    33,
+    31,
+    31,
+    33,
+    35
+   ],
+   "platelets": [
+    341,
+    322,
+    286,
+    256,
+    248,
+    269
+   ]
+  }
+ },
+ {
+  "id": "SIM-000349",
+  "name": "Sofia Clarke",
+  "age": 95,
+  "conditions": [
+   "Hypertension",
+   "Arthritis",
+   "CKD",
+   "Heart failure"
+  ],
+  "needs": [
+   "Interpreter",
+   "Carer involvement"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 2,
+   "observation": 2,
+   "task": 1,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [
+   "Confirm follow-up arrangements"
+  ],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "hdl",
+    "name": "HDL cholesterol",
+    "first": 1.2,
+    "last": 0.9,
+    "ref": "1\u20132.5",
+    "story": "moved OUT",
+    "series": [
+     1.2,
+     1,
+     0.8,
+     0.7,
+     0.7,
+     0.9
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 16,
+    "last": 12.8,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     16,
+     15.1,
+     13.5,
+     12.1,
+     11.8,
+     12.8
+    ]
+   },
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 6.1,
+    "last": 5.4,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     6.1,
+     5.8,
+     5.3,
+     5,
+     5.1,
+     5.4
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    89,
+    79,
+    74,
+    77,
+    86,
+    96
+   ],
+   "creatinine": [
+    62,
+    46,
+    38,
+    42,
+    57,
+    72
+   ],
+   "hba1c": [
+    23,
+    22,
+    24,
+    31,
+    36,
+    38
+   ],
+   "potassium": [
+    4,
+    3.7,
+    3.5,
+    3.6,
+    3.9,
+    4.2
+   ],
+   "crp": [
+    16,
+    15.1,
+    13.5,
+    12.1,
+    11.8,
+    12.8
+   ],
+   "white-cell-count": [
+    8.7,
+    9.9,
+    10.4,
+    9.8,
+    8.5,
+    7.3
+   ],
+   "neutrophils": [
+    4.2,
+    5,
+    5.2,
+    4.9,
+    4.1,
+    3.4
+   ],
+   "haemoglobin": [
+    150,
+    156,
+    158,
+    155,
+    149,
+    143
+   ],
+   "total-cholesterol": [
+    6.1,
+    5.8,
+    5.3,
+    5,
+    5.1,
+    5.4
+   ],
+   "albumin": [
+    45,
+    43,
+    41,
+    41,
+    43,
+    45
+   ],
+   "platelets": [
+    279,
+    312,
+    326,
+    310,
+    276,
+    243
+   ]
+  }
+ },
+ {
+  "id": "SIM-000371",
+  "name": "Aisha Evans",
+  "age": 96,
+  "conditions": [
+   "Asthma",
+   "Diabetes",
+   "Arthritis",
+   "CKD",
+   "Heart failure"
+  ],
+  "needs": [],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 3,
+   "observation": 3,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "mcv",
+    "name": "Mean cell volume",
+    "first": 103.8,
+    "last": 96.8,
+    "ref": "80\u2013100",
+    "story": "moved IN",
+    "series": [
+     103.8,
+     105.2,
+     104.1,
+     101.1,
+     98.1,
+     96.8
+    ]
+   },
+   {
+    "analyte": "sodium",
+    "name": "Sodium",
+    "first": 130,
+    "last": 130,
+    "ref": "133\u2013146",
+    "story": "out throughout",
+    "series": [
+     130,
+     133,
+     134,
+     134,
+     132,
+     130
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 133,
+    "last": 127,
+    "ref": "45\u2013110",
+    "story": "out throughout",
+    "series": [
+     133,
+     149,
+     159,
+     156,
+     143,
+     127
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 44,
+    "last": 41,
+    "ref": "60\u2013120",
+    "story": "out throughout",
+    "series": [
+     44,
+     54,
+     61,
+     59,
+     51,
+     41
+    ]
+   },
+   {
+    "analyte": "albumin",
+    "name": "Albumin",
+    "first": 34,
+    "last": 32,
+    "ref": "35\u201350",
+    "story": "out throughout",
+    "series": [
+     34,
+     37,
+     37,
+     36,
+     34,
+     32
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 10.5,
+    "last": 7,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     10.5,
+     11.2,
+     10.7,
+     9.2,
+     7.7,
+     7
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    44,
+    54,
+    61,
+    59,
+    51,
+    41
+   ],
+   "creatinine": [
+    133,
+    149,
+    159,
+    156,
+    143,
+    127
+   ],
+   "hba1c": [
+    23,
+    27,
+    33,
+    38,
+    38,
+    34
+   ],
+   "potassium": [
+    3.9,
+    4.2,
+    4.4,
+    4.4,
+    4.1,
+    3.8
+   ],
+   "crp": [
+    10.5,
+    11.2,
+    10.7,
+    9.2,
+    7.7,
+    7
+   ],
+   "white-cell-count": [
+    10.7,
+    11.3,
+    10.8,
+    9.6,
+    8.3,
+    7.8
+   ],
+   "neutrophils": [
+    6.4,
+    6.7,
+    6.5,
+    5.7,
+    5,
+    4.7
+   ],
+   "haemoglobin": [
+    141,
+    144,
+    142,
+    136,
+    130,
+    127
+   ],
+   "total-cholesterol": [
+    3.8,
+    3.4,
+    3.2,
+    3.3,
+    3.7,
+    4.1
+   ],
+   "albumin": [
+    34,
+    37,
+    37,
+    36,
+    34,
+    32
+   ],
+   "platelets": [
+    373,
+    389,
+    377,
+    343,
+    309,
+    295
+   ]
+  }
+ },
+ {
+  "id": "SIM-000011",
+  "name": "Zara Khan",
+  "age": 91,
+  "conditions": [
+   "Hypertension",
+   "Heart failure"
+  ],
+  "needs": [
+   "Step-free access"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 3,
+   "observation": 3,
+   "task": 1,
+   "pharmacy-referral": 1,
+   "discharge-summary": 1,
+   "conversation": 1,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [
+   {
+    "title": "General surgery \u00b7 Post-episode handover",
+    "followUp": "The surgical booking office is responsible for confirming any return appointment."
+   }
+  ],
+  "tasks": [
+   "Confirm follow-up arrangements"
+  ],
+  "conversations": [
+   "Appointment preference"
+  ],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 4.5,
+    "last": 5.6,
+    "ref": "0\u20135",
+    "story": "moved OUT",
+    "series": [
+     4.5,
+     4.4,
+     4.6,
+     5.1,
+     5.5,
+     5.6
+    ]
+   },
+   {
+    "analyte": "potassium",
+    "name": "Potassium",
+    "first": 3.3,
+    "last": 3.3,
+    "ref": "3.5\u20135.3",
+    "story": "out throughout",
+    "series": [
+     3.3,
+     3,
+     2.7,
+     2.7,
+     3,
+     3.3
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 53,
+    "last": 53,
+    "ref": "60\u2013120",
+    "story": "out throughout",
+    "series": [
+     53,
+     43,
+     35,
+     35,
+     43,
+     53
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 6.6,
+    "last": 10.3,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     6.6,
+     6.1,
+     6.9,
+     8.4,
+     9.8,
+     10.3
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    53,
+    43,
+    35,
+    35,
+    43,
+    53
+   ],
+   "creatinine": [
+    56,
+    40,
+    28,
+    28,
+    40,
+    56
+   ],
+   "hba1c": [
+    40,
+    37,
+    30,
+    25,
+    24,
+    28
+   ],
+   "potassium": [
+    3.3,
+    3,
+    2.7,
+    2.7,
+    3,
+    3.3
+   ],
+   "crp": [
+    6.6,
+    6.1,
+    6.9,
+    8.4,
+    9.8,
+    10.3
+   ],
+   "white-cell-count": [
+    10.9,
+    12.2,
+    13,
+    12.8,
+    11.7,
+    10.4
+   ],
+   "neutrophils": [
+    2.3,
+    3.1,
+    3.6,
+    3.4,
+    2.8,
+    2
+   ],
+   "haemoglobin": [
+    141,
+    147,
+    151,
+    150,
+    145,
+    139
+   ],
+   "total-cholesterol": [
+    4.5,
+    4.4,
+    4.6,
+    5.1,
+    5.5,
+    5.6
+   ],
+   "albumin": [
+    41,
+    42,
+    45,
+    47,
+    47,
+    45
+   ],
+   "platelets": [
+    236,
+    272,
+    295,
+    289,
+    259,
+    223
+   ]
+  }
+ },
+ {
+  "id": "SIM-000304",
+  "name": "Aisha Okafor",
+  "age": 95,
+  "conditions": [
+   "Hypertension",
+   "CKD",
+   "Heart failure"
+  ],
+  "needs": [
+   "Carer involvement"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 5,
+   "observation": 5,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "haemoglobin",
+    "name": "Haemoglobin",
+    "first": 113,
+    "last": 125,
+    "ref": "115\u2013165",
+    "story": "moved IN",
+    "series": [
+     113,
+     117,
+     124,
+     129,
+     129,
+     125
+    ]
+   },
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 6.7,
+    "last": 9.7,
+    "ref": "2.5\u20137.8",
+    "story": "moved OUT",
+    "series": [
+     6.7,
+     6.3,
+     6.9,
+     8.2,
+     9.4,
+     9.7
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 82,
+    "last": 118,
+    "ref": "45\u2013110",
+    "story": "moved OUT",
+    "series": [
+     82,
+     77,
+     84,
+     100,
+     114,
+     118
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 103,
+    "last": 126,
+    "ref": "60\u2013120",
+    "story": "moved OUT",
+    "series": [
+     103,
+     100,
+     105,
+     115,
+     124,
+     126
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 35,
+    "last": 46,
+    "ref": "20\u201341",
+    "story": "moved OUT",
+    "series": [
+     35,
+     39,
+     45,
+     50,
+     50,
+     46
+    ]
+   },
+   {
+    "analyte": "alp",
+    "name": "Alkaline phosphatase",
+    "first": 28,
+    "last": 12,
+    "ref": "30\u2013130",
+    "story": "out throughout",
+    "series": [
+     28,
+     43,
+     49,
+     42,
+     27,
+     12
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 13,
+    "last": 13,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     13,
+     11.4,
+     10.2,
+     10.2,
+     11.4,
+     13
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 2.5,
+    "last": 2.5,
+    "ref": "0\u20131.7",
+    "story": "out throughout",
+    "series": [
+     2.5,
+     2.2,
+     2,
+     2,
+     2.2,
+     2.5
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    103,
+    100,
+    105,
+    115,
+    124,
+    126
+   ],
+   "creatinine": [
+    82,
+    77,
+    84,
+    100,
+    114,
+    118
+   ],
+   "hba1c": [
+    35,
+    39,
+    45,
+    50,
+    50,
+    46
+   ],
+   "potassium": [
+    3.9,
+    3.8,
+    3.9,
+    4.3,
+    4.5,
+    4.6
+   ],
+   "crp": [
+    13,
+    11.4,
+    10.2,
+    10.2,
+    11.4,
+    13
+   ],
+   "white-cell-count": [
+    7.8,
+    8.7,
+    10,
+    11.1,
+    11.1,
+    10.2
+   ],
+   "neutrophils": [
+    2.3,
+    2.8,
+    3.6,
+    4.2,
+    4.3,
+    3.7
+   ],
+   "haemoglobin": [
+    113,
+    117,
+    124,
+    129,
+    129,
+    125
+   ],
+   "total-cholesterol": [
+    4.8,
+    4.4,
+    4,
+    4,
+    4.4,
+    4.8
+   ],
+   "albumin": [
+    50,
+    52,
+    53,
+    52,
+    49,
+    47
+   ],
+   "platelets": [
+    155,
+    178,
+    215,
+    243,
+    245,
+    220
+   ]
+  }
+ },
+ {
+  "id": "SIM-000511",
+  "name": "Iris Walker",
+  "age": 89,
+  "conditions": [
+   "Arthritis",
+   "Frailty"
+  ],
+  "needs": [
+   "Home visit",
+   "Offline contact"
+  ],
+  "goals": [
+   "Know which team is visiting and when"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "observation": 1,
+   "encounter": 3,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [
+   "Lives alone with support from a neighbour. Keeps appointment letters beside her landline.\nWhat matters to me: Know which team is visiting and when"
+  ],
+  "family_mentions": [
+   "Lives alone with support from a neighbour. Keeps appointment letters beside her landline. What matters to me: Know which team is visiting and when"
+  ],
+  "trajectory": [
+   {
+    "analyte": "alt",
+    "name": "ALT",
+    "first": 42,
+    "last": 34,
+    "ref": "0\u201340",
+    "story": "moved IN",
+    "series": [
+     42,
+     49,
+     52,
+     49,
+     41,
+     34
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 6.1,
+    "last": 2.7,
+    "ref": "0\u20135",
+    "story": "moved IN",
+    "series": [
+     6.1,
+     6.9,
+     6.3,
+     4.8,
+     3.3,
+     2.7
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 32,
+    "last": 19,
+    "ref": "20\u201341",
+    "story": "moved OUT",
+    "series": [
+     32,
+     35,
+     33,
+     27,
+     21,
+     19
+    ]
+   },
+   {
+    "analyte": "hdl",
+    "name": "HDL cholesterol",
+    "first": 1.2,
+    "last": 0.8,
+    "ref": "1\u20132.5",
+    "story": "moved OUT",
+    "series": [
+     1.2,
+     1.3,
+     1.2,
+     1,
+     0.8,
+     0.8
+    ]
+   },
+   {
+    "analyte": "platelets",
+    "name": "Platelets",
+    "first": 407,
+    "last": 408,
+    "ref": "150\u2013400",
+    "story": "out throughout",
+    "series": [
+     407,
+     371,
+     344,
+     344,
+     371,
+     408
+    ]
+   },
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 11.3,
+    "last": 8.7,
+    "ref": "2.5\u20137.8",
+    "story": "out throughout",
+    "series": [
+     11.3,
+     10.6,
+     9.3,
+     8.2,
+     7.9,
+     8.7
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 153,
+    "last": 121,
+    "ref": "45\u2013110",
+    "story": "out throughout",
+    "series": [
+     153,
+     144,
+     128,
+     114,
+     111,
+     121
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    96,
+    91,
+    80,
+    72,
+    70,
+    76
+   ],
+   "creatinine": [
+    153,
+    144,
+    128,
+    114,
+    111,
+    121
+   ],
+   "hba1c": [
+    32,
+    35,
+    33,
+    27,
+    21,
+    19
+   ],
+   "potassium": [
+    5.3,
+    5.2,
+    4.9,
+    4.6,
+    4.5,
+    4.7
+   ],
+   "crp": [
+    6.1,
+    6.9,
+    6.3,
+    4.8,
+    3.3,
+    2.7
+   ],
+   "white-cell-count": [
+    10.8,
+    9.4,
+    8.4,
+    8.4,
+    9.4,
+    10.8
+   ],
+   "neutrophils": [
+    3,
+    2.2,
+    1.6,
+    1.6,
+    2.2,
+    3
+   ],
+   "haemoglobin": [
+    159,
+    152,
+    148,
+    148,
+    152,
+    159
+   ],
+   "total-cholesterol": [
+    4.9,
+    5,
+    4.7,
+    4.3,
+    3.9,
+    3.9
+   ],
+   "albumin": [
+    37,
+    40,
+    40,
+    39,
+    37,
+    35
+   ],
+   "platelets": [
+    407,
+    371,
+    344,
+    344,
+    371,
+    408
+   ]
+  }
+ },
+ {
+  "id": "SIM-000094",
+  "name": "Mohammed Patel",
+  "age": 82,
+  "conditions": [
+   "Asthma",
+   "Hypertension",
+   "CKD",
+   "Heart failure"
+  ],
+  "needs": [
+   "SMS preferred",
+   "Transport"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 4,
+   "observation": 4,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "potassium",
+    "name": "Potassium",
+    "first": 3,
+    "last": 3.8,
+    "ref": "3.5\u20135.3",
+    "story": "moved IN",
+    "series": [
+     3,
+     2.9,
+     3.1,
+     3.4,
+     3.7,
+     3.8
+    ]
+   },
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 0.1,
+    "last": 2.7,
+    "ref": "2.5\u20137.8",
+    "story": "moved IN",
+    "series": [
+     0.1,
+     0.1,
+     0.1,
+     1.2,
+     2.4,
+     2.7
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 12,
+    "last": 23,
+    "ref": "20\u201341",
+    "story": "moved IN",
+    "series": [
+     12,
+     16,
+     22,
+     27,
+     27,
+     23
+    ]
+   },
+   {
+    "analyte": "bilirubin",
+    "name": "Bilirubin",
+    "first": 24,
+    "last": 18,
+    "ref": "0\u201321",
+    "story": "moved IN",
+    "series": [
+     24,
+     22,
+     19,
+     16,
+     16,
+     18
+    ]
+   },
+   {
+    "analyte": "albumin",
+    "name": "Albumin",
+    "first": 39,
+    "last": 34,
+    "ref": "35\u201350",
+    "story": "moved OUT",
+    "series": [
+     39,
+     38,
+     35,
+     33,
+     33,
+     34
+    ]
+   },
+   {
+    "analyte": "white-cell-count",
+    "name": "White cell count",
+    "first": 3.2,
+    "last": 3.2,
+    "ref": "4\u201311",
+    "story": "out throughout",
+    "series": [
+     3.2,
+     1.8,
+     0.8,
+     0.8,
+     1.8,
+     3.2
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 9.9,
+    "last": 6.2,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     9.9,
+     10.2,
+     9.3,
+     7.6,
+     6.3,
+     6.2
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 2.5,
+    "last": 1.9,
+    "ref": "0\u20131.7",
+    "story": "out throughout",
+    "series": [
+     2.5,
+     2.6,
+     2.4,
+     2.1,
+     1.9,
+     1.9
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    96,
+    93,
+    98,
+    108,
+    117,
+    119
+   ],
+   "creatinine": [
+    52,
+    47,
+    54,
+    70,
+    84,
+    88
+   ],
+   "hba1c": [
+    12,
+    16,
+    22,
+    27,
+    27,
+    23
+   ],
+   "potassium": [
+    3,
+    2.9,
+    3.1,
+    3.4,
+    3.7,
+    3.8
+   ],
+   "crp": [
+    9.9,
+    10.2,
+    9.3,
+    7.6,
+    6.3,
+    6.2
+   ],
+   "white-cell-count": [
+    3.2,
+    1.8,
+    0.8,
+    0.8,
+    1.8,
+    3.2
+   ],
+   "neutrophils": [
+    2.4,
+    1.4,
+    0.6,
+    0.6,
+    1.4,
+    2.4
+   ],
+   "haemoglobin": [
+    124,
+    117,
+    113,
+    113,
+    117,
+    124
+   ],
+   "total-cholesterol": [
+    4.1,
+    4.2,
+    3.9,
+    3.5,
+    3.1,
+    3.1
+   ],
+   "albumin": [
+    39,
+    38,
+    35,
+    33,
+    33,
+    34
+   ],
+   "platelets": [
+    236,
+    199,
+    173,
+    173,
+    199,
+    236
+   ]
+  }
+ },
+ {
+  "id": "SIM-000107",
+  "name": "Freya Reed",
+  "age": 95,
+  "conditions": [
+   "Diabetes",
+   "Hypertension",
+   "CKD",
+   "Heart failure"
+  ],
+  "needs": [
+   "SMS preferred"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 5,
+   "observation": 5,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "white-cell-count",
+    "name": "White cell count",
+    "first": 0.9,
+    "last": 4,
+    "ref": "4\u201311",
+    "story": "moved IN",
+    "series": [
+     0.9,
+     0.5,
+     1.1,
+     2.5,
+     3.6,
+     4
+    ]
+   },
+   {
+    "analyte": "mcv",
+    "name": "Mean cell volume",
+    "first": 76,
+    "last": 83.4,
+    "ref": "80\u2013100",
+    "story": "moved IN",
+    "series": [
+     76,
+     75,
+     76.5,
+     79.7,
+     82.5,
+     83.4
+    ]
+   },
+   {
+    "analyte": "neutrophils",
+    "name": "Neutrophils",
+    "first": 0.7,
+    "last": 3,
+    "ref": "2\u20137.5",
+    "story": "moved IN",
+    "series": [
+     0.7,
+     0.4,
+     0.8,
+     1.9,
+     2.7,
+     3
+    ]
+   },
+   {
+    "analyte": "sodium",
+    "name": "Sodium",
+    "first": 135,
+    "last": 130,
+    "ref": "133\u2013146",
+    "story": "moved OUT",
+    "series": [
+     135,
+     136,
+     134,
+     132,
+     130,
+     130
+    ]
+   },
+   {
+    "analyte": "potassium",
+    "name": "Potassium",
+    "first": 3.9,
+    "last": 3.1,
+    "ref": "3.5\u20135.3",
+    "story": "moved OUT",
+    "series": [
+     3.9,
+     3.9,
+     3.7,
+     3.4,
+     3.2,
+     3.1
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 20,
+    "last": 17,
+    "ref": "20\u201341",
+    "story": "moved OUT",
+    "series": [
+     20,
+     26,
+     30,
+     29,
+     24,
+     17
+    ]
+   },
+   {
+    "analyte": "hdl",
+    "name": "HDL cholesterol",
+    "first": 1.1,
+    "last": 0.8,
+    "ref": "1\u20132.5",
+    "story": "moved OUT",
+    "series": [
+     1.1,
+     1,
+     0.9,
+     0.7,
+     0.7,
+     0.8
+    ]
+   },
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 11.8,
+    "last": 8.7,
+    "ref": "2.5\u20137.8",
+    "story": "out throughout",
+    "series": [
+     11.8,
+     12.1,
+     11.3,
+     9.9,
+     8.8,
+     8.7
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 161,
+    "last": 123,
+    "ref": "45\u2013110",
+    "story": "out throughout",
+    "series": [
+     161,
+     164,
+     154,
+     138,
+     125,
+     123
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 10.4,
+    "last": 7.2,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     10.4,
+     9.5,
+     7.9,
+     6.6,
+     6.2,
+     7.2
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    89,
+    91,
+    85,
+    74,
+    66,
+    65
+   ],
+   "creatinine": [
+    161,
+    164,
+    154,
+    138,
+    125,
+    123
+   ],
+   "hba1c": [
+    20,
+    26,
+    30,
+    29,
+    24,
+    17
+   ],
+   "potassium": [
+    3.9,
+    3.9,
+    3.7,
+    3.4,
+    3.2,
+    3.1
+   ],
+   "crp": [
+    10.4,
+    9.5,
+    7.9,
+    6.6,
+    6.2,
+    7.2
+   ],
+   "white-cell-count": [
+    0.9,
+    0.5,
+    1.1,
+    2.5,
+    3.6,
+    4
+   ],
+   "neutrophils": [
+    0.7,
+    0.4,
+    0.8,
+    1.9,
+    2.7,
+    3
+   ],
+   "haemoglobin": [
+    115,
+    113,
+    116,
+    122,
+    128,
+    130
+   ],
+   "total-cholesterol": [
+    4.4,
+    4.2,
+    3.7,
+    3.3,
+    3.2,
+    3.5
+   ],
+   "albumin": [
+    44,
+    46,
+    48,
+    50,
+    50,
+    49
+   ],
+   "platelets": [
+    232,
+    221,
+    238,
+    273,
+    305,
+    314
+   ]
+  }
+ },
+ {
+  "id": "SIM-000204",
+  "name": "Zara Lewis",
+  "age": 90,
+  "conditions": [
+   "Hypertension",
+   "CKD"
+  ],
+  "needs": [
+   "Carer involvement"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 3,
+   "observation": 3,
+   "task": 1,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [
+   "Confirm follow-up arrangements"
+  ],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 5.2,
+    "last": 2.7,
+    "ref": "0\u20135",
+    "story": "moved IN",
+    "series": [
+     5.2,
+     4,
+     2.3,
+     1.3,
+     1.4,
+     2.7
+    ]
+   },
+   {
+    "analyte": "white-cell-count",
+    "name": "White cell count",
+    "first": 9.1,
+    "last": 12.1,
+    "ref": "4\u201311",
+    "story": "moved OUT",
+    "series": [
+     9.1,
+     8.7,
+     9.3,
+     10.6,
+     11.8,
+     12.1
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 60,
+    "last": 26,
+    "ref": "45\u2013110",
+    "story": "moved OUT",
+    "series": [
+     60,
+     68,
+     62,
+     47,
+     32,
+     26
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 74,
+    "last": 52,
+    "ref": "60\u2013120",
+    "story": "moved OUT",
+    "series": [
+     74,
+     79,
+     75,
+     66,
+     56,
+     52
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 68,
+    "last": 56,
+    "ref": "20\u201341",
+    "story": "out throughout",
+    "series": [
+     68,
+     65,
+     59,
+     54,
+     52,
+     56
+    ]
+   },
+   {
+    "analyte": "alt",
+    "name": "ALT",
+    "first": 43,
+    "last": 48,
+    "ref": "0\u201340",
+    "story": "out throughout",
+    "series": [
+     43,
+     35,
+     31,
+     33,
+     41,
+     48
+    ]
+   },
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 6.8,
+    "last": 5.9,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     6.8,
+     6.5,
+     6.1,
+     5.7,
+     5.6,
+     5.9
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 2.8,
+    "last": 2.2,
+    "ref": "0\u20131.7",
+    "story": "out throughout",
+    "series": [
+     2.8,
+     2.7,
+     2.4,
+     2.1,
+     2.1,
+     2.2
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    74,
+    79,
+    75,
+    66,
+    56,
+    52
+   ],
+   "creatinine": [
+    60,
+    68,
+    62,
+    47,
+    32,
+    26
+   ],
+   "hba1c": [
+    68,
+    65,
+    59,
+    54,
+    52,
+    56
+   ],
+   "potassium": [
+    5.1,
+    5.2,
+    5.1,
+    4.8,
+    4.5,
+    4.4
+   ],
+   "crp": [
+    5.2,
+    4,
+    2.3,
+    1.3,
+    1.4,
+    2.7
+   ],
+   "white-cell-count": [
+    9.1,
+    8.7,
+    9.3,
+    10.6,
+    11.8,
+    12.1
+   ],
+   "neutrophils": [
+    3,
+    2.7,
+    3.1,
+    3.9,
+    4.6,
+    4.8
+   ],
+   "haemoglobin": [
+    140,
+    138,
+    141,
+    147,
+    153,
+    154
+   ],
+   "total-cholesterol": [
+    6.8,
+    6.5,
+    6.1,
+    5.7,
+    5.6,
+    5.9
+   ],
+   "albumin": [
+    39,
+    37,
+    36,
+    36,
+    38,
+    41
+   ],
+   "platelets": [
+    204,
+    192,
+    210,
+    245,
+    277,
+    286
+   ]
+  }
+ },
+ {
+  "id": "SIM-000047",
+  "name": "Samuel Singh",
+  "age": 90,
+  "conditions": [
+   "Hypertension",
+   "Arthritis",
+   "CKD"
+  ],
+  "needs": [],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 3,
+   "observation": 3,
+   "discharge-summary": 1,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [
+   {
+    "title": "General surgery \u00b7 Post-episode handover",
+    "followUp": "The surgical booking office is responsible for confirming any return appointment."
+   }
+  ],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "mcv",
+    "name": "Mean cell volume",
+    "first": 101,
+    "last": 93.4,
+    "ref": "80\u2013100",
+    "story": "moved IN",
+    "series": [
+     101,
+     101.5,
+     99.6,
+     96.4,
+     93.8,
+     93.4
+    ]
+   },
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 4.8,
+    "last": 7.9,
+    "ref": "2.5\u20137.8",
+    "story": "moved OUT",
+    "series": [
+     4.8,
+     4.4,
+     5,
+     6.4,
+     7.5,
+     7.9
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 102,
+    "last": 138,
+    "ref": "45\u2013110",
+    "story": "moved OUT",
+    "series": [
+     102,
+     96,
+     104,
+     120,
+     134,
+     138
+    ]
+   },
+   {
+    "analyte": "alt",
+    "name": "ALT",
+    "first": 34,
+    "last": 52,
+    "ref": "0\u201340",
+    "story": "moved OUT",
+    "series": [
+     34,
+     32,
+     35,
+     43,
+     50,
+     52
+    ]
+   },
+   {
+    "analyte": "alp",
+    "name": "Alkaline phosphatase",
+    "first": 102,
+    "last": 138,
+    "ref": "30\u2013130",
+    "story": "moved OUT",
+    "series": [
+     102,
+     96,
+     104,
+     120,
+     134,
+     138
+    ]
+   },
+   {
+    "analyte": "bilirubin",
+    "name": "Bilirubin",
+    "first": 14,
+    "last": 22,
+    "ref": "0\u201321",
+    "story": "moved OUT",
+    "series": [
+     14,
+     13,
+     15,
+     18,
+     21,
+     22
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 36,
+    "last": 59,
+    "ref": "60\u2013120",
+    "story": "out throughout",
+    "series": [
+     36,
+     33,
+     38,
+     47,
+     56,
+     59
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 57,
+    "last": 68,
+    "ref": "20\u201341",
+    "story": "out throughout",
+    "series": [
+     57,
+     61,
+     67,
+     72,
+     72,
+     68
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 9.1,
+    "last": 5.3,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     9.1,
+     9.4,
+     8.4,
+     6.8,
+     5.5,
+     5.3
+    ]
+   },
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 5.6,
+    "last": 5.9,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     5.6,
+     5.1,
+     4.9,
+     5.1,
+     5.5,
+     5.9
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 2,
+    "last": 2.2,
+    "ref": "0\u20131.7",
+    "story": "out throughout",
+    "series": [
+     2,
+     1.7,
+     1.6,
+     1.6,
+     1.9,
+     2.2
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    36,
+    33,
+    38,
+    47,
+    56,
+    59
+   ],
+   "creatinine": [
+    102,
+    96,
+    104,
+    120,
+    134,
+    138
+   ],
+   "hba1c": [
+    57,
+    61,
+    67,
+    72,
+    72,
+    68
+   ],
+   "potassium": [
+    3.8,
+    3.7,
+    3.8,
+    4.1,
+    4.4,
+    4.5
+   ],
+   "crp": [
+    9.1,
+    9.4,
+    8.4,
+    6.8,
+    5.5,
+    5.3
+   ],
+   "white-cell-count": [
+    10.9,
+    11.2,
+    10.4,
+    9,
+    7.9,
+    7.8
+   ],
+   "neutrophils": [
+    4.2,
+    4.3,
+    3.8,
+    3,
+    2.4,
+    2.3
+   ],
+   "haemoglobin": [
+    158,
+    159,
+    155,
+    149,
+    144,
+    143
+   ],
+   "total-cholesterol": [
+    5.6,
+    5.1,
+    4.9,
+    5.1,
+    5.5,
+    5.9
+   ],
+   "albumin": [
+    40,
+    39,
+    40,
+    42,
+    45,
+    45
+   ],
+   "platelets": [
+    240,
+    246,
+    225,
+    188,
+    159,
+    155
+   ]
+  }
+ },
+ {
+  "id": "SIM-000108",
+  "name": "Grace Wilson",
+  "age": 83,
+  "conditions": [
+   "Diabetes",
+   "Arthritis",
+   "CKD"
+  ],
+  "needs": [
+   "Transport"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 3,
+   "observation": 3,
+   "task": 1,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [
+   "Confirm follow-up arrangements"
+  ],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 2,
+    "last": 5.1,
+    "ref": "2.5\u20137.8",
+    "story": "moved IN",
+    "series": [
+     2,
+     1.6,
+     2.2,
+     3.6,
+     4.7,
+     5.1
+    ]
+   },
+   {
+    "analyte": "potassium",
+    "name": "Potassium",
+    "first": 5.1,
+    "last": 5.8,
+    "ref": "3.5\u20135.3",
+    "story": "moved OUT",
+    "series": [
+     5.1,
+     5,
+     5.2,
+     5.5,
+     5.8,
+     5.8
+    ]
+   },
+   {
+    "analyte": "albumin",
+    "name": "Albumin",
+    "first": 39,
+    "last": 34,
+    "ref": "35\u201350",
+    "story": "moved OUT",
+    "series": [
+     39,
+     37,
+     35,
+     33,
+     32,
+     34
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 1.3,
+    "last": 1.9,
+    "ref": "0\u20131.7",
+    "story": "moved OUT",
+    "series": [
+     1.3,
+     1.5,
+     1.8,
+     2,
+     2.1,
+     1.9
+    ]
+   },
+   {
+    "analyte": "platelets",
+    "name": "Platelets",
+    "first": 405,
+    "last": 430,
+    "ref": "150\u2013400",
+    "story": "out throughout",
+    "series": [
+     405,
+     370,
+     352,
+     362,
+     395,
+     430
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 66,
+    "last": 52,
+    "ref": "20\u201341",
+    "story": "out throughout",
+    "series": [
+     66,
+     67,
+     63,
+     57,
+     52,
+     52
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    80,
+    77,
+    82,
+    92,
+    101,
+    103
+   ],
+   "creatinine": [
+    64,
+    59,
+    67,
+    83,
+    97,
+    101
+   ],
+   "hba1c": [
+    66,
+    67,
+    63,
+    57,
+    52,
+    52
+   ],
+   "potassium": [
+    5.1,
+    5,
+    5.2,
+    5.5,
+    5.8,
+    5.8
+   ],
+   "crp": [
+    2.6,
+    1,
+    0.2,
+    0.7,
+    2.1,
+    3.7
+   ],
+   "white-cell-count": [
+    5.5,
+    4.2,
+    3.6,
+    3.9,
+    5.2,
+    6.4
+   ],
+   "neutrophils": [
+    4,
+    3.2,
+    2.7,
+    2.9,
+    3.7,
+    4.5
+   ],
+   "haemoglobin": [
+    115,
+    108,
+    105,
+    107,
+    113,
+    119
+   ],
+   "total-cholesterol": [
+    3.7,
+    4,
+    4.4,
+    4.8,
+    4.8,
+    4.5
+   ],
+   "albumin": [
+    39,
+    37,
+    35,
+    33,
+    32,
+    34
+   ],
+   "platelets": [
+    405,
+    370,
+    352,
+    362,
+    395,
+    430
+   ]
+  }
+ },
+ {
+  "id": "SIM-000468",
+  "name": "Freya Morgan",
+  "age": 81,
+  "conditions": [
+   "Asthma",
+   "Heart failure"
+  ],
+  "needs": [
+   "Step-free access",
+   "Carer involvement"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 3,
+   "observation": 3,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "haemoglobin",
+    "name": "Haemoglobin",
+    "first": 167,
+    "last": 154,
+    "ref": "115\u2013165",
+    "story": "moved IN",
+    "series": [
+     167,
+     163,
+     157,
+     151,
+     150,
+     154
+    ]
+   },
+   {
+    "analyte": "white-cell-count",
+    "name": "White cell count",
+    "first": 12.8,
+    "last": 10.1,
+    "ref": "4\u201311",
+    "story": "moved IN",
+    "series": [
+     12.8,
+     12.1,
+     10.7,
+     9.6,
+     9.3,
+     10.1
+    ]
+   },
+   {
+    "analyte": "mcv",
+    "name": "Mean cell volume",
+    "first": 101.4,
+    "last": 94.9,
+    "ref": "80\u2013100",
+    "story": "moved IN",
+    "series": [
+     101.4,
+     99.7,
+     96.5,
+     93.7,
+     93.1,
+     94.9
+    ]
+   },
+   {
+    "analyte": "bilirubin",
+    "name": "Bilirubin",
+    "first": 27,
+    "last": 19,
+    "ref": "0\u201321",
+    "story": "moved IN",
+    "series": [
+     27,
+     27,
+     26,
+     22,
+     20,
+     19
+    ]
+   },
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 4.8,
+    "last": 1.6,
+    "ref": "2.5\u20137.8",
+    "story": "moved OUT",
+    "series": [
+     4.8,
+     5,
+     4.2,
+     2.9,
+     1.8,
+     1.6
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 52,
+    "last": 14,
+    "ref": "45\u2013110",
+    "story": "moved OUT",
+    "series": [
+     52,
+     54,
+     45,
+     29,
+     16,
+     14
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 68,
+    "last": 44,
+    "ref": "60\u2013120",
+    "story": "moved OUT",
+    "series": [
+     68,
+     70,
+     64,
+     54,
+     45,
+     44
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 30,
+    "last": 18,
+    "ref": "20\u201341",
+    "story": "moved OUT",
+    "series": [
+     30,
+     27,
+     21,
+     16,
+     14,
+     18
+    ]
+   },
+   {
+    "analyte": "alp",
+    "name": "Alkaline phosphatase",
+    "first": 67,
+    "last": 29,
+    "ref": "30\u2013130",
+    "story": "moved OUT",
+    "series": [
+     67,
+     69,
+     60,
+     44,
+     31,
+     29
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 2.6,
+    "last": 2.1,
+    "ref": "0\u20131.7",
+    "story": "out throughout",
+    "series": [
+     2.6,
+     2.4,
+     2.1,
+     1.9,
+     1.9,
+     2.1
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    68,
+    70,
+    64,
+    54,
+    45,
+    44
+   ],
+   "creatinine": [
+    52,
+    54,
+    45,
+    29,
+    16,
+    14
+   ],
+   "hba1c": [
+    30,
+    27,
+    21,
+    16,
+    14,
+    18
+   ],
+   "potassium": [
+    5.3,
+    5.4,
+    5.2,
+    4.9,
+    4.6,
+    4.6
+   ],
+   "crp": [
+    3.6,
+    5.1,
+    5.7,
+    5,
+    3.4,
+    2
+   ],
+   "white-cell-count": [
+    12.8,
+    12.1,
+    10.7,
+    9.6,
+    9.3,
+    10.1
+   ],
+   "neutrophils": [
+    7.5,
+    7,
+    6.2,
+    5.6,
+    5.4,
+    5.9
+   ],
+   "haemoglobin": [
+    167,
+    163,
+    157,
+    151,
+    150,
+    154
+   ],
+   "total-cholesterol": [
+    4.8,
+    4.5,
+    4,
+    3.7,
+    3.7,
+    4.1
+   ],
+   "albumin": [
+    47,
+    47,
+    46,
+    44,
+    42,
+    41
+   ],
+   "platelets": [
+    275,
+    256,
+    220,
+    189,
+    182,
+    203
+   ]
+  }
+ },
+ {
+  "id": "SIM-000170",
+  "name": "Mohammed Reed",
+  "age": 81,
+  "conditions": [
+   "Diabetes",
+   "Hypertension",
+   "Arthritis",
+   "CKD"
+  ],
+  "needs": [],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 3,
+   "observation": 3,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "white-cell-count",
+    "name": "White cell count",
+    "first": 11.9,
+    "last": 10.6,
+    "ref": "4\u201311",
+    "story": "moved IN",
+    "series": [
+     11.9,
+     13.2,
+     13.6,
+     13.1,
+     11.8,
+     10.6
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 35,
+    "last": 64,
+    "ref": "45\u2013110",
+    "story": "moved IN",
+    "series": [
+     35,
+     45,
+     62,
+     74,
+     75,
+     64
+    ]
+   },
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 5.9,
+    "last": 5,
+    "ref": "0\u20135",
+    "story": "moved IN",
+    "series": [
+     5.9,
+     5.7,
+     5.3,
+     4.9,
+     4.8,
+     5
+    ]
+   },
+   {
+    "analyte": "haemoglobin",
+    "name": "Haemoglobin",
+    "first": 117,
+    "last": 111,
+    "ref": "115\u2013165",
+    "story": "moved OUT",
+    "series": [
+     117,
+     123,
+     126,
+     123,
+     117,
+     111
+    ]
+   },
+   {
+    "analyte": "urea",
+    "name": "Urea",
+    "first": 6.6,
+    "last": 9,
+    "ref": "2.5\u20137.8",
+    "story": "moved OUT",
+    "series": [
+     6.6,
+     7.4,
+     8.8,
+     9.8,
+     9.9,
+     9
+    ]
+   },
+   {
+    "analyte": "alp",
+    "name": "Alkaline phosphatase",
+    "first": 56,
+    "last": 21,
+    "ref": "30\u2013130",
+    "story": "moved OUT",
+    "series": [
+     56,
+     63,
+     57,
+     42,
+     27,
+     21
+    ]
+   },
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 34,
+    "last": 52,
+    "ref": "60\u2013120",
+    "story": "out throughout",
+    "series": [
+     34,
+     40,
+     50,
+     58,
+     59,
+     52
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 57,
+    "last": 48,
+    "ref": "20\u201341",
+    "story": "out throughout",
+    "series": [
+     57,
+     53,
+     46,
+     42,
+     43,
+     48
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 11.1,
+    "last": 8.6,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     11.1,
+     9.9,
+     8.3,
+     7.2,
+     7.3,
+     8.6
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    34,
+    40,
+    50,
+    58,
+    59,
+    52
+   ],
+   "creatinine": [
+    35,
+    45,
+    62,
+    74,
+    75,
+    64
+   ],
+   "hba1c": [
+    57,
+    53,
+    46,
+    42,
+    43,
+    48
+   ],
+   "potassium": [
+    4.4,
+    4.6,
+    5,
+    5.2,
+    5.2,
+    5
+   ],
+   "crp": [
+    11.1,
+    9.9,
+    8.3,
+    7.2,
+    7.3,
+    8.6
+   ],
+   "white-cell-count": [
+    11.9,
+    13.2,
+    13.6,
+    13.1,
+    11.8,
+    10.6
+   ],
+   "neutrophils": [
+    4.3,
+    5.1,
+    5.4,
+    5,
+    4.3,
+    3.5
+   ],
+   "haemoglobin": [
+    117,
+    123,
+    126,
+    123,
+    117,
+    111
+   ],
+   "total-cholesterol": [
+    5.9,
+    5.7,
+    5.3,
+    4.9,
+    4.8,
+    5
+   ],
+   "albumin": [
+    47,
+    48,
+    47,
+    45,
+    42,
+    41
+   ],
+   "platelets": [
+    281,
+    315,
+    328,
+    313,
+    278,
+    245
+   ]
+  }
+ },
+ {
+  "id": "SIM-000244",
+  "name": "Daniel Patel",
+  "age": 75,
+  "conditions": [
+   "Diabetes",
+   "Heart failure"
+  ],
+  "needs": [
+   "Interpreter",
+   "Carer involvement"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 2,
+   "observation": 2,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "egfr",
+    "name": "eGFR",
+    "first": 56,
+    "last": 63,
+    "ref": "60\u2013120",
+    "story": "moved IN",
+    "series": [
+     56,
+     46,
+     41,
+     44,
+     53,
+     63
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 5.2,
+    "last": 2,
+    "ref": "0\u20135",
+    "story": "moved IN",
+    "series": [
+     5.2,
+     4.3,
+     2.7,
+     1.3,
+     1,
+     2
+    ]
+   },
+   {
+    "analyte": "platelets",
+    "name": "Platelets",
+    "first": 356,
+    "last": 439,
+    "ref": "150\u2013400",
+    "story": "moved OUT",
+    "series": [
+     356,
+     345,
+     362,
+     397,
+     429,
+     439
+    ]
+   },
+   {
+    "analyte": "mcv",
+    "name": "Mean cell volume",
+    "first": 93.1,
+    "last": 100.4,
+    "ref": "80\u2013100",
+    "story": "moved OUT",
+    "series": [
+     93.1,
+     92.1,
+     93.6,
+     96.7,
+     99.6,
+     100.4
+    ]
+   },
+   {
+    "analyte": "potassium",
+    "name": "Potassium",
+    "first": 5.3,
+    "last": 5.5,
+    "ref": "3.5\u20135.3",
+    "story": "moved OUT",
+    "series": [
+     5.3,
+     5,
+     4.8,
+     4.9,
+     5.2,
+     5.5
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 61,
+    "last": 48,
+    "ref": "20\u201341",
+    "story": "out throughout",
+    "series": [
+     61,
+     57,
+     51,
+     46,
+     45,
+     48
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 2.6,
+    "last": 2.1,
+    "ref": "0\u20131.7",
+    "story": "out throughout",
+    "series": [
+     2.6,
+     2.4,
+     2.1,
+     1.9,
+     1.9,
+     2.1
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    56,
+    46,
+    41,
+    44,
+    53,
+    63
+   ],
+   "creatinine": [
+    71,
+    55,
+    47,
+    52,
+    66,
+    82
+   ],
+   "hba1c": [
+    61,
+    57,
+    51,
+    46,
+    45,
+    48
+   ],
+   "potassium": [
+    5.3,
+    5,
+    4.8,
+    4.9,
+    5.2,
+    5.5
+   ],
+   "crp": [
+    5.2,
+    4.3,
+    2.7,
+    1.3,
+    1,
+    2
+   ],
+   "white-cell-count": [
+    4.1,
+    3.7,
+    4.3,
+    5.6,
+    6.8,
+    7.1
+   ],
+   "neutrophils": [
+    3,
+    2.7,
+    3.1,
+    3.9,
+    4.6,
+    4.8
+   ],
+   "haemoglobin": [
+    123,
+    121,
+    124,
+    131,
+    136,
+    138
+   ],
+   "total-cholesterol": [
+    4.2,
+    3.9,
+    3.4,
+    3.1,
+    3.2,
+    3.5
+   ],
+   "albumin": [
+    42,
+    40,
+    38,
+    38,
+    40,
+    42
+   ],
+   "platelets": [
+    356,
+    345,
+    362,
+    397,
+    429,
+    439
+   ]
+  }
+ },
+ {
+  "id": "SIM-000015",
+  "name": "Grace Shah",
+  "age": 67,
+  "conditions": [
+   "Asthma",
+   "Diabetes",
+   "Arthritis"
+  ],
+  "needs": [
+   "Carer involvement"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 2,
+   "observation": 2,
+   "discharge-summary": 1,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [
+   {
+    "title": "Orthopaedics \u00b7 Day-case discharge handover",
+    "followUp": "A physiotherapy appointment request is pending acknowledgement by the booking team."
+   }
+  ],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "platelets",
+    "name": "Platelets",
+    "first": 415,
+    "last": 358,
+    "ref": "150\u2013400",
+    "story": "moved IN",
+    "series": [
+     415,
+     387,
+     351,
+     327,
+     330,
+     358
+    ]
+   },
+   {
+    "analyte": "alt",
+    "name": "ALT",
+    "first": 42,
+    "last": 23,
+    "ref": "0\u201340",
+    "story": "moved IN",
+    "series": [
+     42,
+     43,
+     38,
+     30,
+     24,
+     23
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 1.6,
+    "last": 2.3,
+    "ref": "0\u20131.7",
+    "story": "moved OUT",
+    "series": [
+     1.6,
+     1.5,
+     1.7,
+     2,
+     2.2,
+     2.3
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 8.6,
+    "last": 12.2,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     8.6,
+     8.1,
+     8.8,
+     10.4,
+     11.8,
+     12.2
+    ]
+   },
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 5.8,
+    "last": 6.9,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     5.8,
+     5.7,
+     5.9,
+     6.4,
+     6.8,
+     6.9
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    81,
+    71,
+    64,
+    64,
+    71,
+    82
+   ],
+   "creatinine": [
+    79,
+    63,
+    51,
+    51,
+    63,
+    79
+   ],
+   "hba1c": [
+    31,
+    36,
+    39,
+    36,
+    30,
+    24
+   ],
+   "potassium": [
+    4.7,
+    4.3,
+    4.1,
+    4.1,
+    4.3,
+    4.7
+   ],
+   "crp": [
+    8.6,
+    8.1,
+    8.8,
+    10.4,
+    11.8,
+    12.2
+   ],
+   "white-cell-count": [
+    8.8,
+    7.8,
+    6.4,
+    5.5,
+    5.7,
+    6.7
+   ],
+   "neutrophils": [
+    6.6,
+    5.8,
+    4.8,
+    4.1,
+    4.3,
+    5
+   ],
+   "haemoglobin": [
+    135,
+    130,
+    123,
+    119,
+    120,
+    125
+   ],
+   "total-cholesterol": [
+    5.8,
+    5.7,
+    5.9,
+    6.4,
+    6.8,
+    6.9
+   ],
+   "albumin": [
+    46,
+    47,
+    45,
+    43,
+    41,
+    41
+   ],
+   "platelets": [
+    415,
+    387,
+    351,
+    327,
+    330,
+    358
+   ]
+  }
+ },
+ {
+  "id": "SIM-000514",
+  "name": "Arthur Green",
+  "age": 71,
+  "conditions": [
+   "COPD"
+  ],
+  "needs": [
+   "Transport",
+   "Telephone preferred"
+  ],
+  "goals": [
+   "Coordinate practice and hospital follow-up"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "observation": 1,
+   "encounter": 3,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [],
+  "tasks": [],
+  "conversations": [],
+  "context": [
+   "A retired decorator living on the edge of town. His daughter drives him when her shifts permit.\nWhat matters to me: Coordinate practice and hospital follow-up"
+  ],
+  "family_mentions": [
+   "A retired decorator living on the edge of town. His daughter drives him when her shifts permit. What matters to me: Coordinate practice and hospital follow-up",
+   "Arthur's daughter requested enough notice to arrange transport. Arthur prefers the practice to speak to him first."
+  ],
+  "trajectory": [
+   {
+    "analyte": "platelets",
+    "name": "Platelets",
+    "first": 131,
+    "last": 213,
+    "ref": "150\u2013400",
+    "story": "moved IN",
+    "series": [
+     131,
+     119,
+     137,
+     172,
+     204,
+     213
+    ]
+   },
+   {
+    "analyte": "neutrophils",
+    "name": "Neutrophils",
+    "first": 1.6,
+    "last": 3.4,
+    "ref": "2\u20137.5",
+    "story": "moved IN",
+    "series": [
+     1.6,
+     1.3,
+     1.7,
+     2.5,
+     3.2,
+     3.4
+    ]
+   },
+   {
+    "analyte": "sodium",
+    "name": "Sodium",
+    "first": 147,
+    "last": 142,
+    "ref": "133\u2013146",
+    "story": "moved IN",
+    "series": [
+     147,
+     147,
+     146,
+     143,
+     142,
+     142
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 120,
+    "last": 82,
+    "ref": "45\u2013110",
+    "story": "moved IN",
+    "series": [
+     120,
+     123,
+     113,
+     97,
+     84,
+     82
+    ]
+   },
+   {
+    "analyte": "hdl",
+    "name": "HDL cholesterol",
+    "first": 0.7,
+    "last": 1.1,
+    "ref": "1\u20132.5",
+    "story": "moved IN",
+    "series": [
+     0.7,
+     0.6,
+     0.7,
+     0.9,
+     1,
+     1.1
+    ]
+   },
+   {
+    "analyte": "albumin",
+    "name": "Albumin",
+    "first": 50,
+    "last": 52,
+    "ref": "35\u201350",
+    "story": "moved OUT",
+    "series": [
+     50,
+     48,
+     46,
+     47,
+     49,
+     52
+    ]
+   },
+   {
+    "analyte": "triglycerides",
+    "name": "Triglycerides",
+    "first": 1.7,
+    "last": 2.4,
+    "ref": "0\u20131.7",
+    "story": "moved OUT",
+    "series": [
+     1.7,
+     1.6,
+     1.8,
+     2.1,
+     2.3,
+     2.4
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 55,
+    "last": 42,
+    "ref": "20\u201341",
+    "story": "out throughout",
+    "series": [
+     55,
+     51,
+     45,
+     40,
+     39,
+     42
+    ]
+   },
+   {
+    "analyte": "bilirubin",
+    "name": "Bilirubin",
+    "first": 22,
+    "last": 24,
+    "ref": "0\u201321",
+    "story": "out throughout",
+    "series": [
+     22,
+     19,
+     18,
+     18,
+     21,
+     24
+    ]
+   },
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 5.5,
+    "last": 6.5,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     5.5,
+     5.3,
+     5.5,
+     6,
+     6.4,
+     6.5
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    100,
+    102,
+    96,
+    85,
+    77,
+    76
+   ],
+   "creatinine": [
+    120,
+    123,
+    113,
+    97,
+    84,
+    82
+   ],
+   "hba1c": [
+    55,
+    51,
+    45,
+    40,
+    39,
+    42
+   ],
+   "potassium": [
+    4.7,
+    4.8,
+    4.6,
+    4.3,
+    4,
+    4
+   ],
+   "crp": [
+    4.1,
+    5.7,
+    6.7,
+    6.5,
+    5.2,
+    3.6
+   ],
+   "white-cell-count": [
+    4.2,
+    3.8,
+    4.4,
+    5.8,
+    6.9,
+    7.3
+   ],
+   "neutrophils": [
+    1.6,
+    1.3,
+    1.7,
+    2.5,
+    3.2,
+    3.4
+   ],
+   "haemoglobin": [
+    140,
+    138,
+    141,
+    147,
+    153,
+    154
+   ],
+   "total-cholesterol": [
+    5.5,
+    5.3,
+    5.5,
+    6,
+    6.4,
+    6.5
+   ],
+   "albumin": [
+    50,
+    48,
+    46,
+    47,
+    49,
+    52
+   ],
+   "platelets": [
+    131,
+    119,
+    137,
+    172,
+    204,
+    213
+   ]
+  }
+ },
+ {
+  "id": "SIM-000026",
+  "name": "Freya Wilson",
+  "age": 93,
+  "conditions": [
+   "Diabetes",
+   "Hypertension"
+  ],
+  "needs": [
+   "Transport"
+  ],
+  "goals": [
+   "Understand the next step",
+   "Avoid unnecessary travel"
+  ],
+  "kinds": {
+   "ehr-record": 1,
+   "encounter": 1,
+   "observation": 1,
+   "discharge-summary": 1,
+   "report": 36
+  },
+  "appointments": [],
+  "letters": [
+   {
+    "title": "Respiratory \u00b7 Assessment discharge letter",
+    "followUp": "The respiratory team retains ownership of the outstanding report."
+   }
+  ],
+  "tasks": [],
+  "conversations": [],
+  "context": [],
+  "family_mentions": [],
+  "trajectory": [
+   {
+    "analyte": "neutrophils",
+    "name": "Neutrophils",
+    "first": 7.9,
+    "last": 5.9,
+    "ref": "2\u20137.5",
+    "story": "moved IN",
+    "series": [
+     7.9,
+     7.4,
+     6.4,
+     5.6,
+     5.3,
+     5.9
+    ]
+   },
+   {
+    "analyte": "hba1c",
+    "name": "HbA1c",
+    "first": 42,
+    "last": 35,
+    "ref": "20\u201341",
+    "story": "moved IN",
+    "series": [
+     42,
+     47,
+     50,
+     47,
+     41,
+     35
+    ]
+   },
+   {
+    "analyte": "alt",
+    "name": "ALT",
+    "first": 49,
+    "last": 32,
+    "ref": "0\u201340",
+    "story": "moved IN",
+    "series": [
+     49,
+     53,
+     50,
+     43,
+     35,
+     32
+    ]
+   },
+   {
+    "analyte": "alp",
+    "name": "Alkaline phosphatase",
+    "first": 132,
+    "last": 97,
+    "ref": "30\u2013130",
+    "story": "moved IN",
+    "series": [
+     132,
+     139,
+     133,
+     119,
+     103,
+     97
+    ]
+   },
+   {
+    "analyte": "total-cholesterol",
+    "name": "Total cholesterol",
+    "first": 5.1,
+    "last": 4.7,
+    "ref": "0\u20135",
+    "story": "moved IN",
+    "series": [
+     5.1,
+     5.5,
+     5.7,
+     5.5,
+     5.1,
+     4.7
+    ]
+   },
+   {
+    "analyte": "creatinine",
+    "name": "Creatinine",
+    "first": 148,
+    "last": 148,
+    "ref": "45\u2013110",
+    "story": "out throughout",
+    "series": [
+     148,
+     132,
+     120,
+     120,
+     132,
+     148
+    ]
+   },
+   {
+    "analyte": "crp",
+    "name": "C-reactive protein",
+    "first": 8.1,
+    "last": 6.5,
+    "ref": "0\u20135",
+    "story": "out throughout",
+    "series": [
+     8.1,
+     9.6,
+     10.2,
+     9.5,
+     7.9,
+     6.5
+    ]
+   }
+  ],
+  "key_series": {
+   "egfr": [
+    113,
+    102,
+    95,
+    95,
+    102,
+    113
+   ],
+   "creatinine": [
+    148,
+    132,
+    120,
+    120,
+    132,
+    148
+   ],
+   "hba1c": [
+    42,
+    47,
+    50,
+    47,
+    41,
+    35
+   ],
+   "potassium": [
+    3.8,
+    3.5,
+    3.2,
+    3.2,
+    3.5,
+    3.8
+   ],
+   "crp": [
+    8.1,
+    9.6,
+    10.2,
+    9.5,
+    7.9,
+    6.5
+   ],
+   "white-cell-count": [
+    10.5,
+    9.8,
+    8.5,
+    7.4,
+    7.1,
+    7.9
+   ],
+   "neutrophils": [
+    7.9,
+    7.4,
+    6.4,
+    5.6,
+    5.3,
+    5.9
+   ],
+   "haemoglobin": [
+    152,
+    149,
+    142,
+    137,
+    136,
+    139
+   ],
+   "total-cholesterol": [
+    5.1,
+    5.5,
+    5.7,
+    5.5,
+    5.1,
+    4.7
+   ],
+   "albumin": [
+    49,
+    50,
+    49,
+    47,
+    44,
+    43
+   ],
+   "platelets": [
+    390,
+    371,
+    335,
+    304,
+    297,
+    318
+   ]
+  }
+ }
+]

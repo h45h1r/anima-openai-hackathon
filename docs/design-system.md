@@ -171,6 +171,14 @@ summary. Rows expand to raw JSON. Three stat tiles at the top: checks, withheld,
 pill, display title, when and where, one-line purpose, an expandable list of what is on record for
 the visit.
 
+**Body view.** A light radial-gradient stage (`#ffffff → #e3ecf0`) holds a stippled figure in
+`#6fa6cf`/`#a9c8dd` scan lines; nothing else on the page uses that blue. The focused system tints
+its region in the system's status colour and the camera glides to it. Micro-labels above the stage
+are JetBrains Mono, 10.5px, uppercase, tracking-wider: `HEALTH DATA 19 ANALYTES`. The systems list on
+the right uses the standard card, a status dot, and an expandable detail with sparklines (reference
+band in `moss-soft`, last point rust when outside range). Organ meshes, when present, sit at
+`#8fb6d3` at 22% opacity and go opaque in the status colour on focus.
+
 **Empty and error states.** Say what is true and what to do: "No appointments booked. Nothing is in
 the practice diary right now." Errors name the failure and the fix ("Start sim-app on port 4192").
 No apologies, no exclamation marks.
