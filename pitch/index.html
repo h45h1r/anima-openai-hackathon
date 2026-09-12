@@ -141,9 +141,10 @@ p { margin: 0; }
 .chain.simple .l { font-size: clamp(1rem, 1.35vw, 1.3rem); margin-top: 0.6rem; }
 .chain.simple .op { font-size: clamp(2rem, 3.5vw, 3.4rem); padding-top: 1.2rem; }
 .chain.simple .step { border-top-width: 4px; padding-top: 0.9rem; }
-.under { margin-top: 2.4rem; font-size: clamp(1.05rem, 1.5vw, 1.4rem); color: var(--muted); }
+.under { display: block; margin-top: 2.4rem; max-width: 60ch; font-size: clamp(1.05rem, 1.5vw, 1.4rem); color: var(--muted); line-height: 1.4; }
 .under b { color: var(--ink); font-weight: 600; }
-.under .pill { margin-left: 0.5rem; vertical-align: middle; }
+.under .pill { display: inline-flex; width: auto; margin-left: 0.5rem; vertical-align: middle; }
+.under b { display: inline; }
 </style>
 </head>
 <body>
