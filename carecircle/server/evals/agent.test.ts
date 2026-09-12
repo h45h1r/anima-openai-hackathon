@@ -472,4 +472,100 @@ describe('grounding and visualisation', () => {
     assert.ok(!answer.facts.some((f) => /\bALT\b/.test(f.text)));
     assert.ok(!answer.facts.some((f) => /Creatinine|eGFR/i.test(f.text)));
   });
+
+  it('routes share-with-daughter to consent/people — not labs or appointment memory', async () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource(), apptResource()] }],
+    });
+    const policy = createDefaultPolicy(patientId, 'Amira Khan');
+    const mem = memory();
+    await mem.remember({
+      patientId,
+      viewerId: 'patient',
+      kind: 'preference',
+      text: 'I prefer afternoon appointments and short plain-language updates',
+    });
+    const fakeClient = { getAppointments: async () => ({}) } as unknown as AnimaClient;
+    const run = await runAgentQuestion({
+      client: fakeClient,
+      context: ctx,
+      policy,
+      viewerId: 'patient',
+      question: 'Can you share this with my daughter?',
+      memory: mem,
+      history: [
+        { role: 'user', content: 'Explain my latest blood tests' },
+        { role: 'assistant', content: 'Latest liver (LFT) results include ALT 48 U/L.' },
+      ],
+    });
+    assert.ok(/People|sharing|consent|access/i.test(run.answer.answer));
+    assert.ok(!/\bALT\b|LFT|48|ALP/i.test(run.answer.answer));
+    assert.ok(!/afternoon appointment/i.test(run.answer.answer));
+    assert.ok(!run.answer.facts.some((f) => /ALT|ALP/i.test(f.text)));
+    const blob = `${run.answer.answer}\n${run.answer.policyNotice || ''}`;
+    assert.ok(!/TOPIC_NOT_GRANTED|RESULT_HELD_FOR_DISCLOSURE|laboratory_results/.test(blob));
+  });
+
+  it('answers BP asks with vitals or honest empty — never appointments or raw denial enums', async () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource(), apptResource(), dischargeResource()] }],
+    });
+    const policy = createDefaultPolicy(patientId, 'Amira Khan');
+    const fakeClient = { getAppointments: async () => ({}) } as unknown as AnimaClient;
+
+    const patientRun = await runAgentQuestion({
+      client: fakeClient,
+      context: ctx,
+      policy,
+      viewerId: 'patient',
+      question: 'What is my BP like?',
+      memory: memory(),
+    });
+    assert.match(patientRun.answer.answer, /no blood pressure|blood pressure/i);
+    assert.ok(!/Practice follow-up|afternoon|oxygen|appointment/i.test(patientRun.answer.answer));
+    assert.ok(!/TOPIC_NOT_GRANTED|RESULT_HELD_FOR_DISCLOSURE|laboratory_results|clinical_documents|private_notes/.test(
+      `${patientRun.answer.answer}\n${patientRun.answer.policyNotice || ''}`,
+    ));
+
+    const johnRun = await runAgentQuestion({
+      client: fakeClient,
+      context: ctx,
+      policy,
+      viewerId: 'john',
+      question: 'What is my BP like?',
+      memory: memory(),
+    });
+    assert.match(johnRun.answer.answer, /no blood pressure|blood pressure|isn't shared|can't show/i);
+    assert.ok(!/Practice follow-up|appointment/i.test(johnRun.answer.answer));
+    assert.ok(!/TOPIC_NOT_GRANTED|RESULT_HELD_FOR_DISCLOSURE|laboratory_results/.test(
+      `${johnRun.answer.answer}\n${johnRun.answer.policyNotice || ''}`,
+    ));
+  });
+
+  it('humanises held-result notices without snake_case enums', async () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource()] }],
+    });
+    let policy = createDefaultPolicy(patientId, 'Amira Khan');
+    policy = holdResource(policy, 'res-lab-1', 'system');
+    const fakeClient = { getAppointments: async () => ({}) } as unknown as AnimaClient;
+    const run = await runAgentQuestion({
+      client: fakeClient,
+      context: ctx,
+      policy,
+      viewerId: 'sarah',
+      question: 'Is the new ALT result serious or bad?',
+      memory: memory(),
+    });
+    assert.equal(run.policy.outcome, 'hold');
+    assert.ok(run.policy.reasonCodes.includes('RESULT_HELD_FOR_DISCLOSURE'));
+    assert.match(run.answer.answer, /waiting for Amira|can't show/i);
+    assert.ok(!/TOPIC_NOT_GRANTED|RESULT_HELD_FOR_DISCLOSURE|laboratory_results/.test(
+      `${run.answer.answer}\n${run.answer.policyNotice || ''}`,
+    ));
+    assert.ok(!/\b48\b|\bALT\b/.test(JSON.stringify(run.answer)));
+  });
 });

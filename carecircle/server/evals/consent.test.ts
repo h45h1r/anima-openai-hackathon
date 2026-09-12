@@ -7,6 +7,7 @@ import {
   updateGrants,
   type EvidenceItem,
 } from '../src/consent/policy.js';
+import { assertHumanPolicyCopy, buildUserFacingPolicyNotice } from '../src/consent/messages.js';
 import type { Measurement, NormalisedEvent } from '../src/types/domain.js';
 
 function meas(partial: Partial<Measurement> & Pick<Measurement, 'evidenceId' | 'resourceId'>): EvidenceItem {
@@ -128,5 +129,40 @@ describe('consent policy', () => {
     });
     assert.equal(decision.outcome, 'deny');
     assert.ok(decision.reasonCodes.includes('VIEWER_MISMATCH'));
+  });
+
+  it('userNotice stays human — no raw enums or topic slugs', () => {
+    const policy = createDefaultPolicy('SIM-000001', 'Amira Khan');
+    const partial = evaluateConsent({
+      policy,
+      viewerId: 'john',
+      evidence: [
+        event({ evidenceId: 'a1', resourceId: 'ra', informationClass: 'appointments' }),
+        meas({ evidenceId: 'm1', resourceId: 'rm', value: 7 }),
+      ],
+    });
+    assert.equal(partial.outcome, 'partial');
+    assert.ok(assertHumanPolicyCopy(partial.userNotice));
+    assert.ok(!/TOPIC_NOT_GRANTED|laboratory_results/.test(partial.userNotice));
+
+    let heldPolicy = createDefaultPolicy('SIM-000001', 'Amira Khan');
+    heldPolicy = holdResource(heldPolicy, 'r-new', 'system');
+    const held = evaluateConsent({
+      policy: heldPolicy,
+      viewerId: 'sarah',
+      evidence: [meas({ evidenceId: 'e1', resourceId: 'r-new', value: 12 })],
+    });
+    assert.match(held.userNotice, /waiting for Amira/i);
+    assert.ok(assertHumanPolicyCopy(held.userNotice));
+
+    const refined = buildUserFacingPolicyNotice({
+      outcome: 'partial',
+      reasonCodes: ['TOPIC_NOT_GRANTED', 'ACTIVE_GRANT'],
+      deniedInformationClasses: ['laboratory_results', 'clinical_documents', 'private_notes'],
+      intent: 'vitals_bp',
+      patientFirstName: 'Amira',
+    });
+    assert.equal(refined, '');
+    assert.ok(assertHumanPolicyCopy(refined));
   });
 });

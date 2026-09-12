@@ -1,6 +1,7 @@
 /**
  * Deterministic grounding helpers — citations, visualisation, appointment stages.
  * Safety-critical booking rules live here (slots ≠ booked).
+ * Intent routing lives in ./intent.ts so Kindred/SSE ports can reuse the same paths.
  */
 import type { AnimaClient } from '../anima/client.js';
 import type {
@@ -13,14 +14,23 @@ import type {
   VisualisationSpec,
 } from '../types/domain.js';
 import type { EvidenceItem } from '../consent/policy.js';
+import {
+  classifyAskIntent,
+  isAppointmentIntent,
+  isDocumentIntent,
+  isFollowUpQuestion,
+  isLabIntent,
+  isShareConsentIntent,
+  isVitalsBpIntent,
+  type ChatTurn,
+} from './intent.js';
 
-const LAB_Q =
-  /\b(result|results|blood|lab|labs|lft|egfr|alt|alp|hba1c|haemoglobin|hemoglobin|panel|analyte|creatinine|sodium|potassium|kidney|renal|u&e|electrolyte|fbc|wbc|platelet|bilirubin|albumin|gfr)\b/i;
+export { classifyAskIntent, isFollowUpQuestion, isLabIntent, type ChatTurn } from './intent.js';
+
 const TREND_Q = /\b(trend|chart|graph|changed|over time|history|compare|how has)\b/i;
-const APPT_Q = /\b(appoint(ment)?s?|book(ing)?|slots?|diary|afternoon|prefer)\b/i;
-const DOC_Q = /\b(discharge|handover|document|letter|summary|next step|follow.?up task)\b/i;
-const FOLLOWUP_Q =
-  /^(what about|how about|and (?:the |my |what about )?|explain (?:that|this|it)|tell me more|why (?:is|was|that)|simpler|more simply|in plain|can you (?:clarify|expand)|also[, ]|what does that)/i;
+
+const BP_MEASUREMENT =
+  /\b(bp|blood\s*pressure|systolic|diastolic|mm\s*hg|mmhg)\b/i;
 
 /** Topic → analyte / panel matchers so “kidney” ≠ full FBC dump. More specific topics first. */
 const LAB_TOPICS: { id: string; re: RegExp; analyte: RegExp }[] = [
@@ -50,18 +60,6 @@ const LAB_TOPICS: { id: string; re: RegExp; analyte: RegExp }[] = [
     analyte: /haemoglobin|hemoglobin|white.?cell|wbc|platelet|rbc|haematocrit|hematocrit|fbc|full blood/i,
   },
 ];
-
-export type ChatTurn = { role: 'user' | 'assistant'; content: string };
-
-export function isFollowUpQuestion(question: string, history?: ChatTurn[]): boolean {
-  const q = question.trim();
-  if (!q) return false;
-  if (FOLLOWUP_Q.test(q)) return true;
-  if (history && history.length > 0 && q.length < 48 && !/\b(explain|latest|blood|appoint|book)\b/i.test(q)) {
-    return true;
-  }
-  return false;
-}
 
 /** Resolve which lab measurements answer this question (and prior turn, for follow-ups). */
 export function selectLabMeasurements(
@@ -293,6 +291,38 @@ export function prefersShortPlain(memoriesHint?: string, question?: string): boo
   return /short|plain.?language|brief|concise|simple updates|not too (long|much)/i.test(blob);
 }
 
+/** BP / blood-pressure measurements only (never oxygen or unrelated vitals). */
+export function selectBpMeasurements(measurements: Measurement[]): Measurement[] {
+  return measurements.filter(
+    (m) =>
+      BP_MEASUREMENT.test(m.displayName) ||
+      BP_MEASUREMENT.test(m.analyteId) ||
+      BP_MEASUREMENT.test(m.informationClass || '') ||
+      /blood.?pressure|systolic|diastolic/i.test(m.displayName),
+  );
+}
+
+export function buildShareConsentAnswer(input: {
+  question: string;
+  policyNotice?: string;
+  viewerIsPatient?: boolean;
+}): AgentAnswer {
+  const wantsDaughter = /\bdaughter\b/i.test(input.question);
+  const who = wantsDaughter ? 'your daughter' : 'family or supporters';
+  const answer = input.viewerIsPatient
+    ? `Sharing is controlled by you in People. You choose who can see appointments, results, and documents — nothing goes to ${who} unless you grant it. I can help adjust consent, or open People to change access.`
+    : `I can't change who has access from this viewer. Sharing and consent are controlled by the patient in People. Ask them to review access if they want to share more with ${who}.`;
+  return {
+    answer,
+    facts: [],
+    policyNotice: input.policyNotice || undefined,
+    citations: [],
+    escalation: input.viewerIsPatient
+      ? 'Open People to adjust who can see which topics.'
+      : 'Ask the patient to open People if they want to change sharing.',
+  };
+}
+
 export function buildDeterministicAnswer(input: {
   question: string;
   policyNotice?: string;
@@ -303,11 +333,13 @@ export function buildDeterministicAnswer(input: {
   appointmentAssist?: AppointmentAssist;
   memoriesHint?: string;
   history?: ChatTurn[];
+  viewerIsPatient?: boolean;
 }): AgentAnswer {
   if (input.outcome === 'hold') {
     return {
       answer:
-        'I cannot confirm whether a new result exists or what it shows. It is held until the patient communication state is recorded in CareCircle.',
+        input.policyNotice ||
+        "I can't show that yet — it's waiting for the patient to release it.",
       facts: [],
       policyNotice: input.policyNotice,
       citations: [],
@@ -317,11 +349,59 @@ export function buildDeterministicAnswer(input: {
   if (input.outcome === 'deny') {
     return {
       answer:
-        'That clinical detail is outside your current CareCircle access. I can help with topics the patient has shared with you.',
+        input.policyNotice ||
+        "That isn't shared with your role. I can help with topics the patient has already shared.",
       facts: [],
       policyNotice: input.policyNotice,
       citations: [],
       escalation: 'Ask the patient to review People and access if they want to share more.',
+    };
+  }
+
+  // Sharing / consent / people — never hijack with labs or appointment memory.
+  if (isShareConsentIntent(input.question)) {
+    return buildShareConsentAnswer({
+      question: input.question,
+      policyNotice: input.policyNotice,
+      viewerIsPatient: input.viewerIsPatient,
+    });
+  }
+
+  // Blood pressure / BP — never substitute appointments or unrelated reviews.
+  if (isVitalsBpIntent(input.question)) {
+    const bp = selectBpMeasurements(input.measurements);
+    if (!bp.length) {
+      return {
+        answer: 'There is no blood pressure reading in the live record for this viewer.',
+        facts: [],
+        uncertainty: 'No permitted BP measurements were available.',
+        policyNotice: input.policyNotice || undefined,
+        citations: [],
+      };
+    }
+    const latest = [...bp].sort((a, b) => b.sampledAt.localeCompare(a.sampledAt))[0];
+    const facts = [
+      {
+        text: `Latest blood pressure on record: ${latest.displayName} ${formatNum(latest.value)} ${latest.unit} (sampled ${formatDate(latest.sampledAt)}).`,
+        evidenceIds: [latest.evidenceId],
+      },
+    ];
+    return {
+      answer: proseFromFacts(facts, { short: true }),
+      facts,
+      uncertainty:
+        'This restates what the synthetic record shows. It is not a diagnosis or treatment recommendation.',
+      policyNotice: input.policyNotice || undefined,
+      citations: [
+        {
+          evidenceId: latest.evidenceId,
+          resourceId: latest.resourceId,
+          title: latest.displayName,
+          date: latest.sampledAt,
+          service: latest.service,
+          kind: 'measurement',
+        },
+      ],
     };
   }
 
@@ -333,20 +413,24 @@ export function buildDeterministicAnswer(input: {
   };
 
   const followUp = isFollowUpQuestion(input.question, input.history);
-  const labIntent = LAB_Q.test(input.question) || (followUp && LAB_Q.test((input.history || []).map((t) => t.content).join(' ')));
+  const labIntent = isLabIntent(input.question, input.history);
+  const apptIntent = isAppointmentIntent(input.question);
+  const docIntent = isDocumentIntent(input.question);
   const short = prefersShortPlain(input.memoriesHint, input.question) || followUp;
   const wantsFullPanel = /\b(full|every|all|complete|entire)\b.*\b(panel|result|blood|lab)/i.test(input.question);
   const labPick = selectLabMeasurements(input.question, input.measurements, input.history);
   const labMeasurements = labPick.selected;
 
-  if (labIntent && labPick.focused && !labMeasurements.length) {
+  if (labIntent && !labMeasurements.length) {
     const topicLabel = labPick.topicIds.includes('kidney')
       ? 'kidney / U&E'
       : labPick.topicIds.includes('lft')
         ? 'liver (LFT)'
         : labPick.topicIds.includes('fbc')
           ? 'full blood count'
-          : 'that topic';
+          : labPick.focused
+            ? 'that topic'
+            : 'blood / lab';
     return {
       answer: `I do not see permitted ${topicLabel} measurements in the live record for this viewer. Try another result topic, or refresh after selecting a patient with those labs.`,
       facts: [],
@@ -432,20 +516,25 @@ export function buildDeterministicAnswer(input: {
       }
     }
   } else {
+    // Non-lab asks: only surface events when the question is about appointments/docs/general record — never invent a clinical substitute.
     const relevantEvents = rankEvents(input.question, input.events, {
       labIntent: false,
-      apptIntent: APPT_Q.test(input.question),
-      docIntent: DOC_Q.test(input.question),
-    }).slice(0, 5);
-    for (const ev of relevantEvents) {
-      facts.push({
-        text: formatEventFact(ev),
-        evidenceIds: [ev.evidenceId],
-      });
-      cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+      apptIntent,
+      docIntent,
+    }).slice(0, apptIntent || docIntent ? 5 : 3);
+    // Avoid dumping appointments for vague clinical asks that didn't match lab/vitals routing.
+    const allowEvents = apptIntent || docIntent || /what.*(happening|next|record|care)|status|update/i.test(input.question);
+    if (allowEvents) {
+      for (const ev of relevantEvents) {
+        facts.push({
+          text: formatEventFact(ev),
+          evidenceIds: [ev.evidenceId],
+        });
+        cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+      }
     }
 
-    if (input.measurements.length && /result|value|number|level/i.test(input.question)) {
+    if (input.measurements.length && /result|value|number|level/i.test(input.question) && !apptIntent) {
       const byAnalyte = groupByAnalyte(input.measurements);
       const series = [...byAnalyte.values()].sort((a, b) => b.length - a.length)[0];
       const sorted = [...series].sort((a, b) => a.sampledAt.localeCompare(b.sampledAt));
@@ -459,7 +548,7 @@ export function buildDeterministicAnswer(input: {
   }
 
   let recordedNextStep: AgentAnswer['recordedNextStep'];
-  if (!labIntent || DOC_Q.test(input.question) || /next step|what happens next|follow.?up/i.test(input.question)) {
+  if ((!labIntent && (apptIntent || docIntent)) || docIntent || /next step|what happens next|follow.?up/i.test(input.question)) {
     const next = input.events.find((e) =>
       /follow|task|appoint|action|review/i.test(`${e.title} ${e.summary} ${e.status}`),
     );
@@ -475,7 +564,6 @@ export function buildDeterministicAnswer(input: {
   if (!facts.length) {
     return {
       answer:
-        input.memoriesHint ||
         'The retrieved record for this patient does not contain enough permitted evidence to answer that question. Try another topic from the suggestions, or refresh after selecting a patient with supporting records.',
       facts: [],
       uncertainty: 'No matching permitted evidence was available for this query.',
@@ -486,7 +574,7 @@ export function buildDeterministicAnswer(input: {
   }
 
   const answer =
-    input.appointmentAssist && APPT_Q.test(input.question)
+    input.appointmentAssist && apptIntent
       ? input.appointmentAssist.notice
       : proseFromFacts(facts, {
           short,

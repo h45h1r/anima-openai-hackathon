@@ -11,6 +11,7 @@ import type {
   Relationship,
   Viewer,
 } from '../types/domain.js';
+import { buildUserFacingPolicyNotice, patientFirstName } from './messages.js';
 
 export const INFORMATION_CLASSES: InformationClass[] = [
   'appointments',
@@ -301,7 +302,14 @@ export function evaluateConsent(input: {
   else if (!allowedCount) outcome = 'deny';
   else if (deniedCount || heldCount) outcome = 'partial';
 
-  const userNotice = buildNotice(outcome, [...denied], [...reasonCodes]);
+  const selfViewer = input.policy.viewers.find((v) => v.relationship === 'self');
+  // Default notice (intent-agnostic). Harness may refine with classifyAskIntent.
+  const userNotice = buildUserFacingPolicyNotice({
+    outcome,
+    reasonCodes: [...reasonCodes],
+    deniedInformationClasses: [...denied],
+    patientFirstName: patientFirstName(selfViewer?.displayName),
+  });
   return {
     decisionId,
     outcome,
@@ -312,17 +320,6 @@ export function evaluateConsent(input: {
     userNotice,
     policyVersion: input.policy.policyVersion,
   };
-}
-
-function buildNotice(outcome: ConsentOutcome, denied: InformationClass[], reasons: string[]): string {
-  if (outcome === 'allow') return '';
-  if (outcome === 'hold') {
-    return 'A result is waiting for patient communication before it can be shared with family. No result details are shown.';
-  }
-  if (outcome === 'deny') {
-    return 'CareCircle cannot share that clinical detail with your current access. Ask the patient to update People and access if appropriate.';
-  }
-  return `Some topics were omitted (${denied.join(', ') || 'restricted'}). Reasons: ${reasons.filter((r) => r !== 'ACTIVE_GRANT' && r !== 'SELF_ACCESS').join(', ') || 'partial grant'}.`;
 }
 
 export function filterEvidence<T extends { evidenceId: string }>(items: T[], decision: PolicyDecision): T[] {

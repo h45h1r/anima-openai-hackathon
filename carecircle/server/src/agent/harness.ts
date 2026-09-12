@@ -47,7 +47,9 @@ import {
   buildVisualisation,
   catalogueEvidence,
   clarifyAppointment,
+  classifyAskIntent,
   isFollowUpQuestion,
+  isLabIntent,
   prefersShortPlain,
   proseFromFacts,
   proseMatchesFacts,
@@ -62,6 +64,7 @@ import {
   memoryKinds,
 } from './memoryStore.js';
 import { PROMPT_VERSION } from './prompts.js';
+import { buildUserFacingPolicyNotice, patientFirstName } from '../consent/messages.js';
 
 export type RunAgentInput = {
   client: AnimaClient;
@@ -379,10 +382,30 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
     name: 'grounded_draft',
     execute: async (ctx) => {
       const decision = bag.policyDecision!;
+      const intent = classifyAskIntent(input.question, input.history);
+      emit({ type: 'tool', tool: 'intent.classify', status: 'ok', detail: `intent=${intent}` });
+      appendTrace(ctx, {
+        tool: 'intent.classify',
+        status: 'ok',
+        latencyMs: 0,
+        detail: `intent=${intent}`,
+      });
+
+      const selfViewer = bag.policy.viewers.find((v) => v.relationship === 'self');
+      const policyNotice = buildUserFacingPolicyNotice({
+        outcome: decision.outcome,
+        reasonCodes: decision.reasonCodes,
+        deniedInformationClasses: decision.deniedInformationClasses,
+        intent,
+        patientFirstName: patientFirstName(selfViewer?.displayName),
+      });
+
       const primaryAppt =
-        /^(please )?(find|book|schedule|check).*(appoint|slot)/i.test(input.question.trim()) ||
-        (/\b(appoint(ment)?s?|book(ing)?|slots?)\b/i.test(input.question) &&
-          !/\b(blood|result|lab|lft|alt|alp|egfr|hba1c|explain)\b/i.test(input.question));
+        intent === 'appointment' ||
+        (/^(please )?(find|book|schedule|check).*(appoint|slot)/i.test(input.question.trim()) &&
+          intent !== 'lab' &&
+          intent !== 'share_consent' &&
+          intent !== 'vitals_bp');
       if (primaryAppt && decision.outcome !== 'deny' && decision.outcome !== 'hold') {
         emitStatus('Checking appointments…');
         bag.appointmentAssist = await clarifyAppointment(input.client, bag.allowedEvents, input.question);
@@ -406,7 +429,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       const prefMatch = input.question.match(
         /\b(?:i prefer|prefer|please remember|remember that)\s+([^.?!]{8,120})/i,
       );
-      if (prefMatch) {
+      if (prefMatch && intent !== 'share_consent' && intent !== 'vitals_bp') {
         const saved = await input.memory.remember({
           patientId: input.context.patientId,
           viewerId: input.viewerId,
@@ -425,7 +448,10 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         }
       }
 
-      const visualisationSpec = buildVisualisation(input.question, bag.allowedMeasurements, input.history);
+      const visualisationSpec =
+        intent === 'share_consent' || intent === 'vitals_bp'
+          ? undefined
+          : buildVisualisation(input.question, bag.allowedMeasurements, input.history);
       const memoryPref = bag.memoriesUsed
         .filter((m) => m.metadata.kind === 'preference' || m.metadata.kind === 'clarification' || m.metadata.kind === 'greeting')
         .map((m) => m.content)
@@ -433,14 +459,15 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         .join(' · ');
       bag.answer = buildDeterministicAnswer({
         question: input.question,
-        policyNotice: decision.userNotice,
+        policyNotice: policyNotice || undefined,
         outcome: decision.outcome,
         measurements: bag.allowedMeasurements,
         events: bag.allowedEvents,
         visualisationSpec,
         appointmentAssist: bag.appointmentAssist,
-        memoriesHint: memoryPref || undefined,
+        memoriesHint: intent === 'appointment' || intent === 'lab' ? memoryPref || undefined : undefined,
         history: input.history,
+        viewerIsPatient: input.viewerId === 'patient' || viewerRole === 'self',
       });
 
       ctx.state.update({
@@ -454,7 +481,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         detail:
           decision.outcome === 'deny' || decision.outcome === 'hold'
             ? 'refused without model'
-            : 'deterministic_grounded',
+            : `deterministic_grounded:${intent}`,
       });
     },
   });
@@ -463,8 +490,14 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
     name: 'responses_ask_agent',
     execute: async (ctx) => {
       const outcome = String(ctx.state.policyOutcome || '');
+      const intent = classifyAskIntent(input.question, input.history);
+      // Keep share/consent and empty-BP answers deterministic — model must not invent labs/appts.
+      const lockDeterministic =
+        intent === 'share_consent' ||
+        (intent === 'vitals_bp' && !(bag.answer?.facts || []).length);
       const canModel =
         Boolean(input.openaiApiKey) &&
+        !lockDeterministic &&
         outcome !== 'deny' &&
         outcome !== 'hold' &&
         outcome !== 'pending' &&
@@ -475,13 +508,21 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           tool: 'answer.refine',
           status: 'skipped',
           latencyMs: 0,
-          detail: input.openaiApiKey ? `policy=${outcome}` : 'no_openai_key',
+          detail: lockDeterministic
+            ? `deterministic_lock:${intent}`
+            : input.openaiApiKey
+              ? `policy=${outcome}`
+              : 'no_openai_key',
         });
         emit({
           type: 'tool',
           tool: 'answer.refine',
           status: 'skipped',
-          detail: input.openaiApiKey ? `policy=${outcome}` : 'no_openai_key',
+          detail: lockDeterministic
+            ? `deterministic_lock:${intent}`
+            : input.openaiApiKey
+              ? `policy=${outcome}`
+              : 'no_openai_key',
         });
         // No refine — stream the deterministic answer once (it is the final).
         if (bag.answer?.answer) emitAnswerTokens(bag.answer.answer);
@@ -622,7 +663,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
               bag.memoriesUsed.map((m) => m.content).join(' '),
               input.question,
             ),
-            labIntent: /\b(blood|result|lab|lft|egfr|alt|haemoglobin|hemoglobin)\b/i.test(input.question),
+            labIntent: isLabIntent(input.question, input.history),
             memoriesHint: bag.memoriesUsed.map((m) => m.content).join(' '),
           });
           bag.answer = { ...bag.answer, answer: fallback };
@@ -676,7 +717,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
                     bag.memoriesUsed.map((m) => m.content).join(' '),
                     input.question,
                   ),
-                  labIntent: /\b(blood|result|lab|lft|egfr|alt|haemoglobin|hemoglobin)\b/i.test(input.question),
+                  labIntent: isLabIntent(input.question, input.history),
                 });
             bag.answer = {
               ...bag.answer,
