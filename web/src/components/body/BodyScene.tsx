@@ -11,7 +11,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshSurfaceSampler } from "three/examples/jsm/math/MeshSurfaceSampler.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { SYSTEMS, type SystemId } from "@/lib/body/systems";
-import { loadManifest } from "@/lib/body/assets";
+import { BODY_HEIGHT, ORGAN_FRAME, loadManifest, manifestSystem } from "@/lib/body/assets";
 
 export interface BodySceneProps {
   focus: SystemId | null;
@@ -217,7 +217,13 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
 
     const organs = new THREE.Group();
     scene.add(organs);
-    const organBySystem = new Map<SystemId, THREE.Mesh>();
+    const organsBySystem = new Map<SystemId, THREE.Mesh[]>();
+    const anchorOverride = new Map<SystemId, THREE.Vector3>();
+    const anchorOf = (id: SystemId): [number, number, number] => {
+      const o = anchorOverride.get(id);
+      if (o) return [o.x, o.y, o.z];
+      return SYSTEMS.find((s) => s.id === id)!.anchor;
+    };
     let disposed = false;
 
     const swapPoints = (next: Float32Array) => {
@@ -241,7 +247,7 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
           const gltf = await loader.loadAsync(`/models/${body.file}`);
           const merged = mergedGeometry(gltf.scene);
           if (merged && !disposed) {
-            normaliseBody(merged, body.height ?? 1.8, body.rotation);
+            normaliseBody(merged, body.height ?? BODY_HEIGHT, body.rotation);
             swapPoints(sampleScanlines(merged));
             merged.dispose();
             paint(currentFocus, currentTint);
@@ -250,8 +256,10 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
           console.warn("body model failed, keeping procedural figure", e);
         }
       }
+      const frameScale = (BODY_HEIGHT / ORGAN_FRAME.height);
       for (const entry of manifest.filter((m) => m.kind === "organ" && m.system)) {
-        const def = SYSTEMS.find((d) => d.id === entry.system);
+        const sysId = manifestSystem(entry) as SystemId | undefined;
+        const def = SYSTEMS.find((d) => d.id === sysId);
         if (!def) continue;
         try {
           const gltf = await loader.loadAsync(`/models/${entry.file}`);
@@ -259,22 +267,36 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
           if (!g || disposed) continue;
           g.computeVertexNormals();
           if (entry.rotation) g.rotateX(THREE.MathUtils.degToRad(entry.rotation[0])).rotateY(THREE.MathUtils.degToRad(entry.rotation[1])).rotateZ(THREE.MathUtils.degToRad(entry.rotation[2]));
-          g.computeBoundingBox();
-          const size = new THREE.Vector3();
-          g.boundingBox!.getSize(size);
-          const targetSize = def.radius * 1.5 * (entry.scale ?? 1);
-          const sc = targetSize / (Math.max(size.x, size.y, size.z) || 1);
-          g.scale(sc, sc, sc);
-          g.computeBoundingBox();
-          const c = new THREE.Vector3();
-          g.boundingBox!.getCenter(c);
-          g.translate(-c.x, -c.y, -c.z);
-          const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: new THREE.Color("#8fb6d3"), emissive: new THREE.Color("#8fb6d3"), emissiveIntensity: 0.15, transparent: true, opacity: 0.22, roughness: 0.55, metalness: 0, depthWrite: false }));
           const off = entry.offset ?? [0, 0, 0];
-          m.position.set(def.anchor[0] + off[0], def.anchor[1] + off[1], def.anchor[2] + off[2]);
+          const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: new THREE.Color("#8fb6d3"), emissive: new THREE.Color("#8fb6d3"), emissiveIntensity: 0.15, transparent: true, opacity: 0.22, roughness: 0.55, metalness: 0, depthWrite: false }));
+          if (entry.bboxMin && entry.bboxMax) {
+            // Anatomical frame → normalised figure: feet to 0, one scale for every organ.
+            const sc = frameScale * (entry.scale ?? 1);
+            g.translate(0, -ORGAN_FRAME.feetY, 0);
+            g.scale(sc, sc, sc);
+            m.position.set(off[0], off[1], off[2]);
+            g.computeBoundingBox();
+            const c = new THREE.Vector3();
+            g.boundingBox!.getCenter(c);
+            c.add(m.position);
+            // Several organs can share a system (kidneys + bladder); keep the first as the focus anchor.
+            if (!anchorOverride.has(def.id)) anchorOverride.set(def.id, c);
+          } else {
+            g.computeBoundingBox();
+            const size = new THREE.Vector3();
+            g.boundingBox!.getSize(size);
+            const targetSize = def.radius * 1.5 * (entry.scale ?? 1);
+            const sc = targetSize / (Math.max(size.x, size.y, size.z) || 1);
+            g.scale(sc, sc, sc);
+            g.computeBoundingBox();
+            const c = new THREE.Vector3();
+            g.boundingBox!.getCenter(c);
+            g.translate(-c.x, -c.y, -c.z);
+            m.position.set(def.anchor[0] + off[0], def.anchor[1] + off[1], def.anchor[2] + off[2]);
+          }
           m.userData.system = def.id;
           organs.add(m);
-          organBySystem.set(def.id, m);
+          organsBySystem.set(def.id, [...(organsBySystem.get(def.id) ?? []), m]);
         } catch (e) {
           console.warn(`organ model ${entry.file} failed`, e);
         }
@@ -320,15 +342,17 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
 
     const paint = (id: SystemId | null, tintHex?: string) => {
       currentTint = tintHex;
-      for (const [sys, mesh] of organBySystem) {
-        const mm = mesh.material as THREE.MeshStandardMaterial;
-        const on = sys === id;
-        const col = new THREE.Color(on ? (tintHex ?? "#6d2e5b") : "#8fb6d3");
-        mm.color.copy(col);
-        mm.emissive.copy(col);
-        mm.emissiveIntensity = on ? 0.55 : 0.12;
-        mm.opacity = on ? 0.92 : id ? 0.1 : 0.22;
-        mm.needsUpdate = true;
+      for (const [sys, meshes] of organsBySystem) {
+        for (const mesh of meshes) {
+          const mm = mesh.material as THREE.MeshStandardMaterial;
+          const on = sys === id;
+          const col = new THREE.Color(on ? (tintHex ?? "#6d2e5b") : "#8fb6d3");
+          mm.color.copy(col);
+          mm.emissive.copy(col);
+          mm.emissiveIntensity = on ? 0.55 : 0.12;
+          mm.opacity = on ? 0.92 : id ? 0.08 : 0.2;
+          mm.needsUpdate = true;
+        }
       }
       const c = new THREE.Color();
       const t = new THREE.Color(tintHex ?? "#6d2e5b");
@@ -338,7 +362,7 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
         const y = positions[i * 3 + 1];
         const z = positions[i * 3 + 2];
         if (def) {
-          const [ax, ay, az] = def.anchor;
+          const [ax, ay, az] = anchorOf(def.id);
           const d = Math.hypot(x - ax, y - ay, z - az);
           const w = Math.max(0, 1 - d / def.radius);
           c.copy(BASE_DIM).lerp(t, Math.pow(w, 0.6));
@@ -351,13 +375,14 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
         colors[i * 3 + 2] = c.b;
       }
       geo.attributes.color.needsUpdate = true;
-      ring.visible = !(def && organBySystem.has(def.id));
+      ring.visible = !(def && organsBySystem.has(def.id));
       if (def) {
-        ring.position.set(def.anchor[0], def.anchor[1], def.anchor[2] + 0.02);
+        const [ax, ay, az] = anchorOf(def.id);
+        ring.position.set(ax, ay, az + 0.02);
         ring.scale.setScalar(def.radius * 2.6);
         (ring.material as THREE.SpriteMaterial).color.set(tintHex ?? "#6d2e5b");
-        targetLook.set(0, def.anchor[1], 0);
-        targetDist = 2.1;
+        targetLook.set(ax * 0.5, ay, 0);
+        targetDist = organsBySystem.has(def.id) ? 1.7 : 2.1;
       } else {
         targetLook.set(0, 0.95, 0);
         targetDist = 3.4;
@@ -392,7 +417,8 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       let best: { id: SystemId; d: number } | null = null;
       const v = new THREE.Vector3();
       for (const s of SYSTEMS) {
-        v.set(s.anchor[0], s.anchor[1], s.anchor[2]).project(camera);
+        const [ax, ay, az] = anchorOf(s.id);
+        v.set(ax, ay, az).project(camera);
         const px = ((v.x + 1) / 2) * rect.width + rect.left;
         const py = ((1 - v.y) / 2) * rect.height + rect.top;
         const d = Math.hypot(px - e.clientX, py - e.clientY);
@@ -441,9 +467,11 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
       disposed = true;
       cancelAnimationFrame(raf);
       ro.disconnect();
-      for (const m of organBySystem.values()) {
-        m.geometry.dispose();
-        (m.material as THREE.Material).dispose();
+      for (const meshes of organsBySystem.values()) {
+        for (const m of meshes) {
+          m.geometry.dispose();
+          (m.material as THREE.Material).dispose();
+        }
       }
       renderer.domElement.removeEventListener("pointerdown", onDown);
       renderer.domElement.removeEventListener("pointerup", onUp);

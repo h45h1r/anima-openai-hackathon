@@ -1,0 +1,453 @@
+[
+  {
+    "id": "body",
+    "file": "body.glb",
+    "kind": "body",
+    "title": "SOMA-X \"Anny\" base body",
+    "source": "https://github.com/NVlabs/SOMA-X (assets/Anny/base_body.obj)",
+    "sourceId": "NVlabs/SOMA-X assets/Anny/base_body.obj",
+    "sourceFiles": [
+      "elanor-twin/public/models/soma-x-base-body.obj (repo copy, sha256 7bf31cb…6504, byte-identical to upstream assets/Anny/base_body.obj)"
+    ],
+    "author": "NVIDIA (SOMA-X); Anny topology by NAVER Corp.",
+    "license": "Apache-2.0",
+    "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+    "triangles": 27420,
+    "vertices": 13718,
+    "bytes": 495056,
+    "bbox": {
+      "x": 1.0336,
+      "y": 1.6262,
+      "z": 0.4195
+    },
+    "bboxMin": [
+      -0.5168,
+      -0.8517,
+      -0.0287
+    ],
+    "bboxMax": [
+      0.5168,
+      0.7745,
+      0.3908
+    ],
+    "center": [
+      0,
+      -0.0386,
+      0.181
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 1,
+    "materials": 1,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Full adult, gender-neutral base body in a relaxed A-pose (arms slightly away from the torso, palms inward, feet apart), untextured, no UVs. Converted from OBJ (13,710 quads fan-triangulated to 27,420 triangles), welded, smooth normals computed, a plain skin-toned opaque material added. Units are metres, Y-up, 1.626 m tall; the origin is at hip height and the mesh is offset forward on z (z -0.029..0.391), so its z-centre (~0.18) does not coincide with the HRA organ frame (organs sit around z -0.15..0.05 with feet at y -0.79): position organs relative to the body explicitly rather than assuming a shared origin. The SOMA-X README notes optional third-party models keep their own terms; the Anny model is itself Apache-2.0 (code, NAVER Corp.) with MakeHuman/MPFB2-derived mesh assets under CC0 1.0."
+  },
+  {
+    "id": "heart",
+    "file": "heart.glb",
+    "kind": "organ",
+    "system": "heart",
+    "title": "Heart, Female",
+    "source": "https://3d.nih.gov/entries/3DPX-020966",
+    "sourceId": "3DPX-020966",
+    "sourceFiles": [
+      "VH_F_Heart.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 60005,
+    "vertices": 30571,
+    "bytes": 1228600,
+    "bbox": {
+      "x": 0.1425,
+      "y": 0.11,
+      "z": 0.1015
+    },
+    "bboxMin": [
+      -0.035,
+      0.3891,
+      -0.1066
+    ],
+    "bboxMax": [
+      0.1076,
+      0.499,
+      -0.0051
+    ],
+    "center": [
+      0.0363,
+      0.4441,
+      -0.0559
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 14,
+    "materials": 1,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Whole heart with chambers, septum, valves and papillary muscles as 14 named sub-meshes (VH_F_*). Derived by HRA from the NLM Visible Human Project female dataset (Spitzer & Whitlock 2002). Decimated 85,914 -> ~60,000 triangles; smooth normals recomputed."
+  },
+  {
+    "id": "lungs",
+    "file": "lungs.glb",
+    "kind": "organ",
+    "system": "lungs",
+    "title": "Lung, Female",
+    "source": "https://3d.nih.gov/entries/3DPX-020974",
+    "sourceId": "3DPX-020974",
+    "sourceFiles": [
+      "3d-vh-f-lung.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 60021,
+    "vertices": 31495,
+    "bytes": 1546312,
+    "bbox": {
+      "x": 0.2509,
+      "y": 0.223,
+      "z": 0.1526
+    },
+    "bboxMin": [
+      -0.1305,
+      0.3671,
+      -0.1564
+    ],
+    "bboxMax": [
+      0.1204,
+      0.5901,
+      -0.0039
+    ],
+    "center": [
+      -0.005,
+      0.4786,
+      -0.0801
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 15,
+    "materials": 3,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Both lungs with lobes / bronchopulmonary segments and intrapulmonary bronchi (trachea and main bronchi are not included in this HRA object). Derived by HRA from the NLM Visible Human Project female dataset (Spitzer & Whitlock 2002). 56 sub-meshes were joined by material (3 materials, 15 meshes remain), decimated 297,097 -> ~60,000 triangles; smooth normals recomputed."
+  },
+  {
+    "id": "kidneys",
+    "file": "kidneys.glb",
+    "kind": "organ",
+    "system": "kidneys",
+    "title": "Kidney, Female, Left + Kidney, Female, Right",
+    "source": "https://3d.nih.gov/entries/3DPX-020967 ; https://3d.nih.gov/entries/3DPX-020968",
+    "sourceId": "3DPX-020967 + 3DPX-020968",
+    "sourceFiles": [
+      "VH_F_Kidney_L.glb",
+      "VH_F_Kidney_R.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 59970,
+    "vertices": 30411,
+    "bytes": 1118948,
+    "bbox": {
+      "x": 0.2219,
+      "y": 0.1249,
+      "z": 0.0776
+    },
+    "bboxMin": [
+      -0.1087,
+      0.1758,
+      -0.1394
+    ],
+    "bboxMax": [
+      0.1132,
+      0.3006,
+      -0.0618
+    ],
+    "center": [
+      0.0022,
+      0.2382,
+      -0.1006
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 29,
+    "materials": 3,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Pair of kidneys merged from the two HRA entries (left 3DPX-020967, right 3DPX-020968) into one scene; each keeps its capsule, cortex/medulla and renal pyramids as named sub-meshes (VH_F_*_L / _R). Derived by HRA from the NLM Visible Human Project female dataset (Spitzer & Whitlock 2002). Decimated 147,071 -> ~60,000 triangles; smooth normals recomputed."
+  },
+  {
+    "id": "liver",
+    "file": "liver.glb",
+    "kind": "organ",
+    "system": "liver",
+    "title": "Liver, Female",
+    "source": "https://3d.nih.gov/entries/3DPX-020973",
+    "sourceId": "3DPX-020973",
+    "sourceFiles": [
+      "VH_F_Liver.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 59969,
+    "vertices": 31289,
+    "bytes": 1136412,
+    "bbox": {
+      "x": 0.2471,
+      "y": 0.17,
+      "z": 0.1663
+    },
+    "bboxMin": [
+      -0.1349,
+      0.2625,
+      -0.1538
+    ],
+    "bboxMax": [
+      0.1122,
+      0.4325,
+      0.0124
+    ],
+    "center": [
+      -0.0113,
+      0.3475,
+      -0.0707
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 26,
+    "materials": 2,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Liver segments, lobes, ligaments and impressions as 26 named sub-meshes. Derived by HRA from the NLM Visible Human Project female dataset (Spitzer & Whitlock 2002). Decimated 93,303 -> ~60,000 triangles; smooth normals recomputed. Base colour is very dark (0.07,0.02,0.01) - consider overriding the material."
+  },
+  {
+    "id": "brain",
+    "file": "brain.glb",
+    "kind": "organ",
+    "system": "mind",
+    "title": "Brain, Female",
+    "source": "https://3d.nih.gov/entries/3DPX-020959",
+    "sourceId": "3DPX-020959",
+    "sourceFiles": [
+      "3d-vh-f-allen-brain.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 59824,
+    "vertices": 30201,
+    "bytes": 1087440,
+    "bbox": {
+      "x": 0.1357,
+      "y": 0.1456,
+      "z": 0.1665
+    },
+    "bboxMin": [
+      -0.0741,
+      0.7114,
+      -0.1478
+    ],
+    "bboxMax": [
+      0.0616,
+      0.857,
+      0.0187
+    ],
+    "center": [
+      -0.0063,
+      0.7842,
+      -0.0646
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 3,
+    "materials": 2,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Whole brain derived by HRA from the Allen Human Brain Reference Atlas (Ding et al. 2016), mirrored and scaled to the Visible Human Female; the entry states the model was re-licensed CC BY 4.0 in v1.3. 283 anatomical sub-meshes were joined by material (2 materials, 3 meshes remain, sub-structure names are lost) and decimated 656,268 -> ~60,000 triangles; smooth normals recomputed."
+  },
+  {
+    "id": "gut",
+    "file": "gut.glb",
+    "kind": "organ",
+    "system": "digestive",
+    "title": "Large Intestine, Female + Small Intestine, Female",
+    "source": "https://3d.nih.gov/entries/3DPX-020971 ; https://3d.nih.gov/entries/3DPX-020987",
+    "sourceId": "3DPX-020971 + 3DPX-020987",
+    "sourceFiles": [
+      "SBU_F_Intestine_Large.glb",
+      "VH_F_Small_Intestine.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 49982,
+    "vertices": 25752,
+    "bytes": 937304,
+    "bbox": {
+      "x": 0.2433,
+      "y": 0.3094,
+      "z": 0.1934
+    },
+    "bboxMin": [
+      -0.1265,
+      -0.0133,
+      -0.1465
+    ],
+    "bboxMax": [
+      0.1168,
+      0.2961,
+      0.0469
+    ],
+    "center": [
+      -0.0048,
+      0.1414,
+      -0.0498
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 19,
+    "materials": 2,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Colon (caecum, appendix, ascending/transverse/descending/sigmoid colon, rectum) plus small intestine (duodenum, jejunum, ileum) merged into one scene, 19 named sub-meshes. HRA notes the female colon was modelled to follow the Visible Human Female path (not direct imaging data). No stomach is included (no suitably licensed clean stomach model found). Decimated 64,173 -> ~50,000 triangles; smooth normals recomputed."
+  },
+  {
+    "id": "joint",
+    "file": "joint.glb",
+    "kind": "organ",
+    "system": "joints",
+    "title": "Knee, Female, Left",
+    "source": "https://3d.nih.gov/entries/3DPX-020969",
+    "sourceId": "3DPX-020969",
+    "sourceFiles": [
+      "VH_F_Knee_L.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 17844,
+    "vertices": 9288,
+    "bytes": 350168,
+    "bbox": {
+      "x": 0.1016,
+      "y": 0.7718,
+      "z": 0.1105
+    },
+    "bboxMin": [
+      0.0678,
+      -0.7331,
+      -0.1233
+    ],
+    "bboxMax": [
+      0.1694,
+      0.0387,
+      -0.0128
+    ],
+    "center": [
+      0.1186,
+      -0.3472,
+      -0.068
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 20,
+    "materials": 2,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Left knee joint: distal femur, patella, tibia, fibula, condyles, cartilage and meniscus as 20 named sub-meshes; the bbox is 0.77 m tall because the full femur/tibia shafts are included. Derived by HRA from the NLM Visible Human Project female dataset (Spitzer & Whitlock 2002). Not decimated (17,844 triangles); original normals kept."
+  },
+  {
+    "id": "pancreas",
+    "file": "pancreas.glb",
+    "kind": "organ",
+    "system": "metabolic",
+    "title": "Pancreas, Female",
+    "source": "https://3d.nih.gov/entries/3DPX-020983",
+    "sourceId": "3DPX-020983",
+    "sourceFiles": [
+      "3d-vh-f-pancreas.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 12894,
+    "vertices": 26347,
+    "bytes": 715208,
+    "bbox": {
+      "x": 0.172,
+      "y": 0.0565,
+      "z": 0.0844
+    },
+    "bboxMin": [
+      -0.054,
+      0.2375,
+      -0.1121
+    ],
+    "bboxMax": [
+      0.1181,
+      0.2941,
+      -0.0277
+    ],
+    "center": [
+      0.0321,
+      0.2658,
+      -0.0699
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 5,
+    "materials": 1,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Pancreas head, neck, body, tail and uncinate process as 5 named sub-meshes. Derived by HRA from the NLM Visible Human Project female dataset (Spitzer & Whitlock 2002). Not decimated (12,894 triangles); original normals kept."
+  },
+  {
+    "id": "bladder",
+    "file": "bladder.glb",
+    "kind": "organ",
+    "system": "kidneys",
+    "title": "Urinary Bladder, Female",
+    "source": "https://3d.nih.gov/entries/3DPX-020995",
+    "sourceId": "3DPX-020995",
+    "sourceFiles": [
+      "VH_F_Urinary_Bladder.glb"
+    ],
+    "author": "HRA (Human Reference Atlas 3D Reference Object Library; NIH 3D user \"HRA\")",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "triangles": 29994,
+    "vertices": 15575,
+    "bytes": 560472,
+    "bbox": {
+      "x": 0.052,
+      "y": 0.0442,
+      "z": 0.0617
+    },
+    "bboxMin": [
+      -0.0405,
+      -0.018,
+      -0.0593
+    ],
+    "bboxMax": [
+      0.0114,
+      0.0262,
+      0.0024
+    ],
+    "center": [
+      -0.0146,
+      0.0041,
+      -0.0284
+    ],
+    "units": "m",
+    "up": "Y",
+    "meshes": 6,
+    "materials": 1,
+    "animations": 0,
+    "skins": 0,
+    "notes": "Urinary bladder dome, base, neck, trigone and ureteral orifices as 6 named sub-meshes. Derived by HRA from the NLM Visible Human Project female dataset (Spitzer & Whitlock 2002). Decimated 41,290 -> ~30,000 triangles; smooth normals recomputed."
+  }
+]

@@ -5,7 +5,7 @@
 import type { AppState, Category, Condition, LabResult, Medication } from "../types";
 import { canAccess } from "../types";
 
-export type SystemId = "heart" | "kidneys" | "metabolic" | "blood" | "liver" | "lungs" | "joints" | "mind";
+export type SystemId = "heart" | "kidneys" | "metabolic" | "blood" | "liver" | "lungs" | "gut" | "joints" | "mind";
 
 export interface SystemDef {
   id: SystemId;
@@ -27,6 +27,7 @@ export const SYSTEMS: SystemDef[] = [
   { id: "metabolic", label: "Blood sugar & metabolism", short: "Sugar", blurb: "Diabetes control over the last three months", analytes: ["hba1c"], conditions: /diabet|glucose|sugar|thyroid|weight|obes/i, medicines: /metformin|gliclazide|insulin|dapagliflozin/i, category: "lab_results", anchor: [0, 1.12, 0.09], radius: 0.14 },
   { id: "liver", label: "Liver", short: "Liver", blurb: "Liver enzymes and protein", analytes: ["alt", "alp", "alkaline-phosphatase", "bilirubin", "albumin", "ggt"], conditions: /liver|hepat|gallbladder|biliary/i, medicines: /ursodeoxycholic/i, category: "lab_results", anchor: [-0.1, 1.14, 0.07], radius: 0.13 },
   { id: "blood", label: "Blood & immunity", short: "Blood", blurb: "Blood counts, infection and inflammation", analytes: ["haemoglobin", "white-cell-count", "neutrophils", "platelets", "mcv", "crp"], conditions: /anaemi|infection|immun|inflamm|sepsis/i, medicines: /ferrous|folic|b12/i, category: "lab_results", anchor: [0.16, 0.95, 0.02], radius: 0.12 },
+  { id: "gut", label: "Gut & digestion", short: "Gut", blurb: "Stomach, bowel and appetite", analytes: [], conditions: /bowel|stomach|reflux|constipat|coeliac|ibs|digest|diverticul|gastro|appetite/i, medicines: /omeprazole|lansoprazole|laxido|macrogol|senna|loperamide/i, category: "conditions", anchor: [0, 1.0, 0.05], radius: 0.16 },
   { id: "joints", label: "Bones & joints", short: "Joints", blurb: "Arthritis, mobility, frailty and falls", analytes: [], conditions: /arthrit|musculoskel|joint|frail|fall|mobility|osteo|back pain|fracture/i, medicines: /paracetamol|alendronic|colecalciferol|naproxen|ibuprofen|diclofenac/i, category: "conditions", anchor: [0.11, 0.48, 0.02], radius: 0.2 },
   { id: "mind", label: "Mind & sleep", short: "Mind", blurb: "Mood, memory and sleep", analytes: [], conditions: /sleep|mood|anxiet|depress|mental|memory|dementia|stress|wellbeing|loneli/i, medicines: /sertraline|citalopram|mirtazapine|zopiclone|donepezil/i, category: "mental_health", anchor: [0, 1.62, 0.02], radius: 0.13 },
 ];
