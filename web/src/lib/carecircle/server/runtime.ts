@@ -58,6 +58,9 @@ function requireSession(headers: Headers, body?: Record<string, unknown>, query?
   if (!id) return { error: jsonError(401, "missing_session") as JsonResult };
   const session = careStore().getSession(id);
   if (!session || (!session.animaApiKey && session.dataSource !== 'neon')) return { error: jsonError(401, "disconnected") as JsonResult };
+  if (process.env.DATABASE_URL && session.dataSource !== 'neon') {
+    return { session: careStore().updateSession(session.sessionId, { dataSource: 'neon', animaBaseUrl: 'neon', animaApiKey: '' }) };
+  }
   return { session };
 }
 
@@ -316,7 +319,7 @@ async function handleCareApiInScope(req: Request, pathParts: string[]): Promise<
       dataSource: process.env.DATABASE_URL ? "neon" : "anima",
       openaiConfigured,
       openaiModel: openaiConfigured ? resolveAskModel(process.env.OPENAI_MODEL) : null,
-      animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY || process.env.SIM_API_KEY),
+      animaEnvKeyConfigured: !process.env.DATABASE_URL && Boolean(process.env.ANIMA_API_KEY || process.env.SIM_API_KEY),
       animaTeamNameConfigured: Boolean(process.env.ANIMA_TEAM_NAME),
       askTransport: ["sse", "rest"],
       ssePath: "/api/care/ask/stream",

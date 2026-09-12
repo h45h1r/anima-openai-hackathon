@@ -297,7 +297,7 @@ export function listDemoPatients(activeSimId?: string) {
 /** Search live sim directory for the patient picker (demo + live judging). */
 export async function searchPatientsForPicker(q: string) {
   const query = q.trim();
-  if (!query) {
+  if (!query && !process.env.DATABASE_URL) {
     return { total: DEMO_PATIENTS.length, items: listDemoPatients() };
   }
   if (!simConfigured()) {
