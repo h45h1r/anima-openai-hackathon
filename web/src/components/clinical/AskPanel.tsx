@@ -88,18 +88,8 @@ export default function AskPanel({
             <KindredMark size={26} />
           </div>
           <p className="text-[15px] leading-relaxed text-ink">
-            Clinical Ask runs inside Kindred. Add your Anima key and restart the app.
+            We couldn’t connect to your record. Please try again.
           </p>
-          <ol className="mt-4 space-y-2 text-left text-sm leading-relaxed text-muted">
-            <li>
-              Set <code className="rounded bg-paper px-1 text-ink">ANIMA_API_KEY</code> in{" "}
-              <code className="rounded bg-paper px-1 text-ink">web/.env.local</code>
-            </li>
-            <li>
-              Restart with <code className="rounded bg-paper px-1 text-ink">npm run dev</code>
-            </li>
-            <li>Open Ask in this same Kindred tab</li>
-          </ol>
           <button
             type="button"
             onClick={() => care.retry()}

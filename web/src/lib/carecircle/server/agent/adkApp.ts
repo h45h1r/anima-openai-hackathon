@@ -108,6 +108,7 @@ export function cacheFriendlyContext(app: CareCircleAdkApp) {
     const dynamicBlock =
       outcome === 'allow' || outcome === 'partial'
         ? [
+            `CURRENT_QUESTION: ${String(ctx.state.question || "")}`,
             `DYNAMIC_CONTEXT (not cached):`,
             `authenticatedViewerId=${viewerId}`,
             `viewerRole=${viewerRole}`,
@@ -118,6 +119,7 @@ export function cacheFriendlyContext(app: CareCircleAdkApp) {
             `Never invent numbers. Prefer short plain language when memories ask for it.`,
           ].join('\n\n')
         : [
+            `CURRENT_QUESTION: ${String(ctx.state.question || "")}`,
             `DYNAMIC_CONTEXT (not cached):`,
             `authenticatedViewerId=${viewerId}`,
             `viewerRole=${viewerRole}`,

@@ -1,3 +1,4 @@
+import { NeonClinicalClient } from './neon/client';
 import { canonicalPolicy, saveCanonicalPolicy } from './consent/canonical';
 /**
  * In-process clinical Ask runtime (ported from CareCircle Express).
@@ -56,11 +57,12 @@ function requireSession(headers: Headers, body?: Record<string, unknown>, query?
   const id = sessionIdFrom(headers, body, query);
   if (!id) return { error: jsonError(401, "missing_session") as JsonResult };
   const session = careStore().getSession(id);
-  if (!session?.animaApiKey) return { error: jsonError(401, "disconnected") as JsonResult };
+  if (!session || (!session.animaApiKey && session.dataSource !== 'neon')) return { error: jsonError(401, "disconnected") as JsonResult };
   return { session };
 }
 
 function clientFor(session: SessionState) {
+  if (process.env.DATABASE_URL) return new NeonClinicalClient();
   return new AnimaClient({ baseUrl: session.animaBaseUrl, apiKey: session.animaApiKey });
 }
 
@@ -151,7 +153,13 @@ async function loadContext(
   await Promise.all(uniqueSites.map(async site => {
     try {
       const view = await client.getView(site, patientId, 500, 0);
-      siteResources.push({ site, resources: view.resources || [], now: view.now });
+      const resources = [...(view.resources || [])];
+      while (resources.length < view.resourceTotal) {
+        const page = await client.getView(site, patientId, 500, resources.length);
+        if (!page.resources.length) throw new AnimaClientError('The patient record could not be fully loaded.', 'unavailable');
+        resources.push(...page.resources);
+      }
+      siteResources.push({ site, resources, now: view.now });
     } catch (err) {
       errors.push({
         site,
@@ -304,6 +312,8 @@ async function handleCareApiInScope(req: Request, pathParts: string[]): Promise<
     return Response.json({
       ok: true,
       service: "kindred-care",
+      databaseConfigured: Boolean(process.env.DATABASE_URL),
+      dataSource: process.env.DATABASE_URL ? "neon" : "anima",
       openaiConfigured,
       openaiModel: openaiConfigured ? resolveAskModel(process.env.OPENAI_MODEL) : null,
       animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY || process.env.SIM_API_KEY),
@@ -332,6 +342,13 @@ async function dispatchJson(
 ): Promise<JsonResult> {
   try {
     if (method === "POST" && matchPath(pathParts, ["connect"])) {
+      if (process.env.DATABASE_URL) {
+        const team = await new NeonClinicalClient().getTeam();
+        const session = careStore().createSession({ animaBaseUrl: 'neon', animaApiKey: '', dataSource: 'neon',
+          teamLabel: team.team, worldId: team.world, scopes: team.scopes, connectedAt: new Date().toISOString() });
+        return { status: 200, body: { session: careStore().publicSessionView(session), createdWorld: false } };
+      }
+
       const baseUrl = String(process.env.VERCEL ? DEFAULT_BASE : body.baseUrl || DEFAULT_BASE).replace(/\/$/, "");
       let apiKey = String(body.apiKey || process.env.ANIMA_API_KEY || process.env.SIM_API_KEY || "").trim();
       const teamName = String(body.teamName || process.env.ANIMA_TEAM_NAME || "").trim();
@@ -380,7 +397,7 @@ async function dispatchJson(
     if (method === "POST" && matchPath(pathParts, ["disconnect"])) {
       const id = sessionIdFrom(headers, body, query);
       if (id && careStore().getSession(id)) {
-        careStore().updateSession(id, { animaApiKey: "", selectedPatientId: undefined, selectedPatientName: undefined });
+        careStore().updateSession(id, { animaApiKey: "", dataSource: undefined, selectedPatientId: undefined, selectedPatientName: undefined });
       }
       return { status: 200, body: { ok: true } };
     }

@@ -13,6 +13,7 @@ export interface SessionState {
   animaBaseUrl: string;
   /** Server-only; never sent to clients in full */
   animaApiKey: string;
+  dataSource?: 'neon' | 'anima';
   teamLabel?: string;
   worldId?: string;
   scopes: string[];
@@ -199,7 +200,8 @@ export class CareCircleStore {
       connectedAt: session.connectedAt,
       lastSyncAt: session.lastSyncAt,
       keyMasked: masked,
-      connected: Boolean(session.animaApiKey),
+      dataSource: session.dataSource || 'anima',
+      connected: session.dataSource === 'neon' || Boolean(session.animaApiKey),
     };
   }
 }

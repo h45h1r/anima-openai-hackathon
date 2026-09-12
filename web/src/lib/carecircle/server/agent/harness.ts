@@ -1087,7 +1087,8 @@ function stickRefinedProse(input: {
   recordedNextStep?: string;
   addressName?: string;
 }): { answer: string; detail: string; mode: 'ok' | 'repaired' | 'fallback'; keptModelVoice: boolean } {
-  const raw = String(input.prose || '').trim();
+  let raw = String(input.prose || '').trim();
+  if (isLabIntent(input.question, input.history) && input.measurements.length && !input.measurements.some(measurement => raw.includes(String(measurement.value)))) raw = '';
   if (!raw) {
     return {
       answer: formatAskProse([

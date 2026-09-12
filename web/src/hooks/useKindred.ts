@@ -16,7 +16,7 @@ export function useKindred() {
       esRef.current = es;
       es.onopen = () => setConnected(true);
       es.onmessage = (ev) => {
-        if (cancelled) return;
+        if (cancelled || esRef.current !== es) return;
         try {
           setState(JSON.parse(ev.data) as AppState);
         } catch {
@@ -54,7 +54,12 @@ export function useKindred() {
     sendChat: (threadId: string, actorId: string, text: string) => post("/api/chat", { threadId, actorId, text }),
     runProactive: () => post("/api/proactive"),
     reset: () => post("/api/reset"),
-    switchPatient: async (patientId: string) => { const result = await post("/api/patient", { patientId }); setPatientRevision(value => value + 1); return result; },
+    switchPatient: async (patientId: string) => {
+      esRef.current?.close(); esRef.current = null;
+      setState(null); setConnected(false);
+      try { return await post('/api/patient', { patientId }); }
+      finally { setPatientRevision(value => value + 1); }
+    },
     respondRequest: (requestId: string, approve: boolean) => post("/api/consent-request", { requestId, approve }),
   };
 

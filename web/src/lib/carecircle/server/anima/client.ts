@@ -199,6 +199,7 @@ export class AnimaClient {
     const res = await fetch(url, {
       method,
       headers: {
+        ...backendHeaders(this.baseUrl),
         Authorization: `Bearer ${this.apiKey}`,
         Accept: 'application/json',
         'Content-Type': 'application/json',

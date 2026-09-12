@@ -53,6 +53,7 @@ export async function withRuntimeState<T>(work: () => Promise<T>, write = true, 
     return requestStore.run(scope, async () => {
       if (selectedPatientId) await ensureSyntheticCircle(scope.state);
       await refreshConsent(true);
+      if (scope.state.ehr.syncError) throw new Error("Sharing preferences are unavailable. Please try again.");
       scope.state = restoreRuntimeSnapshot(scope.state, saved);
       try {
         const value = await work();

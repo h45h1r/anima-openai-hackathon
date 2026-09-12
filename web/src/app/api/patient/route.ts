@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 async function handleGET(req: Request) {
   const q = new URL(req.url).searchParams.get("q") || "";
   try {
-    if (q.trim()) {
+    if (q.trim() || process.env.DATABASE_URL) {
       const res = await searchPatientsForPicker(q);
       return NextResponse.json({ activePatientId: getActivePatientSimId(), ...res });
     }
