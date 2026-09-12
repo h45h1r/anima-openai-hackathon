@@ -142,7 +142,7 @@ function publicContext(context: ReturnType<typeof buildClinicalContext>) {
   };
 }
 
-async function loadContext(
+export async function loadContext(
   client: AnimaClient,
   patientId: string,
   session: SessionState,
@@ -277,6 +277,7 @@ async function executeAsk(input: {
     openaiModel: resolveAskModel(process.env.OPENAI_MODEL),
     memory: careMemory(),
     onConsentUpdate: saveCanonicalPolicy,
+    refreshPolicy: () => canonicalPolicy(input.patientId, input.session.selectedPatientName || input.patientId),
     onEvent: input.onEvent,
   });
   careStore().addRun(run);
@@ -607,6 +608,7 @@ async function dispatchJson(
         openaiModel: resolveAskModel(process.env.OPENAI_MODEL),
         memory: careMemory(),
         onConsentUpdate: saveCanonicalPolicy,
+        refreshPolicy: () => canonicalPolicy(patientId, session.selectedPatientName || patientId),
       });
       careStore().addRun(run);
       careStore().appendChatTurns(session.sessionId, patientId, authenticatedViewer, [

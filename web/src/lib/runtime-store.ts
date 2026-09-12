@@ -60,7 +60,7 @@ export async function withRuntimeSnapshot<T>(patientId: string, write: boolean,
   try {
     await client.query('BEGIN');
     await client.query("SET LOCAL lock_timeout = '110s'");
-    await client.query("SET LOCAL idle_in_transaction_session_timeout = '130s'");
+    await client.query("SET LOCAL idle_in_transaction_session_timeout = '170s'");
     await client.query('INSERT INTO public.kindred_runtime_state(namespace,patient_id) VALUES($1,$2) ON CONFLICT DO NOTHING', [namespace, patientId]);
     const saved = await client.query('SELECT snapshot FROM public.kindred_runtime_state WHERE namespace=$1 AND patient_id=$2 FOR UPDATE', [namespace, patientId]);
     const result = await work(saved.rows[0].snapshot);

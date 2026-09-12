@@ -146,6 +146,8 @@ export interface ConsentCheck {
 }
 
 export interface ToolTrace {
+  callId?: string;
+  source?: 'model';
   name: string;
   input: unknown;
   summary: string;

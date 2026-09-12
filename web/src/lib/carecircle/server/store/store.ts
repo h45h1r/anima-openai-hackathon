@@ -5,7 +5,7 @@ import type { ConsentPolicyState } from '../consent/policy';
 import { createDefaultPolicy } from '../consent/policy';
 import type { AgentRunResult, ToolObservation } from '../types/domain';
 import type { CareCircleMemoryItem } from '../agent/memoryStore';
-import type { ChatTurn } from '../agent/grounding';
+import type { ChatTurn } from '../types/domain';
 
 export interface SessionState {
   sessionId: string;

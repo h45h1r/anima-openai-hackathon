@@ -5,7 +5,6 @@
  */
 
 import type { ConsentOutcome, InformationClass } from '../types/domain';
-import type { AskIntent } from '../agent/intent';
 
 export function patientFirstName(displayName?: string): string {
   const first = String(displayName || '')
@@ -18,11 +17,9 @@ export function buildUserFacingPolicyNotice(input: {
   outcome: ConsentOutcome;
   reasonCodes: string[];
   deniedInformationClasses: InformationClass[];
-  /** When known, shapes whether a partial catalogue omission is relevant. */
-  intent?: AskIntent;
   patientFirstName?: string;
 }): string {
-  const { outcome, reasonCodes, deniedInformationClasses, intent } = input;
+  const { outcome, reasonCodes, deniedInformationClasses } = input;
   if (outcome === 'allow') return '';
 
   const name = input.patientFirstName || 'the patient';
@@ -45,38 +42,11 @@ export function buildUserFacingPolicyNotice(input: {
     return "That isn’t shared with you yet. Ask them to open Circle if they’d like to share more.";
   }
 
-  // partial — only mention when the ask actually needed blocked clinical topics
-  if (intent === 'share_consent' || intent === 'appointment' || intent === 'vitals_bp') {
-    // BP empty-state answers are enough; suppress unrelated catalogue omissions.
-    // Only surface a hold notice if results are held and the viewer might otherwise expect labs.
-  if (intent === 'vitals_bp' && held && deniedInformationClasses.includes('laboratory_results')) {
-      return `I can’t show that yet — it’s waiting for ${name} to release it. You can ask them in Circle.`;
-    }
-    return '';
-  }
-
-  const needsLabs = intent === 'lab' || intent === undefined;
-  const labsBlocked =
-    deniedInformationClasses.includes('laboratory_results') ||
-    deniedInformationClasses.includes('clinical_documents');
-
-  if (needsLabs && labsBlocked) {
-    if (held) {
-      return `I can’t show that yet — it’s waiting for ${name} to release it. You can ask them in Circle.`;
-    }
-    if (notGranted) {
-      return "That isn’t shared with you yet. Ask them to open Circle if they’d like to share more.";
-    }
-  }
-
-  if (intent === 'general' || intent === 'document') {
-    return '';
-  }
 
   if (held) {
     return `I can’t show that yet — it’s waiting for ${name} to release it. You can ask them in Circle.`;
   }
-  if (notGranted && labsBlocked) {
+  if (notGranted && deniedInformationClasses.length > 0) {
     return "That isn’t shared with you yet. Ask them to open Circle if they’d like to share more.";
   }
   return '';

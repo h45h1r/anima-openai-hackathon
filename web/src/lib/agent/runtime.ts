@@ -12,7 +12,7 @@ import { personById, type Message, type ToolTrace } from "../types";
 import { systemPrompt } from "./prompts";
 import { runTool, toAnthropicTools, toolsForActor, type ToolDef, type ToolResult } from "./tools";
 import { scriptedTurn } from "./scripted";
-import { openaiTurn } from "./openai";
+import { adkTurn } from "./adk";
 
 export interface TurnOpts {
   threadId: string;
@@ -29,7 +29,7 @@ export async function agentTurn(opts: TurnOpts): Promise<Message> {
   addAudit({ kind: "agent.turn", actorId, summary: `${personById(state, actorId).shortName} asked Kindred: “${text.slice(0, 80)}${text.length > 80 ? "…" : ""}”`, detail: { model: state.agentModel } });
 
   try {
-    if (state.agentMode === "openai") await openaiTurn(placeholder.id, threadId, actorId, text);
+    if (state.agentMode === "openai") await adkTurn(placeholder.id, threadId, actorId, text);
     else if (state.agentMode === "claude") await claudeTurn(placeholder.id, threadId, actorId, text);
     else await scriptedTurn(placeholder.id, threadId, actorId, text);
   } catch (e) {

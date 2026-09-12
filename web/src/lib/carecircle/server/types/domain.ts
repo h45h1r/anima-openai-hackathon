@@ -1,3 +1,5 @@
+export type ChatTurn = { role: 'user' | 'assistant'; content: string };
+
 /** Shared CareCircle domain types */
 
 export type InformationClass =
@@ -199,6 +201,9 @@ export interface AppointmentAssist {
 
 export interface ToolObservation {
   tool: string;
+  callId?: string;
+  arguments?: Record<string, unknown>;
+  source?: 'model';
   status: 'ok' | 'error' | 'skipped';
   latencyMs: number;
   detail: string;

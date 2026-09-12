@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { agentTurn } from "@/lib/agent/runtime";
 import { ensureLoaded } from "@/lib/store";
 
-export const maxDuration = 120;
+export const maxDuration = 180;
 
 async function handlePOST(req: Request) {
   const body = (await req.json()) as { threadId: string; actorId: string; text: string };
