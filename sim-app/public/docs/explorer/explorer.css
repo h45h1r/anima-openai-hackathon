@@ -1,0 +1,14 @@
+body { margin: 0; background: #f8f8f3; color: #233a35; font-family: 'Avenir Next', 'Segoe UI', sans-serif; }
+a { color: #126354; }
+.explorer-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 28px; border-bottom: 1px solid #dbe2db; }
+.explorer-header > a { color: #233a35; font-weight: 700; text-decoration: none; }
+.explorer-header nav { display: flex; flex-wrap: wrap; gap: 20px; font-size: 14px; }
+.explorer-intro { max-width: 1400px; margin: 30px auto 16px; padding: 0 20px; }
+.explorer-intro h1 { font-size: 32px; letter-spacing: -.04em; margin-bottom: 12px; }
+.explorer-intro p { max-width: 95ch; line-height: 1.6; }
+.swagger-ui .information-container { background: transparent; }
+.swagger-ui .info { margin: 22px 0; }
+.swagger-ui .scheme-container { background: #eef2e9; box-shadow: none; }
+.swagger-ui .opblock { background-color: white; }
+.swagger-ui .wrapper { max-width: 1440px; }
+@media(max-width: 700px) { .explorer-header { align-items: flex-start; flex-direction: column; padding: 16px 20px; } .explorer-header nav { gap: 12px; } }

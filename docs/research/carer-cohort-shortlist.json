@@ -1,0 +1,102 @@
+{
+  "ageAsOf": "2026-09-12",
+  "criteria": "Demo examples chosen from the fully retrieved carer-involvement directory cohort; not clinical risk ranking.",
+  "patients": [
+    {
+      "id": "SIM-000001",
+      "name": "Amira Khan",
+      "birthDate": "1952-05-12",
+      "age": 74,
+      "conditions": [
+        "Heart failure",
+        "CKD"
+      ],
+      "needs": [
+        "Home visit",
+        "Carer involvement"
+      ],
+      "goals": [
+        "Understand the next step",
+        "Avoid unnecessary travel",
+        "Stay at home with a clear contact for help"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "SIM-000015",
+      "name": "Grace Shah",
+      "birthDate": "1959-01-23",
+      "age": 67,
+      "conditions": [
+        "Asthma",
+        "Diabetes",
+        "Arthritis"
+      ],
+      "needs": [
+        "Carer involvement"
+      ],
+      "goals": [
+        "Understand the next step",
+        "Avoid unnecessary travel"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "SIM-000048",
+      "name": "Grace Ahmed",
+      "birthDate": "1961-12-09",
+      "age": 64,
+      "conditions": [
+        "Asthma",
+        "Arthritis"
+      ],
+      "needs": [
+        "Offline contact",
+        "Carer involvement"
+      ],
+      "goals": [
+        "Understand the next step",
+        "Avoid unnecessary travel"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "SIM-000244",
+      "name": "Daniel Patel",
+      "birthDate": "1951-05-07",
+      "age": 75,
+      "conditions": [
+        "Diabetes",
+        "Heart failure"
+      ],
+      "needs": [
+        "Interpreter",
+        "Carer involvement"
+      ],
+      "goals": [
+        "Understand the next step",
+        "Avoid unnecessary travel"
+      ],
+      "synthetic": true
+    },
+    {
+      "id": "SIM-000304",
+      "name": "Aisha Okafor",
+      "birthDate": "1931-06-04",
+      "age": 95,
+      "conditions": [
+        "Hypertension",
+        "CKD",
+        "Heart failure"
+      ],
+      "needs": [
+        "Carer involvement"
+      ],
+      "goals": [
+        "Understand the next step",
+        "Avoid unnecessary travel"
+      ],
+      "synthetic": true
+    }
+  ]
+}

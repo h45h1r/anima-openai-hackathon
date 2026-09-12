@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f2f4f1;
+  --card: #ffffff;
+  --ink: #14261f;
+  --muted: #5f6d66;
+  --line: #d8ded9;
+  --moss: #2f6b4f;
+  --moss-deep: #1e4a36;
+  --moss-soft: #e4eee8;
+  --plum: #6d2e5b;
+  --plum-soft: #f1e4ec;
+  --amber: #c98a1e;
+  --amber-soft: #fbf1dc;
+  --rust: #c2572f;
+  --sky-soft: #e6eef6;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-moss: var(--moss);
+  --color-moss-deep: var(--moss-deep);
+  --color-moss-soft: var(--moss-soft);
+  --color-plum: var(--plum);
+  --color-plum-soft: var(--plum-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-rust: var(--rust);
+  --color-sky-soft: var(--sky-soft);
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+:root {
+  --header-h: 3.5rem;
+  --tabbar-h: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 4rem;
+    --tabbar-h: 0px;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* Full-height working area between the header and the mobile tab bar */
+.app-main-h {
+  height: calc(100dvh - var(--header-h) - var(--tabbar-h));
+}
+
+/* Scrolling page content; clears the mobile tab bar */
+.page {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1rem 1rem calc(var(--tabbar-h) + 1.5rem);
+}
+@media (min-width: 640px) {
+  .page { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+@media (min-width: 1024px) {
+  .page { padding: 1.5rem 2rem 3rem; }
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Subtle paper grain so the page isn't a flat grey */
+.paper-grain {
+  background-image:
+    radial-gradient(at 20% 0%, rgba(47, 107, 79, 0.06), transparent 50%),
+    radial-gradient(at 100% 100%, rgba(109, 46, 91, 0.05), transparent 45%);
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.pulse-soft { animation: pulse-soft 1.4s ease-in-out infinite; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: rise 0.28s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .pulse-soft { animation: none; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--plum);
+  outline-offset: 2px;
+}
+
+.care-person:focus {
+  outline: none;
+}
+
+.care-person:focus-visible .care-person-label {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}

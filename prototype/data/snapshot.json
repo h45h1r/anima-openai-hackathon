@@ -1,0 +1,5869 @@
+{
+  "capturedAt": "2026-09-12",
+  "source": "https://sim.animahealth.com",
+  "team": {
+    "team": "team-5",
+    "world": "team-8942268fa18a",
+    "scopes": [
+      "gp",
+      "hospital",
+      "community",
+      "pharmacy",
+      "diagnostics",
+      "referrals",
+      "wearables"
+    ]
+  },
+  "patient": {
+    "id": "SIM-000006",
+    "name": "Eleanor Chen",
+    "goals": [
+      "Understand the next step",
+      "Avoid unnecessary travel",
+      "Attend local appointments with reliable transport"
+    ],
+    "needs": [
+      "Step-free access"
+    ],
+    "localIds": {
+      "gp": "RIV-5",
+      "legacy": "WH-90005",
+      "hospital": "NBG-10005"
+    },
+    "birthDate": "1943-05-12",
+    "synthetic": true,
+    "conditions": [
+      "Frailty"
+    ]
+  },
+  "view": {
+    "id": "team-8942268fa18a",
+    "now": 1789200000000,
+    "speed": 60,
+    "paused": true,
+    "population": 50000,
+    "counters": {
+      "actions": 0,
+      "rejected": 0,
+      "completed": 0,
+      "reviewMinutes": 0,
+      "documentVersion": 2,
+      "pharmacyVersion": 2,
+      "messagingVersion": 1,
+      "bloodResultVersion": 0,
+      "documentAuthorVersion": 1,
+      "appointmentSessionVersion": 1,
+      "hospitalAttendanceVersion": 2,
+      "bloodPatient:SIM-000006": 1,
+      "telephonySequence": 8
+    },
+    "resources": [
+      {
+        "id": "capacity-gp",
+        "data": {
+          "total": 6,
+          "remaining": 6
+        },
+        "kind": "capacity",
+        "owner": "gp",
+        "title": "gp available slots",
+        "status": "available",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp",
+          "referrals"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-84",
+        "data": {
+          "problems": [
+            {
+              "code": "SIM-PROBLEM-1",
+              "date": "2026-08-13",
+              "term": "Frailty",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-2",
+              "date": "2026-05-15",
+              "term": "Musculoskeletal symptoms",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-3",
+              "date": "2026-02-14",
+              "term": "Sleep concern",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-4",
+              "date": "2025-11-16",
+              "term": "Medication review",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-5",
+              "date": "2025-08-18",
+              "term": "Preventive health review",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-6",
+              "date": "2025-05-20",
+              "term": "Follow-up after hospital contact",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-7",
+              "date": "2025-02-19",
+              "term": "Frailty",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-8",
+              "date": "2024-11-21",
+              "term": "Musculoskeletal symptoms",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-9",
+              "date": "2024-08-23",
+              "term": "Sleep concern",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-10",
+              "date": "2024-05-25",
+              "term": "Medication review",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-11",
+              "date": "2024-02-25",
+              "term": "Preventive health review",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-12",
+              "date": "2023-11-27",
+              "term": "Follow-up after hospital contact",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-13",
+              "date": "2023-08-29",
+              "term": "Frailty",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-14",
+              "date": "2023-05-31",
+              "term": "Musculoskeletal symptoms",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-15",
+              "date": "2023-03-02",
+              "term": "Sleep concern",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-16",
+              "date": "2022-12-02",
+              "term": "Medication review",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-17",
+              "date": "2022-09-03",
+              "term": "Preventive health review",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-18",
+              "date": "2022-06-05",
+              "term": "Follow-up after hospital contact",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-19",
+              "date": "2022-03-07",
+              "term": "Frailty",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-20",
+              "date": "2021-12-07",
+              "term": "Musculoskeletal symptoms",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-21",
+              "date": "2021-09-08",
+              "term": "Sleep concern",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-22",
+              "date": "2021-06-10",
+              "term": "Medication review",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-23",
+              "date": "2021-03-12",
+              "term": "Preventive health review",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-24",
+              "date": "2020-12-12",
+              "term": "Follow-up after hospital contact",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-25",
+              "date": "2020-09-13",
+              "term": "Frailty",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-26",
+              "date": "2020-06-15",
+              "term": "Musculoskeletal symptoms",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-27",
+              "date": "2020-03-17",
+              "term": "Sleep concern",
+              "status": "active"
+            },
+            {
+              "code": "SIM-PROBLEM-28",
+              "date": "2019-12-18",
+              "term": "Medication review",
+              "status": "resolved"
+            },
+            {
+              "code": "SIM-PROBLEM-29",
+              "date": "2019-09-19",
+              "term": "Preventive health review",
+              "status": "active"
+            }
+          ],
+          "allergies": [],
+          "miscCodes": [
+            {
+              "code": "SIM-ADMIN-1",
+              "term": "Contact preferences recorded"
+            },
+            {
+              "code": "SIM-ADMIN-2",
+              "term": "Appointment invitation sent"
+            },
+            {
+              "code": "SIM-ADMIN-3",
+              "term": "Record reviewed"
+            },
+            {
+              "code": "SIM-ADMIN-4",
+              "term": "Correspondence received"
+            },
+            {
+              "code": "SIM-ADMIN-5",
+              "term": "Care team updated"
+            },
+            {
+              "code": "SIM-ADMIN-6",
+              "term": "Contact preferences recorded"
+            },
+            {
+              "code": "SIM-ADMIN-7",
+              "term": "Appointment invitation sent"
+            },
+            {
+              "code": "SIM-ADMIN-8",
+              "term": "Record reviewed"
+            },
+            {
+              "code": "SIM-ADMIN-9",
+              "term": "Correspondence received"
+            },
+            {
+              "code": "SIM-ADMIN-10",
+              "term": "Care team updated"
+            },
+            {
+              "code": "SIM-ADMIN-11",
+              "term": "Contact preferences recorded"
+            },
+            {
+              "code": "SIM-ADMIN-12",
+              "term": "Appointment invitation sent"
+            },
+            {
+              "code": "SIM-ADMIN-13",
+              "term": "Record reviewed"
+            }
+          ],
+          "synthetic": true,
+          "provenance": "ehr-collection-shape-v1",
+          "calibration": "Collection sizes only; fictional values and dates",
+          "medications": [],
+          "medicationProfile": "condition-linked-v1"
+        },
+        "kind": "ehr-record",
+        "owner": "gp",
+        "title": "Longitudinal GP record",
+        "status": "available",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789113600000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789113600000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-85",
+        "data": {
+          "text": "Fictional consultation. The patient discussed their next appointment and contact preferences.",
+          "reason": "Long-term condition review",
+          "channel": "in-person",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1"
+        },
+        "kind": "encounter",
+        "owner": "gp",
+        "title": "Primary care contact",
+        "status": "completed",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1783497600000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1783497600000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-86",
+        "data": {
+          "value": "telephone",
+          "category": "administrative",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1"
+        },
+        "kind": "observation",
+        "owner": "gp",
+        "title": "Contact preference recorded",
+        "status": "completed",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1783498200000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1783498200000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3689",
+        "data": {
+          "goal": "Attend local appointments with reliable transport",
+          "text": "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app.\nWhat matters to me: Attend local appointments with reliable transport",
+          "context": "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app.",
+          "category": "administrative",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyIndex": 5,
+          "storyVersion": "patient-stories-v1"
+        },
+        "kind": "observation",
+        "owner": "gp",
+        "title": "Personal context and contact preferences",
+        "status": "completed",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1788854400000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1788854400000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3690",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789201800000,
+          "clinician": "Nurse Alex Morgan",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789201800000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3691",
+        "data": {
+          "text": "Eleanor cancelled an upstairs appointment because the lift was unavailable. A step-free room was requested.",
+          "author": "Dr Rowan Ellis",
+          "reason": "Frailty",
+          "channel": "in-person",
+          "sections": {
+            "plan": "Recorded patient preferences and outstanding administrative follow-up.",
+            "context": "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app.",
+            "history": "Eleanor cancelled an upstairs appointment because the lift was unavailable. A step-free room was requested."
+          },
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1"
+        },
+        "kind": "encounter",
+        "owner": "gp",
+        "title": "Earlier practice contact",
+        "status": "completed",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1768464000000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1768464000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic clinician Dr Rowan Ellis"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3692",
+        "data": {
+          "text": "Eleanor's husband could not drive her to a review. She asked whether appointments could be arranged locally.",
+          "author": "Dr Rowan Ellis",
+          "reason": "Frailty",
+          "channel": "telephone",
+          "sections": {
+            "plan": "Recorded patient preferences and outstanding administrative follow-up.",
+            "context": "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app.",
+            "history": "Eleanor's husband could not drive her to a review. She asked whether appointments could be arranged locally."
+          },
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1"
+        },
+        "kind": "encounter",
+        "owner": "gp",
+        "title": "Follow-up consultation",
+        "status": "completed",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1782028800000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1782028800000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic clinician Dr Rowan Ellis"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3693",
+        "data": {
+          "text": "Eleanor prefers a telephone call to arrange her next appointment. Her library group meets on Thursday mornings.",
+          "author": "Dr Rowan Ellis",
+          "reason": "Attend local appointments with reliable transport",
+          "channel": "in-person",
+          "sections": {
+            "plan": "Recorded patient preferences and outstanding administrative follow-up.",
+            "context": "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app.",
+            "history": "Eleanor prefers a telephone call to arrange her next appointment. Her library group meets on Thursday mornings."
+          },
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1"
+        },
+        "kind": "encounter",
+        "owner": "gp",
+        "title": "Recent practice consultation",
+        "status": "completed",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1788422400000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1788422400000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic clinician Dr Rowan Ellis"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "document-batch-2-006",
+        "data": {
+          "stage": "sent",
+          "sentAt": 1788598800000,
+          "sentBy": "Dr Taylor Brook",
+          "assignee": "Practice document team",
+          "sections": {
+            "course": "The clinic attendance is complete. The appointment outcome was entered in the hospital record. The discharge coordinator recorded the handover for Eleanor Chen.",
+            "reason": "Attendance for a planned renal clinic review. This is a fictional episode for document workflow practice.",
+            "results": "An existing simulated laboratory panel is referenced without new values in this letter.",
+            "followUp": "The clinic secretary will confirm the next appointment through a separate booking letter.",
+            "diagnoses": "No new coded diagnosis is asserted by this training letter. Check the simulated patient record when classifying the correspondence.",
+            "gpActions": "Match the referenced panel to the patient record and request the outstanding medicines note before closing the document task.",
+            "medicationChanges": "The letter does not request a prescription. A medicines reconciliation note is still expected."
+          }
+        },
+        "kind": "discharge-summary",
+        "owner": "hospital",
+        "title": "Renal \u00b7 Clinic discharge correspondence",
+        "status": "sent",
+        "version": 2,
+        "priority": "routine",
+        "createdAt": 1788595200000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "hospital",
+          "gp"
+        ],
+        "provenance": {
+          "changes": [
+            {
+              "time": 1788598800000,
+              "actor": {
+                "kind": "simulation",
+                "name": "Dr Taylor Brook"
+              },
+              "action": "seed_document_sent",
+              "source": "hospital",
+              "version": 2
+            }
+          ],
+          "created": {
+            "time": 1788595200000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Taylor Brook"
+            },
+            "action": "seed",
+            "source": "hospital",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789200000000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789214400000,
+          "location": "Room 1",
+          "startsAt": 1789200000000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789209000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789218000000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789232400000,
+          "location": "Room 1",
+          "startsAt": 1789218000000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789227000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789200000000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789214400000,
+          "location": "Telephone hub",
+          "startsAt": 1789200000000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789209000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789218000000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789232400000,
+          "location": "Telephone hub",
+          "startsAt": 1789218000000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789227000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789200000000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789214400000,
+          "location": "Room 3",
+          "startsAt": 1789200000000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789209000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789218000000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789232400000,
+          "location": "Room 3",
+          "startsAt": 1789218000000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789227000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789286400000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789300800000,
+          "location": "Room 1",
+          "startsAt": 1789286400000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789295400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789304400000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789318800000,
+          "location": "Room 1",
+          "startsAt": 1789304400000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789313400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789286400000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789300800000,
+          "location": "Telephone hub",
+          "startsAt": 1789286400000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789295400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789304400000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789318800000,
+          "location": "Telephone hub",
+          "startsAt": 1789304400000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789313400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789286400000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789300800000,
+          "location": "Room 3",
+          "startsAt": 1789286400000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789295400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789304400000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789318800000,
+          "location": "Room 3",
+          "startsAt": 1789304400000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789313400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789372800000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789387200000,
+          "location": "Room 1",
+          "startsAt": 1789372800000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789381800000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789390800000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789405200000,
+          "location": "Room 1",
+          "startsAt": 1789390800000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789399800000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789372800000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789387200000,
+          "location": "Telephone hub",
+          "startsAt": 1789372800000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789381800000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789390800000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789405200000,
+          "location": "Telephone hub",
+          "startsAt": 1789390800000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789399800000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789372800000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789387200000,
+          "location": "Room 3",
+          "startsAt": 1789372800000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789381800000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789390800000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789405200000,
+          "location": "Room 3",
+          "startsAt": 1789390800000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789399800000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789459200000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789473600000,
+          "location": "Room 1",
+          "startsAt": 1789459200000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789468200000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789477200000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789491600000,
+          "location": "Room 1",
+          "startsAt": 1789477200000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789486200000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789459200000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789473600000,
+          "location": "Telephone hub",
+          "startsAt": 1789459200000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789468200000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789477200000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789491600000,
+          "location": "Telephone hub",
+          "startsAt": 1789477200000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789486200000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789459200000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789473600000,
+          "location": "Room 3",
+          "startsAt": 1789459200000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789468200000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789477200000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789491600000,
+          "location": "Room 3",
+          "startsAt": 1789477200000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789486200000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789545600000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789560000000,
+          "location": "Room 1",
+          "startsAt": 1789545600000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789554600000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789563600000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789578000000,
+          "location": "Room 1",
+          "startsAt": 1789563600000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789572600000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789545600000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789560000000,
+          "location": "Telephone hub",
+          "startsAt": 1789545600000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789554600000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789563600000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789578000000,
+          "location": "Telephone hub",
+          "startsAt": 1789563600000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789572600000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789545600000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789560000000,
+          "location": "Room 3",
+          "startsAt": 1789545600000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789554600000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789563600000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789578000000,
+          "location": "Room 3",
+          "startsAt": 1789563600000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789572600000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789632000000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789646400000,
+          "location": "Room 1",
+          "startsAt": 1789632000000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789641000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789650000000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789664400000,
+          "location": "Room 1",
+          "startsAt": 1789650000000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789659000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789632000000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789646400000,
+          "location": "Telephone hub",
+          "startsAt": 1789632000000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789641000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789650000000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789664400000,
+          "location": "Telephone hub",
+          "startsAt": 1789650000000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789659000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789632000000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789646400000,
+          "location": "Room 3",
+          "startsAt": 1789632000000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789641000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789650000000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789664400000,
+          "location": "Room 3",
+          "startsAt": 1789650000000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789659000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789718400000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789732800000,
+          "location": "Room 1",
+          "startsAt": 1789718400000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789727400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789736400000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789750800000,
+          "location": "Room 1",
+          "startsAt": 1789736400000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789745400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789718400000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789732800000,
+          "location": "Telephone hub",
+          "startsAt": 1789718400000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789727400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789736400000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789750800000,
+          "location": "Telephone hub",
+          "startsAt": 1789736400000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789745400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789718400000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789732800000,
+          "location": "Room 3",
+          "startsAt": 1789718400000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789727400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789736400000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789750800000,
+          "location": "Room 3",
+          "startsAt": 1789736400000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789745400000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "messaging-example-6",
+        "data": {
+          "entries": [
+            {
+              "at": 1789174800000,
+              "id": "messaging-example-6-1",
+              "body": "Please contact reception to finish the outstanding registration paperwork.",
+              "actor": {
+                "kind": "simulation",
+                "name": "Dr Rowan Page"
+              },
+              "channel": "sms",
+              "delivery": [
+                {
+                  "at": 1789174800000,
+                  "actor": {
+                    "kind": "simulation",
+                    "name": "Dr Rowan Page"
+                  },
+                  "status": "queued"
+                },
+                {
+                  "at": 1789174801000,
+                  "actor": {
+                    "kind": "simulation",
+                    "name": "Dr Rowan Page"
+                  },
+                  "status": "delivered"
+                }
+              ],
+              "direction": "outgoing"
+            }
+          ],
+          "assignee": "Dr Rowan Page",
+          "allowReply": true
+        },
+        "kind": "conversation",
+        "owner": "gp",
+        "title": "Registration paperwork",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789174800000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp",
+          "patient"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789174800000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Rowan Page"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "messaging-template-1",
+        "data": {
+          "body": "Your appointment booking is ready to confirm. Please reply with your preferred morning or afternoon time.",
+          "channel": "sms"
+        },
+        "kind": "message-template",
+        "owner": "gp",
+        "title": "Appointment confirmation",
+        "status": "active",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "messaging-template-2",
+        "data": {
+          "body": "Please check your contact preferences with reception. This message uses a fictional delivery address.",
+          "channel": "sms"
+        },
+        "kind": "message-template",
+        "owner": "gp",
+        "title": "Contact details check",
+        "status": "active",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "messaging-template-3",
+        "data": {
+          "body": "Your requested administrative form is ready for collection at reception.",
+          "channel": "sms"
+        },
+        "kind": "message-template",
+        "owner": "gp",
+        "title": "Form ready to collect",
+        "status": "active",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-fbc-0",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Full blood count (FBC) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1757667600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "fbc",
+            "name": "Full blood count (FBC)"
+          },
+          "collectedAt": 1757664000000,
+          "analytes": [
+            {
+              "id": "haemoglobin",
+              "name": "Haemoglobin",
+              "unit": "g/L",
+              "referenceLow": 115,
+              "referenceHigh": 165,
+              "value": 156
+            },
+            {
+              "id": "white-cell-count",
+              "name": "White cell count",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 4,
+              "referenceHigh": 11,
+              "value": 4.7
+            },
+            {
+              "id": "platelets",
+              "name": "Platelets",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 150,
+              "referenceHigh": 400,
+              "value": 341
+            },
+            {
+              "id": "mcv",
+              "name": "Mean cell volume",
+              "unit": "fL",
+              "referenceLow": 80,
+              "referenceHigh": 100,
+              "value": 90.7
+            },
+            {
+              "id": "neutrophils",
+              "name": "Neutrophils",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 2,
+              "referenceHigh": 7.5,
+              "value": 3.5
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1757667600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-fbc-1",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Full blood count (FBC) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1768467600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "fbc",
+            "name": "Full blood count (FBC)"
+          },
+          "collectedAt": 1768464000000,
+          "analytes": [
+            {
+              "id": "haemoglobin",
+              "name": "Haemoglobin",
+              "unit": "g/L",
+              "referenceLow": 115,
+              "referenceHigh": 165,
+              "value": 153
+            },
+            {
+              "id": "white-cell-count",
+              "name": "White cell count",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 4,
+              "referenceHigh": 11,
+              "value": 4
+            },
+            {
+              "id": "platelets",
+              "name": "Platelets",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 150,
+              "referenceHigh": 400,
+              "value": 322
+            },
+            {
+              "id": "mcv",
+              "name": "Mean cell volume",
+              "unit": "fL",
+              "referenceLow": 80,
+              "referenceHigh": 100,
+              "value": 89
+            },
+            {
+              "id": "neutrophils",
+              "name": "Neutrophils",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 2,
+              "referenceHigh": 7.5,
+              "value": 3
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1768467600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-fbc-2",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Full blood count (FBC) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1778835600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "fbc",
+            "name": "Full blood count (FBC)"
+          },
+          "collectedAt": 1778832000000,
+          "analytes": [
+            {
+              "id": "haemoglobin",
+              "name": "Haemoglobin",
+              "unit": "g/L",
+              "referenceLow": 115,
+              "referenceHigh": 165,
+              "value": 147
+            },
+            {
+              "id": "white-cell-count",
+              "name": "White cell count",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 4,
+              "referenceHigh": 11,
+              "value": 2.7
+            },
+            {
+              "id": "platelets",
+              "name": "Platelets",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 150,
+              "referenceHigh": 400,
+              "value": 286
+            },
+            {
+              "id": "mcv",
+              "name": "Mean cell volume",
+              "unit": "fL",
+              "referenceLow": 80,
+              "referenceHigh": 100,
+              "value": 85.8
+            },
+            {
+              "id": "neutrophils",
+              "name": "Neutrophils",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 2,
+              "referenceHigh": 7.5,
+              "value": 2
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1778835600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-fbc-3",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Full blood count (FBC) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1784019600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "fbc",
+            "name": "Full blood count (FBC)"
+          },
+          "collectedAt": 1784016000000,
+          "analytes": [
+            {
+              "id": "haemoglobin",
+              "name": "Haemoglobin",
+              "unit": "g/L",
+              "referenceLow": 115,
+              "referenceHigh": 165,
+              "value": 141
+            },
+            {
+              "id": "white-cell-count",
+              "name": "White cell count",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 4,
+              "referenceHigh": 11,
+              "value": 1.6
+            },
+            {
+              "id": "platelets",
+              "name": "Platelets",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 150,
+              "referenceHigh": 400,
+              "value": 256
+            },
+            {
+              "id": "mcv",
+              "name": "Mean cell volume",
+              "unit": "fL",
+              "referenceLow": 80,
+              "referenceHigh": 100,
+              "value": 83
+            },
+            {
+              "id": "neutrophils",
+              "name": "Neutrophils",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 2,
+              "referenceHigh": 7.5,
+              "value": 1.2
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1784019600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-fbc-4",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Full blood count (FBC) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1787994000000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "fbc",
+            "name": "Full blood count (FBC)"
+          },
+          "collectedAt": 1787990400000,
+          "analytes": [
+            {
+              "id": "haemoglobin",
+              "name": "Haemoglobin",
+              "unit": "g/L",
+              "referenceLow": 115,
+              "referenceHigh": 165,
+              "value": 140
+            },
+            {
+              "id": "white-cell-count",
+              "name": "White cell count",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 4,
+              "referenceHigh": 11,
+              "value": 1.3
+            },
+            {
+              "id": "platelets",
+              "name": "Platelets",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 150,
+              "referenceHigh": 400,
+              "value": 248
+            },
+            {
+              "id": "mcv",
+              "name": "Mean cell volume",
+              "unit": "fL",
+              "referenceLow": 80,
+              "referenceHigh": 100,
+              "value": 82.4
+            },
+            {
+              "id": "neutrophils",
+              "name": "Neutrophils",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 2,
+              "referenceHigh": 7.5,
+              "value": 1
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1787994000000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-fbc-5",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Full blood count (FBC) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1789117200000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "fbc",
+            "name": "Full blood count (FBC)"
+          },
+          "collectedAt": 1789113600000,
+          "analytes": [
+            {
+              "id": "haemoglobin",
+              "name": "Haemoglobin",
+              "unit": "g/L",
+              "referenceLow": 115,
+              "referenceHigh": 165,
+              "value": 144
+            },
+            {
+              "id": "white-cell-count",
+              "name": "White cell count",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 4,
+              "referenceHigh": 11,
+              "value": 2.1
+            },
+            {
+              "id": "platelets",
+              "name": "Platelets",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 150,
+              "referenceHigh": 400,
+              "value": 269
+            },
+            {
+              "id": "mcv",
+              "name": "Mean cell volume",
+              "unit": "fL",
+              "referenceLow": 80,
+              "referenceHigh": 100,
+              "value": 84.3
+            },
+            {
+              "id": "neutrophils",
+              "name": "Neutrophils",
+              "unit": "\u00d710\u2079/L",
+              "referenceLow": 2,
+              "referenceHigh": 7.5,
+              "value": 1.6
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1789117200000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-ue-0",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Urea & electrolytes (U&E) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1757667600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "ue",
+            "name": "Urea & electrolytes (U&E)"
+          },
+          "collectedAt": 1757664000000,
+          "analytes": [
+            {
+              "id": "sodium",
+              "name": "Sodium",
+              "unit": "mmol/L",
+              "referenceLow": 133,
+              "referenceHigh": 146,
+              "value": 136
+            },
+            {
+              "id": "potassium",
+              "name": "Potassium",
+              "unit": "mmol/L",
+              "referenceLow": 3.5,
+              "referenceHigh": 5.3,
+              "value": 3.5
+            },
+            {
+              "id": "urea",
+              "name": "Urea",
+              "unit": "mmol/L",
+              "referenceLow": 2.5,
+              "referenceHigh": 7.8,
+              "value": 4.6
+            },
+            {
+              "id": "creatinine",
+              "name": "Creatinine",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 45,
+              "referenceHigh": 110,
+              "value": 42
+            },
+            {
+              "id": "egfr",
+              "name": "eGFR",
+              "unit": "mL/min/1.73m\u00b2",
+              "referenceLow": 60,
+              "referenceHigh": 120,
+              "value": 77
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1757667600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-ue-1",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Urea & electrolytes (U&E) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1768467600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "ue",
+            "name": "Urea & electrolytes (U&E)"
+          },
+          "collectedAt": 1768464000000,
+          "analytes": [
+            {
+              "id": "sodium",
+              "name": "Sodium",
+              "unit": "mmol/L",
+              "referenceLow": 133,
+              "referenceHigh": 146,
+              "value": 134
+            },
+            {
+              "id": "potassium",
+              "name": "Potassium",
+              "unit": "mmol/L",
+              "referenceLow": 3.5,
+              "referenceHigh": 5.3,
+              "value": 3.2
+            },
+            {
+              "id": "urea",
+              "name": "Urea",
+              "unit": "mmol/L",
+              "referenceLow": 2.5,
+              "referenceHigh": 7.8,
+              "value": 3.3
+            },
+            {
+              "id": "creatinine",
+              "name": "Creatinine",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 45,
+              "referenceHigh": 110,
+              "value": 26
+            },
+            {
+              "id": "egfr",
+              "name": "eGFR",
+              "unit": "mL/min/1.73m\u00b2",
+              "referenceLow": 60,
+              "referenceHigh": 120,
+              "value": 67
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1768467600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-ue-2",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Urea & electrolytes (U&E) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1778835600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "ue",
+            "name": "Urea & electrolytes (U&E)"
+          },
+          "collectedAt": 1778832000000,
+          "analytes": [
+            {
+              "id": "sodium",
+              "name": "Sodium",
+              "unit": "mmol/L",
+              "referenceLow": 133,
+              "referenceHigh": 146,
+              "value": 133
+            },
+            {
+              "id": "potassium",
+              "name": "Potassium",
+              "unit": "mmol/L",
+              "referenceLow": 3.5,
+              "referenceHigh": 5.3,
+              "value": 3
+            },
+            {
+              "id": "urea",
+              "name": "Urea",
+              "unit": "mmol/L",
+              "referenceLow": 2.5,
+              "referenceHigh": 7.8,
+              "value": 2.7
+            },
+            {
+              "id": "creatinine",
+              "name": "Creatinine",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 45,
+              "referenceHigh": 110,
+              "value": 18
+            },
+            {
+              "id": "egfr",
+              "name": "eGFR",
+              "unit": "mL/min/1.73m\u00b2",
+              "referenceLow": 60,
+              "referenceHigh": 120,
+              "value": 62
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1778835600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-ue-3",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Urea & electrolytes (U&E) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1784019600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "ue",
+            "name": "Urea & electrolytes (U&E)"
+          },
+          "collectedAt": 1784016000000,
+          "analytes": [
+            {
+              "id": "sodium",
+              "name": "Sodium",
+              "unit": "mmol/L",
+              "referenceLow": 133,
+              "referenceHigh": 146,
+              "value": 134
+            },
+            {
+              "id": "potassium",
+              "name": "Potassium",
+              "unit": "mmol/L",
+              "referenceLow": 3.5,
+              "referenceHigh": 5.3,
+              "value": 3.1
+            },
+            {
+              "id": "urea",
+              "name": "Urea",
+              "unit": "mmol/L",
+              "referenceLow": 2.5,
+              "referenceHigh": 7.8,
+              "value": 3
+            },
+            {
+              "id": "creatinine",
+              "name": "Creatinine",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 45,
+              "referenceHigh": 110,
+              "value": 23
+            },
+            {
+              "id": "egfr",
+              "name": "eGFR",
+              "unit": "mL/min/1.73m\u00b2",
+              "referenceLow": 60,
+              "referenceHigh": 120,
+              "value": 65
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1784019600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-ue-4",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Urea & electrolytes (U&E) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1787994000000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "ue",
+            "name": "Urea & electrolytes (U&E)"
+          },
+          "collectedAt": 1787990400000,
+          "analytes": [
+            {
+              "id": "sodium",
+              "name": "Sodium",
+              "unit": "mmol/L",
+              "referenceLow": 133,
+              "referenceHigh": 146,
+              "value": 136
+            },
+            {
+              "id": "potassium",
+              "name": "Potassium",
+              "unit": "mmol/L",
+              "referenceLow": 3.5,
+              "referenceHigh": 5.3,
+              "value": 3.4
+            },
+            {
+              "id": "urea",
+              "name": "Urea",
+              "unit": "mmol/L",
+              "referenceLow": 2.5,
+              "referenceHigh": 7.8,
+              "value": 4.3
+            },
+            {
+              "id": "creatinine",
+              "name": "Creatinine",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 45,
+              "referenceHigh": 110,
+              "value": 37
+            },
+            {
+              "id": "egfr",
+              "name": "eGFR",
+              "unit": "mL/min/1.73m\u00b2",
+              "referenceLow": 60,
+              "referenceHigh": 120,
+              "value": 74
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1787994000000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-ue-5",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Urea & electrolytes (U&E) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1789117200000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "ue",
+            "name": "Urea & electrolytes (U&E)"
+          },
+          "collectedAt": 1789113600000,
+          "analytes": [
+            {
+              "id": "sodium",
+              "name": "Sodium",
+              "unit": "mmol/L",
+              "referenceLow": 133,
+              "referenceHigh": 146,
+              "value": 138
+            },
+            {
+              "id": "potassium",
+              "name": "Potassium",
+              "unit": "mmol/L",
+              "referenceLow": 3.5,
+              "referenceHigh": 5.3,
+              "value": 3.7
+            },
+            {
+              "id": "urea",
+              "name": "Urea",
+              "unit": "mmol/L",
+              "referenceLow": 2.5,
+              "referenceHigh": 7.8,
+              "value": 5.5
+            },
+            {
+              "id": "creatinine",
+              "name": "Creatinine",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 45,
+              "referenceHigh": 110,
+              "value": 53
+            },
+            {
+              "id": "egfr",
+              "name": "eGFR",
+              "unit": "mL/min/1.73m\u00b2",
+              "referenceLow": 60,
+              "referenceHigh": 120,
+              "value": 84
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1789117200000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-hba1c-0",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "HbA1c \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1757667600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "hba1c",
+            "name": "HbA1c"
+          },
+          "collectedAt": 1757664000000,
+          "analytes": [
+            {
+              "id": "hba1c",
+              "name": "HbA1c",
+              "unit": "mmol/mol",
+              "referenceLow": 20,
+              "referenceHigh": 41,
+              "value": 51
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1757667600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-hba1c-1",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "HbA1c \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1768467600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "hba1c",
+            "name": "HbA1c"
+          },
+          "collectedAt": 1768464000000,
+          "analytes": [
+            {
+              "id": "hba1c",
+              "name": "HbA1c",
+              "unit": "mmol/mol",
+              "referenceLow": 20,
+              "referenceHigh": 41,
+              "value": 57
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1768467600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-hba1c-2",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "HbA1c \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1778835600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "hba1c",
+            "name": "HbA1c"
+          },
+          "collectedAt": 1778832000000,
+          "analytes": [
+            {
+              "id": "hba1c",
+              "name": "HbA1c",
+              "unit": "mmol/mol",
+              "referenceLow": 20,
+              "referenceHigh": 41,
+              "value": 61
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1778835600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-hba1c-3",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "HbA1c \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1784019600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "hba1c",
+            "name": "HbA1c"
+          },
+          "collectedAt": 1784016000000,
+          "analytes": [
+            {
+              "id": "hba1c",
+              "name": "HbA1c",
+              "unit": "mmol/mol",
+              "referenceLow": 20,
+              "referenceHigh": 41,
+              "value": 60
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1784019600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-hba1c-4",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "HbA1c \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1787994000000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "hba1c",
+            "name": "HbA1c"
+          },
+          "collectedAt": 1787990400000,
+          "analytes": [
+            {
+              "id": "hba1c",
+              "name": "HbA1c",
+              "unit": "mmol/mol",
+              "referenceLow": 20,
+              "referenceHigh": 41,
+              "value": 55
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1787994000000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-hba1c-5",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "HbA1c \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1789117200000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "hba1c",
+            "name": "HbA1c"
+          },
+          "collectedAt": 1789113600000,
+          "analytes": [
+            {
+              "id": "hba1c",
+              "name": "HbA1c",
+              "unit": "mmol/mol",
+              "referenceLow": 20,
+              "referenceHigh": 41,
+              "value": 49
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1789117200000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lft-0",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Liver function tests (LFT) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1757667600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lft",
+            "name": "Liver function tests (LFT)"
+          },
+          "collectedAt": 1757664000000,
+          "analytes": [
+            {
+              "id": "alt",
+              "name": "ALT",
+              "unit": "U/L",
+              "referenceLow": 0,
+              "referenceHigh": 40,
+              "value": 11
+            },
+            {
+              "id": "alp",
+              "name": "Alkaline phosphatase",
+              "unit": "U/L",
+              "referenceLow": 30,
+              "referenceHigh": 130,
+              "value": 55
+            },
+            {
+              "id": "bilirubin",
+              "name": "Bilirubin",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 0,
+              "referenceHigh": 21,
+              "value": 25
+            },
+            {
+              "id": "albumin",
+              "name": "Albumin",
+              "unit": "g/L",
+              "referenceLow": 35,
+              "referenceHigh": 50,
+              "value": 35
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1757667600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lft-1",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Liver function tests (LFT) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1768467600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lft",
+            "name": "Liver function tests (LFT)"
+          },
+          "collectedAt": 1768464000000,
+          "analytes": [
+            {
+              "id": "alt",
+              "name": "ALT",
+              "unit": "U/L",
+              "referenceLow": 0,
+              "referenceHigh": 40,
+              "value": 3
+            },
+            {
+              "id": "alp",
+              "name": "Alkaline phosphatase",
+              "unit": "U/L",
+              "referenceLow": 30,
+              "referenceHigh": 130,
+              "value": 39
+            },
+            {
+              "id": "bilirubin",
+              "name": "Bilirubin",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 0,
+              "referenceHigh": 21,
+              "value": 22
+            },
+            {
+              "id": "albumin",
+              "name": "Albumin",
+              "unit": "g/L",
+              "referenceLow": 35,
+              "referenceHigh": 50,
+              "value": 33
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1768467600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lft-2",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Liver function tests (LFT) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1778835600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lft",
+            "name": "Liver function tests (LFT)"
+          },
+          "collectedAt": 1778832000000,
+          "analytes": [
+            {
+              "id": "alt",
+              "name": "ALT",
+              "unit": "U/L",
+              "referenceLow": 0,
+              "referenceHigh": 40,
+              "value": 0
+            },
+            {
+              "id": "alp",
+              "name": "Alkaline phosphatase",
+              "unit": "U/L",
+              "referenceLow": 30,
+              "referenceHigh": 130,
+              "value": 27
+            },
+            {
+              "id": "bilirubin",
+              "name": "Bilirubin",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 0,
+              "referenceHigh": 21,
+              "value": 19
+            },
+            {
+              "id": "albumin",
+              "name": "Albumin",
+              "unit": "g/L",
+              "referenceLow": 35,
+              "referenceHigh": 50,
+              "value": 31
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1778835600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lft-3",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Liver function tests (LFT) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1784019600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lft",
+            "name": "Liver function tests (LFT)"
+          },
+          "collectedAt": 1784016000000,
+          "analytes": [
+            {
+              "id": "alt",
+              "name": "ALT",
+              "unit": "U/L",
+              "referenceLow": 0,
+              "referenceHigh": 40,
+              "value": 0
+            },
+            {
+              "id": "alp",
+              "name": "Alkaline phosphatase",
+              "unit": "U/L",
+              "referenceLow": 30,
+              "referenceHigh": 130,
+              "value": 27
+            },
+            {
+              "id": "bilirubin",
+              "name": "Bilirubin",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 0,
+              "referenceHigh": 21,
+              "value": 19
+            },
+            {
+              "id": "albumin",
+              "name": "Albumin",
+              "unit": "g/L",
+              "referenceLow": 35,
+              "referenceHigh": 50,
+              "value": 31
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1784019600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lft-4",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Liver function tests (LFT) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1787994000000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lft",
+            "name": "Liver function tests (LFT)"
+          },
+          "collectedAt": 1787990400000,
+          "analytes": [
+            {
+              "id": "alt",
+              "name": "ALT",
+              "unit": "U/L",
+              "referenceLow": 0,
+              "referenceHigh": 40,
+              "value": 3
+            },
+            {
+              "id": "alp",
+              "name": "Alkaline phosphatase",
+              "unit": "U/L",
+              "referenceLow": 30,
+              "referenceHigh": 130,
+              "value": 39
+            },
+            {
+              "id": "bilirubin",
+              "name": "Bilirubin",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 0,
+              "referenceHigh": 21,
+              "value": 22
+            },
+            {
+              "id": "albumin",
+              "name": "Albumin",
+              "unit": "g/L",
+              "referenceLow": 35,
+              "referenceHigh": 50,
+              "value": 33
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1787994000000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lft-5",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Liver function tests (LFT) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1789117200000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lft",
+            "name": "Liver function tests (LFT)"
+          },
+          "collectedAt": 1789113600000,
+          "analytes": [
+            {
+              "id": "alt",
+              "name": "ALT",
+              "unit": "U/L",
+              "referenceLow": 0,
+              "referenceHigh": 40,
+              "value": 11
+            },
+            {
+              "id": "alp",
+              "name": "Alkaline phosphatase",
+              "unit": "U/L",
+              "referenceLow": 30,
+              "referenceHigh": 130,
+              "value": 55
+            },
+            {
+              "id": "bilirubin",
+              "name": "Bilirubin",
+              "unit": "\u00b5mol/L",
+              "referenceLow": 0,
+              "referenceHigh": 21,
+              "value": 25
+            },
+            {
+              "id": "albumin",
+              "name": "Albumin",
+              "unit": "g/L",
+              "referenceLow": 35,
+              "referenceHigh": 50,
+              "value": 35
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1789117200000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-crp-0",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "C-reactive protein (CRP) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1757667600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "crp",
+            "name": "C-reactive protein (CRP)"
+          },
+          "collectedAt": 1757664000000,
+          "analytes": [
+            {
+              "id": "crp",
+              "name": "C-reactive protein",
+              "unit": "mg/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 5.9
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1757667600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-crp-1",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "C-reactive protein (CRP) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1768467600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "crp",
+            "name": "C-reactive protein (CRP)"
+          },
+          "collectedAt": 1768464000000,
+          "analytes": [
+            {
+              "id": "crp",
+              "name": "C-reactive protein",
+              "unit": "mg/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 7.4
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1768467600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-crp-2",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "C-reactive protein (CRP) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1778835600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "crp",
+            "name": "C-reactive protein (CRP)"
+          },
+          "collectedAt": 1778832000000,
+          "analytes": [
+            {
+              "id": "crp",
+              "name": "C-reactive protein",
+              "unit": "mg/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 8
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1778835600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-crp-3",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "C-reactive protein (CRP) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1784019600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "crp",
+            "name": "C-reactive protein (CRP)"
+          },
+          "collectedAt": 1784016000000,
+          "analytes": [
+            {
+              "id": "crp",
+              "name": "C-reactive protein",
+              "unit": "mg/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 7.3
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1784019600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-crp-4",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "C-reactive protein (CRP) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1787994000000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "crp",
+            "name": "C-reactive protein (CRP)"
+          },
+          "collectedAt": 1787990400000,
+          "analytes": [
+            {
+              "id": "crp",
+              "name": "C-reactive protein",
+              "unit": "mg/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 5.8
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1787994000000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-crp-5",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "C-reactive protein (CRP) \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1789117200000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "crp",
+            "name": "C-reactive protein (CRP)"
+          },
+          "collectedAt": 1789113600000,
+          "analytes": [
+            {
+              "id": "crp",
+              "name": "C-reactive protein",
+              "unit": "mg/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 4.3
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1789117200000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lipids-0",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Lipid profile \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1757667600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lipids",
+            "name": "Lipid profile"
+          },
+          "collectedAt": 1757664000000,
+          "analytes": [
+            {
+              "id": "total-cholesterol",
+              "name": "Total cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 3.8
+            },
+            {
+              "id": "hdl",
+              "name": "HDL cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 1,
+              "referenceHigh": 2.5,
+              "value": 1.8
+            },
+            {
+              "id": "triglycerides",
+              "name": "Triglycerides",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 1.7,
+              "value": 1.8
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1757667600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lipids-1",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Lipid profile \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1768467600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lipids",
+            "name": "Lipid profile"
+          },
+          "collectedAt": 1768464000000,
+          "analytes": [
+            {
+              "id": "total-cholesterol",
+              "name": "Total cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 4.3
+            },
+            {
+              "id": "hdl",
+              "name": "HDL cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 1,
+              "referenceHigh": 2.5,
+              "value": 1.9
+            },
+            {
+              "id": "triglycerides",
+              "name": "Triglycerides",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 1.7,
+              "value": 2
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1768467600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lipids-2",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Lipid profile \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1778835600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lipids",
+            "name": "Lipid profile"
+          },
+          "collectedAt": 1778832000000,
+          "analytes": [
+            {
+              "id": "total-cholesterol",
+              "name": "Total cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 4.4
+            },
+            {
+              "id": "hdl",
+              "name": "HDL cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 1,
+              "referenceHigh": 2.5,
+              "value": 2
+            },
+            {
+              "id": "triglycerides",
+              "name": "Triglycerides",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 1.7,
+              "value": 2.1
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1778835600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lipids-3",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Lipid profile \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1784019600000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lipids",
+            "name": "Lipid profile"
+          },
+          "collectedAt": 1784016000000,
+          "analytes": [
+            {
+              "id": "total-cholesterol",
+              "name": "Total cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 4.2
+            },
+            {
+              "id": "hdl",
+              "name": "HDL cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 1,
+              "referenceHigh": 2.5,
+              "value": 1.9
+            },
+            {
+              "id": "triglycerides",
+              "name": "Triglycerides",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 1.7,
+              "value": 2
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1784019600000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lipids-4",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Lipid profile \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1787994000000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lipids",
+            "name": "Lipid profile"
+          },
+          "collectedAt": 1787990400000,
+          "analytes": [
+            {
+              "id": "total-cholesterol",
+              "name": "Total cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 3.8
+            },
+            {
+              "id": "hdl",
+              "name": "HDL cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 1,
+              "referenceHigh": 2.5,
+              "value": 1.8
+            },
+            {
+              "id": "triglycerides",
+              "name": "Triglycerides",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 1.7,
+              "value": 1.7
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1787994000000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "blood-v1-SIM-000006-lipids-5",
+        "patientId": "SIM-000006",
+        "kind": "report",
+        "title": "Lipid profile \u00b7 synthetic blood results",
+        "owner": "diagnostics",
+        "visibleTo": [
+          "gp",
+          "hospital",
+          "diagnostics"
+        ],
+        "status": "available",
+        "priority": "routine",
+        "createdAt": 1789117200000,
+        "version": 1,
+        "data": {
+          "kind": "blood-result",
+          "panel": {
+            "id": "lipids",
+            "name": "Lipid profile"
+          },
+          "collectedAt": 1789113600000,
+          "analytes": [
+            {
+              "id": "total-cholesterol",
+              "name": "Total cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 5,
+              "value": 3.4
+            },
+            {
+              "id": "hdl",
+              "name": "HDL cholesterol",
+              "unit": "mmol/L",
+              "referenceLow": 1,
+              "referenceHigh": 2.5,
+              "value": 1.6
+            },
+            {
+              "id": "triglycerides",
+              "name": "Triglycerides",
+              "unit": "mmol/L",
+              "referenceLow": 0,
+              "referenceHigh": 1.7,
+              "value": 1.5
+            }
+          ],
+          "laboratory": "Northbank training laboratory",
+          "synthetic": true
+        },
+        "provenance": {
+          "created": {
+            "actor": {
+              "kind": "simulation",
+              "name": "Dr Robin Vial"
+            },
+            "source": "diagnostics",
+            "action": "seed_blood_results",
+            "time": 1789117200000,
+            "version": 1
+          },
+          "changes": []
+        }
+      },
+      {
+        "id": "call-team-8942268fa18a-3837",
+        "patientId": "SIM-000006",
+        "kind": "telephone-call",
+        "owner": "gp",
+        "visibleTo": [
+          "gp"
+        ],
+        "title": "Letter collection",
+        "status": "waiting",
+        "priority": "routine",
+        "createdAt": 1789211570042,
+        "version": 1,
+        "data": {
+          "patientName": "Eleanor Chen",
+          "phone": "07700 900005",
+          "reason": "Letter collection",
+          "script": "Hello, my name is Eleanor Chen. Good afternoon. I'm checking whether a letter I requested is ready at reception.",
+          "voiceSeed": 5,
+          "state": {
+            "kind": "waiting",
+            "queuedAt": 1789211570042
+          }
+        }
+      }
+    ],
+    "resourceTotal": 93,
+    "resourceOffset": 0,
+    "resourceLimit": 500,
+    "staffing": {
+      "doctors": 4,
+      "nurses": 4,
+      "staffedSpaces": 8,
+      "waiting": 5
+    },
+    "faults": {},
+    "events": []
+  },
+  "appointments": {
+    "appointments": [
+      {
+        "id": "pop-v2-25754-appointment",
+        "data": {
+          "mode": "in-person",
+          "sampling": "Independent count-weighted public marginals; patient assignment, date and duration authored. This appointment is separate from the consultation narrative.",
+          "startsAt": 1789178400000,
+          "clinician": "Practice team",
+          "sourceUrl": "https://digital.nhs.uk/data-and-information/publications/statistical/appointments-in-general-practice/may-2025",
+          "synthetic": true,
+          "provenance": "nhs-england-gp-appointments-2025-05-v1",
+          "sourceMode": "Face-to-Face",
+          "sourceRole": "Other Practice staff",
+          "sourceStatus": "Unknown",
+          "serviceSetting": "General Practice",
+          "durationMinutes": 15,
+          "capacityReserved": false,
+          "calibrationPeriod": "2025-05",
+          "populationVersion": "population-v2"
+        },
+        "kind": "appointment",
+        "dueAt": 1789178400000,
+        "owner": "gp",
+        "title": "Historical practice appointment",
+        "status": "unknown",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789174800000,
+        "patientId": "SIM-025754",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789174800000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "pop-v2-42487-appointment",
+        "data": {
+          "mode": "in-person",
+          "sampling": "Independent count-weighted public marginals; patient assignment, date and duration authored. This appointment is separate from the consultation narrative.",
+          "startsAt": 1789179428571.4285,
+          "clinician": "Dr Maya Shah",
+          "sourceUrl": "https://digital.nhs.uk/data-and-information/publications/statistical/appointments-in-general-practice/may-2025",
+          "synthetic": true,
+          "provenance": "nhs-england-gp-appointments-2025-05-v1",
+          "sourceMode": "Face-to-Face",
+          "sourceRole": "GP",
+          "sourceStatus": "Attended",
+          "serviceSetting": "General Practice",
+          "durationMinutes": 15,
+          "capacityReserved": false,
+          "calibrationPeriod": "2025-05",
+          "populationVersion": "population-v2"
+        },
+        "kind": "appointment",
+        "dueAt": 1789179428571.4285,
+        "owner": "gp",
+        "title": "Historical practice appointment",
+        "status": "completed",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789175314285.7144,
+        "patientId": "SIM-042487",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789175314285.7144,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "r-3665",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789200900000,
+          "clinician": "Dr Maya Shah",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789200900000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000001",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3670",
+        "data": {
+          "mode": "telephone",
+          "startsAt": 1789200900000,
+          "clinician": "Dr Daniel Brooks",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789200900000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000002",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3675",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789200900000,
+          "clinician": "Nurse Alex Morgan",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789200900000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000003",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3680",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789201800000,
+          "clinician": "Dr Maya Shah",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789201800000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000004",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3685",
+        "data": {
+          "mode": "telephone",
+          "startsAt": 1789201800000,
+          "clinician": "Dr Daniel Brooks",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789201800000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000005",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3690",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789201800000,
+          "clinician": "Nurse Alex Morgan",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789201800000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000006",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3695",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789202700000,
+          "clinician": "Dr Maya Shah",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789202700000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000007",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3700",
+        "data": {
+          "mode": "telephone",
+          "startsAt": 1789202700000,
+          "clinician": "Dr Daniel Brooks",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789202700000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000008",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3706",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789202700000,
+          "clinician": "Nurse Alex Morgan",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789202700000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000501",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3712",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789203600000,
+          "clinician": "Dr Maya Shah",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789203600000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000502",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3718",
+        "data": {
+          "mode": "telephone",
+          "startsAt": 1789203600000,
+          "clinician": "Dr Daniel Brooks",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789203600000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000503",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      },
+      {
+        "id": "r-3724",
+        "data": {
+          "mode": "in-person",
+          "startsAt": 1789203600000,
+          "clinician": "Nurse Alex Morgan",
+          "synthetic": true,
+          "provenance": "authored-synthetic-v1",
+          "storyVersion": "patient-stories-v1",
+          "durationMinutes": 15,
+          "capacityReserved": false
+        },
+        "kind": "appointment",
+        "dueAt": 1789203600000,
+        "owner": "gp",
+        "title": "Practice follow-up",
+        "status": "booked",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "patientId": "SIM-000504",
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Synthetic GP history"
+            },
+            "action": "generate_history",
+            "source": "gp",
+            "version": 1
+          },
+          "recovery": {
+            "basis": "synthetic-history",
+            "migration": "historical-record-attribution-v2"
+          }
+        }
+      }
+    ],
+    "patients": [
+      {
+        "id": "SIM-000001",
+        "name": "Amira Khan"
+      },
+      {
+        "id": "SIM-000002",
+        "name": "George Evans"
+      },
+      {
+        "id": "SIM-000003",
+        "name": "Aisha Patel"
+      },
+      {
+        "id": "SIM-000004",
+        "name": "Thomas Reed"
+      },
+      {
+        "id": "SIM-000005",
+        "name": "Grace Okafor"
+      },
+      {
+        "id": "SIM-000006",
+        "name": "Eleanor Chen"
+      },
+      {
+        "id": "SIM-000007",
+        "name": "Mohammed Ali"
+      },
+      {
+        "id": "SIM-000008",
+        "name": "Sofia Williams"
+      },
+      {
+        "id": "SIM-000501",
+        "name": "Nina Brooks"
+      },
+      {
+        "id": "SIM-000502",
+        "name": "Leo Mason"
+      },
+      {
+        "id": "SIM-000503",
+        "name": "Ruby Ellis"
+      },
+      {
+        "id": "SIM-000504",
+        "name": "Ben Cooper"
+      },
+      {
+        "id": "SIM-025754",
+        "name": "Zoe D. Parker"
+      },
+      {
+        "id": "SIM-042487",
+        "name": "Bilal A. Hill"
+      }
+    ],
+    "sessions": [
+      {
+        "id": "appointment-session-1789200000000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789214400000,
+          "location": "Room 1",
+          "startsAt": 1789200000000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789209000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789218000000-0",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789232400000,
+          "location": "Room 1",
+          "startsAt": 1789218000000,
+          "clinician": "Dr Maya Shah",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789227000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Main surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789200000000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789214400000,
+          "location": "Telephone hub",
+          "startsAt": 1789200000000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789209000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789218000000-1",
+        "data": {
+          "mode": "telephone",
+          "endsAt": 1789232400000,
+          "location": "Telephone hub",
+          "startsAt": 1789218000000,
+          "clinician": "Dr Daniel Brooks",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789227000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Telephone surgery \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789200000000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789214400000,
+          "location": "Room 3",
+          "startsAt": 1789200000000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789209000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 AM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      },
+      {
+        "id": "appointment-session-1789218000000-2",
+        "data": {
+          "mode": "in-person",
+          "endsAt": 1789232400000,
+          "location": "Room 3",
+          "startsAt": 1789218000000,
+          "clinician": "Nurse Alex Morgan",
+          "slotMinutes": 15,
+          "blockedSlots": [
+            {
+              "reason": "Protected break",
+              "startsAt": 1789227000000
+            }
+          ]
+        },
+        "kind": "appointment-session",
+        "owner": "gp",
+        "title": "Practice nurse \u00b7 PM",
+        "status": "open",
+        "version": 1,
+        "priority": "routine",
+        "createdAt": 1789200000000,
+        "visibleTo": [
+          "gp"
+        ],
+        "provenance": {
+          "changes": [],
+          "created": {
+            "time": 1789200000000,
+            "actor": {
+              "kind": "simulation",
+              "name": "Alex Ledger \u00b7 Practice administrator"
+            },
+            "action": "seed",
+            "source": "gp",
+            "version": 1
+          }
+        }
+      }
+    ]
+  }
+}

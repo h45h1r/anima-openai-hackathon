@@ -1,0 +1,36 @@
+{
+  "verifiedAt": "2026-09-12T12:47:25.312Z",
+  "tables": [
+    {
+      "table": "sim.patients",
+      "rows": 50000
+    },
+    {
+      "table": "sim.resource_projections",
+      "rows": 376047
+    },
+    {
+      "table": "sim.events",
+      "rows": 92
+    },
+    {
+      "table": "companion.members",
+      "rows": 9
+    },
+    {
+      "table": "companion.patients",
+      "rows": 3
+    },
+    {
+      "table": "companion.audit",
+      "rows": 31
+    }
+  ],
+  "fingerprints": {
+    "sim.resource_projections": "-3135567974333413241475",
+    "sim.patients": "347986388940306984623"
+  },
+  "consentRevisionsMatch": true,
+  "activeSessions": 0,
+  "caughtUpEvents": 3
+}

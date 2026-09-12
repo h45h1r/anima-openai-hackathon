@@ -1,0 +1,24 @@
+.env*
+!.env.example
+node_modules/
+.DS_Store
+.playwright-mcp/
+prototype/.cache/
+*.log
+*.tsbuildinfo
+coverage/
+test-results/
+.next/
+.vercel/
+*.dump
+*.sql.gz
+
+# Browser captures are local evidence; keep the images referenced by docs.
+docs/research/screenshots/*
+!docs/research/screenshots/gp-records-original.png
+!docs/research/screenshots/gp-journal-integrated.png
+!docs/research/screenshots/gp-appointments-integrated.png
+!docs/research/screenshots/documents-prototype.png
+!docs/research/screenshots/messages-prototype.png
+!docs/research/screenshots/kindred-circle-connected.png
+!docs/research/screenshots/kindred-gp-consent-connected.png

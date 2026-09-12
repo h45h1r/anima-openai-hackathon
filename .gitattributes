@@ -1,0 +1,3 @@
+# Preserve captured upstream assets while keeping generated bundles out of code statistics.
+sim-app/public/**/assets/* linguist-generated=true -whitespace
+sim-app/public/docs/** linguist-generated=true

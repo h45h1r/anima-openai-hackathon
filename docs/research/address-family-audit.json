@@ -1,0 +1,127 @@
+{
+  "world": "team-8942268fa18a",
+  "source": "https://sim.animahealth.com/api/nhs/pds/Patient",
+  "parameters": {
+    "_count": 100,
+    "_offset": "0, 100, ... 49900"
+  },
+  "queriedAt": "2026-09-12T11:33:48.964Z",
+  "pages": 500,
+  "complete": true,
+  "uniquePatients": 50000,
+  "patientsWithPostcode": 0,
+  "patientsWithStructuredContact": 0,
+  "patientsWithPatientLink": 0,
+  "uniqueAddresses": 180,
+  "addressNormalisation": "NFKC, casefold, whitespace normalization; full line(s), city, postalCode when supplied, and country. No fuzzy matching.",
+  "addressGroupSizes": {
+    "277": 40,
+    "278": 140
+  },
+  "surnameAddressGroups": 11878,
+  "surnameAddressGroupsWithMultiplePatients": 10763,
+  "surnameAddressGroupSizeRange": [
+    1,
+    14
+  ],
+  "period180": {
+    "pairsTested": 49820,
+    "sameAddressPairs": 49820
+  },
+  "examples": [
+    {
+      "patientId": "SIM-000001",
+      "name": "Amira Khan",
+      "address": {
+        "use": "home",
+        "type": "physical",
+        "line": [
+          "2 Cedar Crescent"
+        ],
+        "city": "Northbank",
+        "country": "GB"
+      },
+      "patientsAtAddress": 278,
+      "distinctSurnamesAtAddress": 66,
+      "patientsWithSameAddressAndSurname": 1,
+      "sampleOtherResidents": [
+        {
+          "id": "SIM-000181",
+          "name": "Oliver Wilson",
+          "birthDate": "1943-10-13"
+        },
+        {
+          "id": "SIM-000361",
+          "name": "Grace Williams",
+          "birthDate": "2013-01-01"
+        },
+        {
+          "id": "SIM-000541",
+          "name": "Vera W. Gray",
+          "birthDate": "1986-04-20"
+        },
+        {
+          "id": "SIM-000721",
+          "name": "Felix K. Stevens",
+          "birthDate": "1963-11-04"
+        },
+        {
+          "id": "SIM-000901",
+          "name": "Harriet F. Rahman",
+          "birthDate": "1984-02-22"
+        }
+      ]
+    },
+    {
+      "patientId": "SIM-000006",
+      "name": "Eleanor Chen",
+      "address": {
+        "use": "home",
+        "type": "physical",
+        "line": [
+          "7 Meadow Walk"
+        ],
+        "city": "Northbank",
+        "country": "GB"
+      },
+      "patientsAtAddress": 278,
+      "distinctSurnamesAtAddress": 65,
+      "patientsWithSameAddressAndSurname": 1,
+      "sampleOtherResidents": [
+        {
+          "id": "SIM-000186",
+          "name": "George Reed",
+          "birthDate": "2023-10-17"
+        },
+        {
+          "id": "SIM-000366",
+          "name": "Idris Taylor",
+          "birthDate": "2010-08-26"
+        },
+        {
+          "id": "SIM-000546",
+          "name": "Julia M. Cole",
+          "birthDate": "1951-03-13"
+        },
+        {
+          "id": "SIM-000726",
+          "name": "Beatrice A. Baker",
+          "birthDate": "1976-10-25"
+        },
+        {
+          "id": "SIM-000906",
+          "name": "Arlo I. Hunt",
+          "birthDate": "1940-05-19"
+        }
+      ]
+    }
+  ],
+  "conclusion": "No verified families can be established from these addresses/postcodes. Repetition is strong evidence of artificial address assignment. Shared address/surname groups must not become confirmed relationships or consent grants.",
+  "cohortContext": {
+    "carerInvolvementPatients": 3176,
+    "carerPatients65Plus": 150,
+    "carerPatients65PlusWithCondition": 138,
+    "preferredDemoPatient": "SIM-000001",
+    "relationshipEvidence": "Amira GP notes refer to an unnamed daughter; identify and confirm the person separately."
+  }
+}

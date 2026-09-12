@@ -1,0 +1,14 @@
+{
+  "name": "family-companion-agent-spike",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@animahealth/adk": "file:../../vendor/adk",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3",
+    "@types/node": "^22.19.19"
+  }
+}

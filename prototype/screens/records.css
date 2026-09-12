@@ -1,0 +1,121 @@
+.system-ui .clinical-journal{color:#172d42;min-width:0;font:13px Arial,sans-serif}
+.system-ui .journal-titlebar{justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;display:flex}
+.system-ui .journal-titlebar h2{color:inherit;margin:0;font-size:15px}
+.system-ui .journal-titlebar span{font-size:11px}
+.system-ui .journal-toolbar{background:#f0f1f3;border-bottom:1px solid #aab9c7;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px;display:flex}
+.system-ui .journal-toolbar label{align-items:center;gap:5px;display:flex}
+.system-ui .journal-toolbar select,.system-ui .journal-toolbar input{border:1px solid #9facbb;border-radius:0;width:auto;min-height:27px;padding:4px 7px;font-size:12px}
+.system-ui .journal-toolbar input{width:235px;margin-left:auto}
+.system-ui .clinical-journal button{color:#184d7d;cursor:pointer;background:linear-gradient(#fff,#e8edf2);border:1px solid #a1b1c0;border-radius:1px;padding:5px 9px;font-size:12px}
+.system-ui .clinical-journal button:hover{background:#e0edf9}
+.system-ui .clinical-journal button:focus-visible{outline-offset:2px;outline:2px solid #0879c1}
+.system-ui .journal-gp .journal-titlebar{color:#173e76;background:#dce7f8;border:1px solid #b0c3df}
+.system-ui .journal-date-heading{color:#164782;background:#cadcf3;border-top:1px solid #a5bcda;margin:0;padding:6px 12px;font-size:13px}
+.system-ui .journal-contact{background:#fff;border-bottom:1px solid #c5d0de;border-left:4px solid #aac0df;padding:0 14px 10px}
+.system-ui .journal-contact:nth-of-type(2n){background:#f8fafe}
+.system-ui .journal-contact>header{background:0 0;border-bottom:1px dotted #ced7e2;align-items:baseline;gap:20px;padding:9px 0;display:flex}
+.system-ui .journal-contact time{color:#315a8f;white-space:nowrap;font-size:12px}
+.system-ui .journal-contact h4{margin:0 0 4px;font-size:14px}
+.system-ui .journal-contact header span{color:#54687f;font-size:11px}
+.system-ui .journal-narrative{margin:12px 0;display:block}
+.system-ui .journal-narrative>div{grid-template-columns:150px minmax(0,1fr);gap:16px;padding:5px 0;display:grid}
+.system-ui .journal-narrative dt{color:#425c78;border:0;padding:0;font-size:12px;font-weight:700}
+.system-ui .journal-narrative dd{white-space:pre-wrap;overflow-wrap:anywhere;border:0;margin:0;padding:0;line-height:1.55}
+.system-ui .journal-entry-details{color:#435c76;margin:7px 0 0;font-size:11px}
+.system-ui .journal-entry-details summary{cursor:pointer}
+.system-ui .journal-hospital .journal-titlebar{color:#fff;background:linear-gradient(#2384a9,#084363)}
+.system-ui .journal-documentation{border:1px solid #a8b4bf;grid-template-columns:minmax(220px,30%) minmax(0,1fr);min-height:520px;display:grid}
+.system-ui .journal-document-list{background:#f7f8fa;border-right:4px double #9eabb8;max-height:750px;overflow-y:auto}
+.system-ui .journal-list-heading{background:#d9e1e7;border-bottom:1px solid #9caab6;justify-content:space-between;padding:7px 9px;font-size:11px;display:flex}
+.system-ui .journal-document-list>button{text-align:left;color:#172c3e;background:#fff;border:0;border-bottom:1px solid #c5cdd6;border-radius:0;flex-direction:column;gap:4px;width:100%;padding:9px 10px;display:flex}
+.system-ui .journal-document-list>button:nth-child(odd){background:#eef2f6}
+.system-ui .journal-document-list>button.selected{color:#fff;background:#2583c8;box-shadow:inset 3px 0 #084065}
+.system-ui .journal-document-list strong{font-size:12px}
+.system-ui .journal-document-list time,.system-ui .journal-document-list span,.system-ui .journal-document-list small{font-size:11px}
+.system-ui .journal-paper{background:#fff;min-width:0}
+.system-ui .journal-preview-actions{background:#e9ecef;border-bottom:1px solid #acb7c1;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px;display:flex}
+.system-ui .journal-preview-actions>span{margin-right:auto;font-size:11px}
+.system-ui .journal-paper-content{padding:22px 26px}
+.system-ui .journal-paper-content>h3{color:#111;margin:0 0 14px;font:700 17px Georgia,serif}
+.system-ui .journal-paper-content>p{font-size:12px}
+.system-ui .journal-paper-context{color:#334c63;font-weight:700}
+.system-ui .journal-hospital .journal-narrative>div{padding:6px 0;display:block}
+.system-ui .journal-hospital .journal-narrative dt{color:#101820;margin-bottom:4px;font-size:13px}
+.system-ui .journal-hospital .journal-narrative dd{color:#17212b;font-family:Arial,sans-serif}
+.system-ui .journal-signature{border-top:1px solid #ccd2d7;margin-top:28px;padding-top:15px;font-size:12px}
+.system-ui .journal-addendum{border-top:1px dashed #9babb8;margin-top:20px;padding-top:12px}
+.system-ui .journal-addendum p{white-space:pre-wrap}
+.system-ui .journal-paper-attribution{border-top:1px solid #c8d1da;margin-top:24px;padding-top:14px}
+.system-ui .journal-no-body{color:#546477;padding:16px}
+.system-ui .journal-load-more{margin:12px auto;display:block}
+.system-ui .journal-document-list{border-bottom:3px double #9eabb8;border-right:0;max-height:240px}
+.system-ui .journal-paper-content{padding:16px}
+.system-ui .journal-narrative>div{grid-template-columns:110px minmax(0,1fr);gap:8px}
+.system-ui .journal-toolbar input{width:100%;margin-left:0}
+.blood-results .ehr-section-heading{flex-wrap:wrap;gap:12px}
+.blood-panels{flex-wrap:wrap;gap:4px;margin:8px 0;display:flex}
+.blood-panels button[aria-pressed=true]{background:#dbeaf5;border-color:#21739d;font-weight:700}
+.blood-hint{color:#576b7b;margin:8px 0;font-size:12px}
+.blood-table-scroll{overflow:auto}
+.blood-results td small{color:#63798a;margin-top:4px;display:block}
+.blood-flag{color:#a32622;background:#fff0e7;padding:2px 5px;font-weight:700}
+.blood-other{padding:14px 0}
+.blood-trend-modal{color:#223848;background:#fff;border:1px solid #69869b;width:min(900px,100vw - 32px);max-height:calc(100dvh - 40px);padding:0;box-shadow:0 12px 65px #0005}
+.blood-trend-modal::backdrop{background:#18304488}
+.blood-trend-modal header{z-index:1;background:#e4edf3;border-bottom:1px solid #b4c8d5;justify-content:space-between;align-items:center;gap:15px;padding:14px 20px;display:flex;position:sticky;top:0}
+.blood-trend-modal h2,.blood-trend-modal header p{margin:0 0 4px}
+.blood-trend-modal button{cursor:pointer;padding:6px 12px}
+.blood-period{align-items:center;gap:12px;padding:12px 20px;display:flex}
+.blood-period select{padding:5px}
+.blood-trend-body{padding:0 20px 20px}
+.blood-trend{border-top:1px solid #d0dde5;padding:10px 0}
+.blood-trend h3{margin:4px 0}
+.blood-trend h3 small{font-weight:400}
+.blood-trend svg{width:100%;max-height:280px;font:12px Arial,sans-serif;display:block}
+.blood-trend summary{cursor:pointer;padding:6px 0}
+.hospital-operations .blood-results-hospital{background:#f0f0f0;border:1px solid #a1acb3}
+.hospital-operations .blood-results-hospital .ehr-section-heading{background:#fff;margin:0;padding:8px 12px}
+.hospital-operations .blood-results-hospital .ehr-section-heading h2{font-size:13px}
+.hospital-operations .blood-results-hospital .results-browser{grid-template-columns:180px minmax(0,1fr);display:grid}
+.hospital-operations .blood-results-hospital .blood-panels{border:1px solid #a5afb7;flex-direction:column;align-self:start;align-items:stretch;gap:0;margin:8px;display:flex}
+.hospital-operations .blood-results-hospital .blood-panels button{text-align:left;border:0;background:#e2e7eb;border-bottom:1px solid #bec7cf;border-radius:0;padding:8px}
+.hospital-operations .blood-results-hospital .blood-panels button[aria-pressed=true]{background:#b8d5e8;box-shadow:inset 3px 0 #0875ad}
+.results-values{min-width:0}
+.blood-results-hospital .results-values{padding:0 8px 8px 0}
+.hospital-operations .results-flowsheet .ehr-table{border-collapse:collapse;background:#fff;min-width:650px;font:11px Tahoma,Arial,sans-serif}
+.hospital-operations .results-flowsheet .ehr-table th,.hospital-operations .results-flowsheet .ehr-table td{border:1px solid #c3cbd1;padding:4px 6px}
+.hospital-operations .results-flowsheet .ehr-table thead th{color:#213a4e;white-space:nowrap;background:#dce7ef;font-weight:400}
+.hospital-operations .results-flowsheet .ehr-table tbody th{text-align:left;background:#e8edf2;min-width:170px;font-weight:400}
+.hospital-operations .results-flowsheet .ehr-table .results-panel-row th{background:#bccfdf;font-weight:700}
+.hospital-operations .results-flowsheet button.result-value{color:#154b74;font:inherit;white-space:nowrap;background:0 0;border:0;padding:1px}
+.hospital-operations .blood-results-hospital .blood-panels{flex-flow:row;overflow-x:auto}
+.hospital-operations .blood-results-hospital .blood-panels button{flex-shrink:0}
+.blood-results-hospital .results-values{padding:0 8px 8px}
+.gp-appointment-book .ehr-table small{margin-top:6px;display:block}
+.gp-appointment-book .ehr-table{min-width:720px}
+.records-screen{min-width:0;color:#172e46;font-family:Arial,sans-serif;font-size:12px}
+.records-screen .records-filters{display:flex;gap:20px;align-items:center;padding:8px 12px;background:#f0f1f3;border-bottom:1px solid #aab9c7}
+.records-screen .records-filters select{margin-left:6px}
+.records-screen .records-filters span{font-size:11px;color:#54687f}
+.records-screen .records-table-scroll{overflow:auto}
+.records-screen .records-link{color:#244e80;background:transparent;border:0;text-align:left;padding:0;text-decoration:underline;cursor:pointer}
+.records-screen .record-attribution{font-size:11px;color:#435c76;margin:10px 0}
+.records-screen .records-subheading{font-size:13px;padding:8px 12px;margin:0;background:#dce7f8}
+.records-screen .records-status{text-transform:capitalize}
+.records-screen .ehr-table{width:100%;border-collapse:collapse}
+.records-screen .ehr-table th,.records-screen .ehr-table td{padding:9px 10px;border-bottom:1px solid #c5d0de;text-align:left;vertical-align:top}
+.records-screen .ehr-table th{background:#e9eef6;color:#2c4765;font-size:11px}
+.records-screen .ehr-table td{background:#fff}
+.records-screen .ehr-table tr:nth-child(even) td{background:#f8fafe}
+.records-screen .ehr-table small{display:block;color:#52677e;margin-top:3px}
+.records-screen .ehr-section-heading{padding:10px 12px;background:#dce7f8;border:1px solid #b0c3df}
+.records-screen .ehr-section-heading h2{margin:0;font-size:15px;color:#173e76}
+.records-screen .ehr-section-heading small{display:block;font-size:11px;font-weight:400;margin-top:4px}
+.records-screen .results-browser{display:grid;grid-template-columns:180px minmax(0,1fr)}
+.records-screen .blood-panels{padding:8px;background:#edf1f7;border-right:1px solid #bcc9d9;display:flex;flex-direction:column;gap:3px}
+.records-screen .blood-panels button{text-align:left;padding:7px;border:0;background:transparent;font-size:11px}
+.records-screen .blood-panels button[aria-pressed=true]{background:#345aa0;color:white}
+.records-screen .blood-hint{padding:6px 10px;font-size:11px}
+.records-screen .blood-flag{color:#9c2929;background:#ffe6e6;padding:2px 4px;font-weight:700}
+@media(max-width:700px){.records-screen .results-browser{display:block}.records-screen .blood-panels{flex-direction:row;flex-wrap:wrap}.records-screen .journal-narrative>div{grid-template-columns:110px minmax(0,1fr)}}
+@media(min-width:701px){.records-screen .journal-narrative>div{grid-template-columns:150px minmax(0,1fr);gap:16px}.records-screen .journal-toolbar input{width:235px;margin-left:auto}}

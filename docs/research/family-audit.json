@@ -1,0 +1,129 @@
+{
+  "world": "team-8942268fa18a",
+  "method": "Authenticated GET only; no simulation mutations. First, middle and final PDS pages, not a random or complete population sample.",
+  "queries": [
+    {
+      "endpoint": "/api/sites/gp/patients?offset=0",
+      "httpStatus": 200,
+      "queriedAt": "2026-09-12T11:28:43.031Z",
+      "total": 50000,
+      "returned": 30
+    },
+    {
+      "endpoint": "/api/sites/gp/patients?q=Carer%20involvement&offset=0",
+      "httpStatus": 200,
+      "queriedAt": "2026-09-12T11:29:45.724Z",
+      "total": 3176,
+      "returned": 30
+    },
+    {
+      "endpoint": "/api/nhs/pds/Patient?_count=100&_offset=0",
+      "httpStatus": 200,
+      "queriedAt": "2026-09-12T11:28:29.928Z",
+      "total": 50000,
+      "returned": 100
+    },
+    {
+      "endpoint": "/api/nhs/pds/Patient?_count=100&_offset=24900",
+      "httpStatus": 200,
+      "queriedAt": "2026-09-12T11:28:30.014Z",
+      "total": 50000,
+      "returned": 100
+    },
+    {
+      "endpoint": "/api/nhs/pds/Patient?_count=100&_offset=49900",
+      "httpStatus": 200,
+      "queriedAt": "2026-09-12T11:28:30.284Z",
+      "total": 50000,
+      "returned": 100
+    }
+  ],
+  "patientCount": 50000,
+  "carerInvolvementSearchMatches": 3176,
+  "demographicSample": {
+    "count": 300,
+    "uniquePatientIds": 300,
+    "offsets": [
+      0,
+      24900,
+      49900
+    ],
+    "fieldsPresentInEveryRecord": [
+      "active",
+      "address",
+      "birthDate",
+      "generalPractitioner",
+      "id",
+      "identifier",
+      "meta",
+      "name",
+      "resourceType",
+      "telecom"
+    ],
+    "recordsWithPatientContact": 0,
+    "recordsWithPatientLink": 0,
+    "distinctAddresses": 160,
+    "repeatedAddressGroups": 100,
+    "patientsAtRepeatedAddresses": 240,
+    "distinctTelecomValues": 300,
+    "telecomSystems": {
+      "email": 300
+    }
+  },
+  "addressCollisionExample": [
+    {
+      "patientId": "SIM-049901",
+      "name": "Evelyn S. Roberts",
+      "birthDate": "1995-08-06",
+      "address": [
+        {
+          "use": "home",
+          "type": "physical",
+          "line": [
+            "42 Cedar Crescent"
+          ],
+          "city": "Northbank",
+          "country": "GB"
+        }
+      ]
+    },
+    {
+      "patientId": "SIM-000041",
+      "name": "Eleanor Taylor",
+      "birthDate": "2015-04-06",
+      "address": [
+        {
+          "use": "home",
+          "type": "physical",
+          "line": [
+            "42 Cedar Crescent"
+          ],
+          "city": "Northbank",
+          "country": "GB"
+        }
+      ]
+    }
+  ],
+  "clinicalEvidence": {
+    "source": "Earlier successful GP capture in prototype/data/snapshot.json, 12 September 2026; fresh clinical reads timed out during family audit.",
+    "patientId": "SIM-000006",
+    "resources": [
+      {
+        "id": "r-3689",
+        "field": "data.context",
+        "excerpt": "Lives with her husband and enjoys a weekly library group. Uses a landline and does not use the patient app."
+      },
+      {
+        "id": "r-3692",
+        "field": "data.text",
+        "excerpt": "Eleanor's husband could not drive her to a review. She asked whether appointments could be arranged locally."
+      }
+    ]
+  },
+  "interpretation": {
+    "structuredFamilyLinksFoundInSample": 0,
+    "verifiedPopulationFamilyCount": null,
+    "canInferFamilyFromSharedAddressOrSurname": false,
+    "suggestedApproach": "Own patient-person relationship table plus separate explicit consent grants; extracted relationships stay unverified until confirmed."
+  }
+}
