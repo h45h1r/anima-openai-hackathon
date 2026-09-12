@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useKindred } from "@/hooks/useKindred";
+import { useCareClinical } from "@/hooks/useCareClinical";
 import type { AppState, Person } from "@/lib/types";
 import { personById, visibleMessages } from "@/lib/types";
 import { Avatar, Button, KindredMark, LockIcon, Pill } from "./ui";
@@ -14,8 +15,11 @@ import CircleOfCare from "./patient/CircleOfCare";
 import SharingLevels from "./patient/SharingLevels";
 import FamilyHome from "./family/FamilyHome";
 import EhrView from "./clinician/EhrView";
+import AskPanel from "./clinical/AskPanel";
+import CarePanel from "./clinical/CarePanel";
+import type { CareClinical } from "@/hooks/useCareClinical";
 
-type Tab = "home" | "circle" | "family" | "kindred" | "activity" | "levels";
+type Tab = "home" | "circle" | "family" | "kindred" | "ask" | "care" | "activity" | "levels";
 
 interface TabDef {
   id: Tab;
@@ -28,6 +32,14 @@ export default function App() {
   const { state, connected, actions } = useKindred();
   const params = useSearchParams();
   const router = useRouter();
+  const asParamEarly = params.get("as");
+  const kindredViewerId =
+    state?.loaded && asParamEarly && state.people.some((p) => p.id === asParamEarly && p.accessStatus !== "revoked")
+      ? asParamEarly
+      : state?.loaded
+        ? state.patientId
+        : null;
+  const care = useCareClinical(state, kindredViewerId);
   const [running, setRunning] = useState(false);
   const [showAudit, setShowAudit] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -89,16 +101,26 @@ export default function App() {
       ? [
           { id: "home", label: "Home", icon: <HomeIcon />, badge: pending },
           { id: "circle", label: "Circle", icon: <LockIcon size={20} /> },
+          { id: "ask", label: "Ask", icon: <AskIcon /> },
+          { id: "care", label: "Care", icon: <CareIcon /> },
           { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
-          { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
         ]
       : [
           { id: "home", label: patient.shortName, icon: <HomeIcon /> },
+          { id: "ask", label: "Ask", icon: <AskIcon /> },
+          { id: "care", label: "Care", icon: <CareIcon /> },
           { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
         ];
   const tabParam = params.get("tab") as Tab | null;
-  const tab: Tab = tabParam && (tabs.some((t) => t.id === tabParam) || tabParam === "activity" || (tabParam === "levels" && isPatient)) ? tabParam : "home";
+  const tab: Tab =
+    tabParam &&
+    (tabs.some((t) => t.id === tabParam) ||
+      tabParam === "activity" ||
+      tabParam === "kindred" ||
+      (tabParam === "levels" && isPatient))
+      ? tabParam
+      : "home";
 
   const go = (next: { as?: string; tab?: Tab }) => {
     const q = new URLSearchParams();
@@ -107,10 +129,16 @@ export default function App() {
     if (t !== "home") q.set("tab", t);
     router.replace(`?${q.toString()}`);
   };
-  const ask = (question: string) => {
+  /** Companion / consent chat (existing Kindred agent). */
+  const askCompanion = (question: string) => {
     const dm = Object.values(state.threads).find((t) => t.kind === "direct" && t.memberIds.includes(viewerId));
     if (dm) actions.sendChat(dm.id, viewerId, question).catch(() => {});
     go({ tab: "kindred" });
+  };
+  /** Clinical Ask tab (CareCircle API behind one Kindred shell). */
+  const askClinical = (question?: string) => {
+    if (question) sessionStorage.setItem("kindred.draftQuestion", question);
+    go({ tab: "ask" });
   };
   const runCheck = async () => {
     setRunning(true);
@@ -172,7 +200,16 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <Screen state={state} actions={actions} viewer={viewer} tab={tab} onAsk={ask} go={go} />
+            <Screen
+              state={state}
+              actions={actions}
+              viewer={viewer}
+              tab={tab}
+              care={care}
+              onAskCompanion={askCompanion}
+              onAskClinical={askClinical}
+              go={go}
+            />
           )}
         </main>
         {showAudit && (
@@ -197,7 +234,25 @@ export default function App() {
   );
 }
 
-function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; actions: ReturnType<typeof useKindred>["actions"]; viewer: Person; tab: Tab; onAsk: (q: string) => void; go: (n: { tab?: Tab }) => void }) {
+function Screen({
+  state,
+  actions,
+  viewer,
+  tab,
+  care,
+  onAskCompanion,
+  onAskClinical,
+  go,
+}: {
+  state: AppState;
+  actions: ReturnType<typeof useKindred>["actions"];
+  viewer: Person;
+  tab: Tab;
+  care: CareClinical;
+  onAskCompanion: (q: string) => void;
+  onAskClinical: (q?: string) => void;
+  go: (n: { tab?: Tab }) => void;
+}) {
   const isPatient = viewer.id === state.patientId;
   const patient = personById(state, state.patientId);
   const dm = Object.values(state.threads).find((t) => t.kind === "direct" && t.memberIds.includes(viewer.id));
@@ -213,7 +268,17 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
   if (tab === "home") {
     return (
       <div className="page">
-        {isPatient ? <PatientHome state={state} actions={actions} onOpenCircle={() => go({ tab: "circle" })} onOpenChat={() => go({ tab: "kindred" })} /> : <FamilyHome state={state} actions={actions} viewerId={viewer.id} onAsk={onAsk} />}
+        {isPatient ? (
+          <PatientHome
+            state={state}
+            actions={actions}
+            onOpenCircle={() => go({ tab: "circle" })}
+            onOpenChat={() => onAskClinical()}
+            onOpenCompanion={() => go({ tab: "kindred" })}
+          />
+        ) : (
+          <FamilyHome state={state} actions={actions} viewerId={viewer.id} onAsk={onAskClinical} />
+        )}
       </div>
     );
   }
@@ -231,6 +296,20 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
       <div className="page">
         <SharingLevels state={state} actions={actions} onBack={() => go({ tab: "circle" })} />
       </div>
+    );
+  }
+  if (tab === "ask") {
+    return <AskPanel state={state} viewer={viewer} care={care} onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })} />;
+  }
+  if (tab === "care") {
+    return (
+      <CarePanel
+        state={state}
+        viewer={viewer}
+        care={care}
+        onAsk={onAskClinical}
+        onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })}
+      />
     );
   }
   if (tab === "family") {
@@ -315,6 +394,12 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, status 
 
 function HomeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z" /></svg>;
+}
+function AskIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19v-2.2A7 7 0 1 1 12 19H5Z" /><path d="M9.5 10.5h.01M12 10.5h.01M14.5 10.5h.01" /></svg>;
+}
+function CareIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4h8v4H8V4Z" /><path d="M6 8h12v12H6V8Z" /><path d="M10 12h4M12 10v4" /></svg>;
 }
 function PeopleIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.5" /><circle cx="17" cy="10" r="2.5" /><path d="M3 20a6 6 0 0 1 12 0M15 20a4 4 0 0 1 6 0" /></svg>;

@@ -1,44 +1,40 @@
-# CareCircle
+# CareCircle (clinical Ask backend)
 
-Patient-controlled family communication over **live Anima** synthetic clinical data.
+Patient-controlled clinical Ask over **live Anima** synthetic data. In this repo the **product UI is Kindred** (`../web/` on :3111). This package’s **Express server** (:8787) powers Kindred’s Ask / Care tabs via `/care-api` rewrites.
 
-UI follows the shared **Kindred design system** ([`docs/design-system.md`](../docs/design-system.md)): tokens in `web/src/app/globals.css`, primitives in `web/src/components/ui.tsx`, Next.js App Router + fonts aligned with Kindred `web/`.
+Do **not** present `carecircle/web` (:3112) as a second app users must open.
 
 ## Ownership split
 
 | Concern | Owner | Where |
 | --- | --- | --- |
-| People / circle / sharing levels / GP consent | **Kindred** | Repo `web/` + `sim-app/` · [http://localhost:3111/?tab=circle](http://localhost:3111/?tab=circle) |
-| Ask / Results / clinical demo / disclosure holds | **CareCircle** | This folder · [http://localhost:3112](http://localhost:3112) |
+| People / circle / sharing levels / GP consent / `?as=` | **Kindred** | Repo `web/` + `sim-app/` · [http://localhost:3111](http://localhost:3111) |
+| Grounded Ask / Results evidence / disclosure holds (API) | **CareCircle server** | `server/` · :8787 (called from Kindred) |
 
-CareCircle’s **Circle** tab mirrors Kindred’s three sharing levels (Everything / Only practical / Important updates) and deep-links into Kindred Circle. It does **not** ship the old information-class matrix as the primary access UX. Ask filtering maps those Kindred levels onto Anima information classes via `server/src/consent/kindredBridge.ts`.
+Ask filtering maps Kindred sharing levels onto Anima information classes via `server/src/consent/kindredBridge.ts`.
 
 ## Architecture
 
-- `web/` — **Next.js 16** App Router UI (port **3112**), Kindred-style tokens/fonts
-- `server/` — Node/Express API (port **8787**); holds the Anima bearer key
-- Ask streaming — **SSE** `POST /api/ask/stream` (`text/event-stream`, `data: {json}` frames + `: ping` keepalives), same event shapes as before (`status` / `tool` / `token` / `stream_reset` / `final` / `error`). REST `POST /api/ask` remains as fallback.
+- `server/` — Node/Express API (port **8787**); holds the Anima bearer key — **this is what Kindred uses**
+- `web/` — Legacy MVP Next UI (:3112); optional for isolated CareCircle demos only
+- Ask streaming — **SSE** `POST /api/ask/stream` (`text/event-stream`, `data: {json}` frames + `: ping` keepalives). REST `POST /api/ask` remains as fallback.
 - CareCircle store — Ask filter grants (Kindred levels), disclosure holds, agent traces (`data/store.json`)
 
-Anima OpenAPI contract used: `https://sim.animahacks.com/openapi.json` (cached as `docs-openapi.json`).
-
-Kindred itself lives at repo `web/` (port **3111**) and uses SSE for app-state sync (`GET /api/events`). CareCircle keeps a separate Express API for live Anima ADK agents, but matches Kindred’s coding language (Next + SSE) and visual system.
-
-## Setup
+## Setup (API for Kindred)
 
 ```bash
 cd carecircle
 cp .env.example .env
-# Edit .env — at minimum set ANIMA_API_KEY (or use Connect UI / ANIMA_TEAM_NAME)
+# Edit .env — at minimum set ANIMA_API_KEY
 npm install
-npm run dev
+npm run dev --prefix server
+# or from repo root: npm run dev:ask
 ```
 
-- UI: http://localhost:3112  
 - API: http://localhost:8787  
-- Kindred Circle (access): http://localhost:3111/?tab=circle  
+- Product UI: http://localhost:3111 (Ask / Care tabs)
 
-Next rewrites `/api/*` → Express (`CARE_CIRCLE_API_ORIGIN`, default `http://localhost:8787`). Leave `NEXT_PUBLIC_API_BASE` empty in local dev so the browser talks same-origin `/api` (Anima key never reaches the client).
+From the repo root, `npm run dev:product` starts sim + Ask API + Kindred together.
 
 ### Environment variables
 

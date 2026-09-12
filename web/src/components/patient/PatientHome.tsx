@@ -5,7 +5,19 @@ import { CATEGORIES, personById } from "@/lib/types";
 import type { KindredActions } from "@/hooks/useKindred";
 import { Avatar, Button, Card, LockIcon, Pill, fmtClock, fmtLongDay } from "../ui";
 
-export default function PatientHome({ state, actions, onOpenCircle, onOpenChat }: { state: AppState; actions: KindredActions; onOpenCircle: () => void; onOpenChat: () => void }) {
+export default function PatientHome({
+  state,
+  actions,
+  onOpenCircle,
+  onOpenChat,
+  onOpenCompanion,
+}: {
+  state: AppState;
+  actions: KindredActions;
+  onOpenCircle: () => void;
+  onOpenChat: () => void;
+  onOpenCompanion?: () => void;
+}) {
   const patient = personById(state, state.patientId);
   const next = state.appointments[0];
   const pending = state.consentRequests.filter((r) => r.status === "pending");
@@ -102,16 +114,31 @@ export default function PatientHome({ state, actions, onOpenCircle, onOpenChat }
         </div>
       </button>
 
-      <button onClick={onOpenChat} className="w-full rounded-2xl border border-line bg-card p-4 text-left transition hover:bg-paper md:col-span-2">
+      <button onClick={onOpenChat} className="w-full rounded-2xl border border-line bg-card p-4 text-left transition hover:bg-paper">
         <div className="flex items-center gap-3">
           <Avatar person={personById(state, state.agentId)} size={44} />
           <div className="flex-1">
-            <div className="font-display text-lg font-bold leading-tight">Ask Kindred</div>
-            <div className="text-[15px] text-muted">“What do my latest blood tests mean?”</div>
+            <div className="font-display text-lg font-bold leading-tight">Ask about your care</div>
+            <div className="text-[15px] text-muted">“What do my latest blood tests mean?” · grounded clinical Ask</div>
           </div>
           <Chevron />
         </div>
       </button>
+
+      {onOpenCompanion ? (
+        <button onClick={onOpenCompanion} className="w-full rounded-2xl border border-line bg-card p-4 text-left transition hover:bg-paper">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-plum text-white">
+              <LockIcon size={20} />
+            </span>
+            <div className="flex-1">
+              <div className="font-display text-lg font-bold leading-tight">Talk to Kindred about sharing</div>
+              <div className="text-[15px] text-muted">Change who can see what — same companion chat as before</div>
+            </div>
+            <Chevron />
+          </div>
+        </button>
+      ) : null}
       </div>
     </div>
   );
