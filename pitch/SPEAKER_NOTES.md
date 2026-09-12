@@ -99,6 +99,8 @@ If asked for a UK carer anxiety figure: Carers UK State of Caring 2025, 74% of c
 
 ## Slide 4: The solution (30 seconds)
 
+Removed from the slide on 12 Sep evening and kept here to say aloud: the eight-step flow (trend engine reads a year of bloods, flags worsening, result lands or trend flagged, has she been told, held or released, her consent for big news, per-person version, act); "if nobody tells her within three days, the agent raises a GP task and phones her landline"; and "on Eleanor's real values the engine flags her liver trend as worsening and her white cells as watch".
+
 **Script**
 
 "CareCircle turns every result into the right explanation and next action for every trusted person, under the patient's control. Three pillars, one loop. One: it sees it coming. A trend engine reads a year of bloods and the watch data and says improving, watch or worsening; on Eleanor's real values it flags her liver trend as worsening and her white cells as watch. Two: it tells her first. When a result lands or a trend is flagged, the gate asks one question, has she been told, and holds everything until she has been talked through it. Big news waits for her yes. If nobody tells her within three days, the agent raises a GP task and phones her landline. Three: it tells the right people the right way. Three sharing levels over six record categories, enforced inside every tool call, mirrored to her GP's consent view. Grace gets the numbers, Idris gets the logistics, Thomas gets a yes or no. Proxy access gives a person the record. Kindred gives each person their role."
@@ -109,6 +111,22 @@ If asked for a UK carer anxiety figure: Carers UK State of Caring 2025, 74% of c
 - Gate (prototype, `lib/gate.mjs`): deterministic code, not a model decision. Steps: idle, ordered, result_detected, disclosed, awaiting_patient, released. Family threads stay empty until disclosure, and with "ask me first" on, until the patient shares. Escalation fires only when a result is abnormal and undisclosed, and the family escalation message carries no analyte value or name.
 - Consent (Kindred app): levels are `Everything` (all six categories), `Only practical` (appointments, medications, care notes), `Important updates` (appointments, test results, conditions), from `web/src/lib/levels.ts`. Circle defaults from `web/src/lib/data/circle.ts`: Grace sees appointments, medications, conditions, care notes (4 of 6, a custom mix); Thomas sees appointments only; Idris sees appointments, medications, test results, conditions, care notes (5 of 6). The patient changes them on the Circle screen or by telling Kindred in words (`set_sharing_level`, `update_consent`). Enforcement is in `web/src/lib/agent/tools.ts`: every read tool calls `checkConsent` first and returns `NOT_SHARED` with an instruction not to reveal or guess; the audit rail records the check.
 - Plain-language rewriting evidence, for questions only: Steimetz E, et al. JAMA Netw Open 2024;7(5):e2412767. GPT-4 simplified 1,134 pathology reports from grade 13.19 to 7.45 reading level, 97.44% interpreted correctly, hallucinations in 0.26%; the authors say simplified reports "should be reviewed by clinicians before distribution to patients". Balance with Zaretsky J, et al. JAMA Netw Open 2024;7(3):e240357: discharge summaries rewritten by GPT-4, only 54% of physician reviews rated fully accurate, 18 of 100 flagged a safety concern, mostly omissions.
+
+---
+
+## Slide 4b: After CareCircle (15 seconds)
+
+"So what changes for Eleanor. Her white cells were filed four times; now the trend is flagged the second time, in July. A result lands; instead of sitting there, it is held until the practice has talked her through it, and she says yes. Her daughter gets the numbers, her husband gets the lift to arrange, her son gets nothing-needed-this-week. And if nobody confirms within three days, a GP task is raised and her landline rings."
+
+Timing: take these 15 seconds from the demo (90 to 75) so the total stays at three minutes.
+
+Honesty: the right-hand column is what the demo shows across the app and the prototype; see the code-ownership table at the top. "Flagged in July" is the second low panel (14 July 2026, white cells 1.6) in the remote Anima record; the prototype's trend rule needs two consecutive out-of-range values, so July is the earliest it fires on her real data.
+
+---
+
+## Slides removed 12 Sep evening
+
+The demo, plan-fit and close slides were cut; the deck now ends on "What happens to Eleanor now" and the demo runs live after it. The demo script, the three plan quotes and the close line are kept below for the presenter.
 
 ---
 

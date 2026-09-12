@@ -145,6 +145,19 @@ p { margin: 0; }
 .under b { color: var(--ink); font-weight: 600; }
 .under .pill { display: inline-flex; width: auto; margin-left: 0.5rem; vertical-align: middle; }
 .under b { display: inline; }
+.pillars.big { margin-top: 2.4rem; gap: clamp(1rem, 2vw, 1.8rem); }
+.pillars.big .pillar { padding: 1.3rem 1.4rem 1.5rem; border-top-width: 4px; }
+.pillars.big .pillar b { font-size: clamp(1.2rem, 1.8vw, 1.7rem); }
+.pillars.big .pillar span { font-size: clamp(1rem, 1.3vw, 1.25rem); margin-top: 0.6rem; line-height: 1.4; }
+
+/* before / after */
+.ba-head { display: grid; grid-template-columns: 1fr 2.4rem 1.15fr; gap: 0 1rem; margin-top: 1.8rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.ba-head span:last-child { color: var(--plum); }
+.ba-grid { display: grid; gap: 0.6rem; margin-top: 0.5rem; }
+.ba-row { display: grid; grid-template-columns: 1fr 2.4rem 1.15fr; gap: 0 1rem; align-items: center; }
+.ba { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 0.8rem 1rem; font-size: clamp(0.92rem, 1.2vw, 1.15rem); line-height: 1.38; color: var(--muted); }
+.ba.after { border-color: rgba(109, 46, 91, 0.35); background: var(--plum-soft, #F1E4EC); color: var(--ink); }
+.ba-arrow { text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.4rem; color: var(--plum); }
 </style>
 </head>
 <body>
@@ -197,74 +210,30 @@ p { margin: 0; }
 <section class="slide">
   <span class="kicker">The solution</span>
   <div class="body">
-    <h2 style="max-width:36ch"><span class="product">Kindred</span> turns every result into the right explanation and next action for every trusted person, <em>under the patient's control.</em></h2>
-    <div class="pillars">
-      <div class="pillar rust"><b>1. Sees it coming</b><span>Proactive, longitudinal. A year of bloods and a week of watch data become improving, watch, worsening, on the Home boxes and a nine-system Body view.</span></div>
-      <div class="pillar amber"><b>2. Tells her first</b><span>Transparency. The disclosure gate: nothing goes to the family until she has been told.</span></div>
-      <div class="pillar plum"><b>3. Tells the right people the right way</b><span>Consent. Three levels over six record categories, enforced in every tool call, a version per person.</span></div>
-    </div>
-    <div class="flow">
-      <div class="rust"><b>Trend engine</b>reads a year of bloods</div>
-      <div class="rust"><b>Flags worsening</b>improving, watch, worsening</div>
-      <div class="amber"><b>Result lands</b>or a trend is flagged</div>
-      <div class="amber"><b>Has she been told?</b>the gate checks</div>
-      <div class="amber"><b>Held / Released</b>held until she has been talked through it</div>
-      <div class="plum"><b>Her consent</b>big news waits for her yes</div>
-      <div class="plum"><b>Per-person version</b>Grace numbers, Idris logistics, Thomas yes/no</div>
-      <div class="moss"><b>Act</b>explain, notify, or raise a task</div>
-    </div>
-    <div class="under">
-      <p><b>If nobody tells her within three days,</b> the agent raises a GP task and phones her landline.</p>
-      <p>On Eleanor's real values the engine flags her liver trend as <span class="lab w">worsening</span> and her white cells as <span class="lab k">watch</span>.</p>
+    <h2 style="max-width:30ch"><span class="product">Kindred</span> turns every result into the right explanation and next action for every trusted person, <em>under the patient's control.</em></h2>
+    <div class="pillars big">
+      <div class="pillar rust"><b>1. Sees it coming</b><span>Reads the whole trend, not one result.</span></div>
+      <div class="pillar amber"><b>2. Tells her first</b><span>Nothing reaches the family until she has been told and says yes.</span></div>
+      <div class="pillar plum"><b>3. Tells the right people the right way</b><span>Daughter gets the numbers. Husband gets the lift to arrange. Son gets a yes or no.</span></div>
     </div>
   </div>
   <div class="foot"><span class="src">Proxy access gives a person the record. <span class="product">Kindred</span> gives each person their role.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
 </section>
 
-<!-- 5. The demo -->
+<!-- 4b. After CareCircle -->
 <section class="slide">
-  <span class="kicker">The demo</span>
+  <span class="kicker">After <span class="product">Kindred</span></span>
   <div class="body">
-    <h2>90 seconds, live against Anima.</h2>
-    <ul class="facts moss" style="max-width:72ch;margin-top:1.6rem;gap:0.85rem">
-      <li><b>Eleanor's body.</b> Nine systems coloured from her live record in the Body tab, consent-gated per system; the Home boxes say what needs watching. Trend cards <span class="pill live">live from the prototype</span></li>
-      <li><b>Order the LFT in Anima; advance the clock 121 minutes.</b> The result lands as a real state change.</li>
-      <li><b>Held.</b> Eleanor's phone: a result has arrived and the practice will talk her through it. Family sees nothing.</li>
-      <li><b>Her yes.</b> Three versions go out: Grace numbers, Idris logistics, Thomas yes/no. A task appears in Anima's activity trail.</li>
-      <li><b>Grace asks about a result she cannot see.</b> <span class="mono">NOT_SHARED</span>, no hint. She asks for access; Eleanor approves from a card; the GP consent view updates live.</li>
-      <li><b>The morning check</b> reads the 08:30 appointment from the record and posts to the family group: who can give Eleanor a lift?</li>
-    </ul>
-  </div>
-  <div class="foot"><span class="src">Visibly simulated: WhatsApp delivery, relative identity checks, the clinician's “discussed with patient” tap, the persona switcher. Consent writes go to the companion backend, not native FHIR Consent on the remote simulator.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
-</section>
-
-<!-- 6. 10 Year Health Plan fit -->
-<section class="slide">
-  <span class="kicker">10 Year Health Plan fit</span>
-  <div class="body qs">
-    <div><p class="q">There are 3 shifts, but only one core purpose: to put power in patients' hands.</p><p class="who2">Chapter 1, p22</p></div>
-    <div><p class="q">Patients will have control over whether this data is shared.</p><p class="who2">Chapter 3, My Health, pp50 to 51. And My Carer, p51: carers gain access to the App on their loved one's behalf.</p></div>
-    <div><p class="q">The most common reasons for complaints is poor communication.</p><p class="who2">Chapter 6, p89</p></div>
-    <p class="chapters">Chapters 2, 3 and 6.</p>
-  </div>
-  <div class="foot"><span class="src">Fit for the Future: the 10 Year Health Plan for England, July 2025.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
-</section>
-
-<!-- 7. Close and proof -->
-<section class="slide">
-  <span class="kicker">Close</span>
-  <div class="body">
-    <h1 style="max-width:14ch">No result ever sits uncommunicated.</h1>
-    <p class="lede" style="margin-top:1rem;max-width:52ch">And when it is communicated, every trusted person gets the right version, in their words, under her control.</p>
-    <div class="stat-row">
-      <div class="stat"><div class="n">3 <small>× 6</small></div><div class="l">sharing levels over six record categories, plus custom mixes</div></div>
-      <div class="stat"><div class="n">Every</div><div class="l">agent tool call checks consent and is written to the audit rail</div></div>
-      <div class="stat rust"><div class="n">9</div><div class="l">body systems coloured from the live record, consent-gated per system, on a licensed 3D figure</div></div>
-      <div class="stat"><div class="n">1</div><div class="l">transaction mirrors each consent change to the GP view: observation plus audit</div></div>
+    <h2 style="max-width:30ch">What happens to Eleanor now.</h2>
+    <div class="ba-head"><span>Today</span><span></span><span>With <span class="product">Kindred</span></span></div>
+    <div class="ba-grid">
+      <div class="ba-row"><div class="ba before">Four low white cell counts since May, each filed on its own.</div><div class="ba-arrow">→</div><div class="ba after">The trend is flagged as worsening the second time, in July, not filed a fourth time.</div></div>
+      <div class="ba-row"><div class="ba before">A result lands in the record. Nobody knows if she has been told.</div><div class="ba-arrow">→</div><div class="ba after">The result is held. The practice talks her through it. She says yes.</div></div>
+      <div class="ba-row"><div class="ba before">Her family knows nothing. She is the messenger.</div><div class="ba-arrow">→</div><div class="ba after">Grace gets the numbers. Idris gets the lift to arrange. Thomas gets “nothing needed this week”.</div></div>
+      <div class="ba-row"><div class="ba before">Nobody follows up. Nothing chases it.</div><div class="ba-arrow">→</div><div class="ba after">Three days with no confirmation: a GP task is raised and her landline rings.</div></div>
     </div>
-    <p class="roadmap"><b>Next:</b> fold the disclosure gate, the escalation and the 30-day trend rules, prototyped today against the live Anima world, into the app's scheduled check. Pilot at one practice. Wire consent to NHS App proxy access.</p>
   </div>
-  <div class="foot"><span class="src">All patient data synthetic. Fictional demo, not an official NHS product.</span><span class="legal"><span class="product">Kindred</span> · Team 5</span></div>
+  <div class="foot"><span class="src">Every line on the right is something the demo shows. All patient data synthetic.</span><span class="legal">Fictional demo, not an official NHS product</span></div>
 </section>
 
 </div>
