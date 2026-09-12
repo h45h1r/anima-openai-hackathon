@@ -56,6 +56,52 @@ for (const question of ['when is my next appointment', 'when is my next appinmtn
     assert.ok(run.tools.every(t => t.source === 'model'));
     assert.doesNotMatch(run.answer.answer, /bilirubin|liver result/i);
     assert.match(run.answer.answer, /13 September|13th September|13 Sept|tomorrow/i);
-    assert.match(run.answer.answer, /12:20|12\.20|12.20pm/i);
+    assert.match(run.answer.answer, /13:20|1:20|1\.20/i);
   });
 }
+
+test('revocation between tool read and delivery blocks the reply', async () => {
+  const request = input('sarah');
+  const latest = structuredClone(request.policy);
+  request.refreshPolicy = async () => latest;
+  const run = createQuestionTools(request);
+  assert.equal((await invoke(run, 'get_test_results', { includeHistory: false })).records?.length, 1);
+  latest.grants.filter(g => g.viewerId === 'sarah').forEach(g => { g.allowed = false; });
+  await assert.rejects(run.checkDelivery(), /Sharing changed/);
+  assert.deepEqual((await invoke(run, 'get_test_results', { includeHistory: false })).records, []);
+});
+
+test('consent outage blocks tools and final delivery', async () => {
+  const request = input();
+  request.refreshPolicy = async () => { throw new Error('Consent unavailable'); };
+  const run = createQuestionTools(request);
+  assert.equal((await invoke(run, 'get_test_results', {})).error, 'Consent unavailable');
+  assert.equal(run.seen.size, 0);
+  await assert.rejects(run.checkDelivery(), /Consent unavailable/);
+});
+
+test('self access cannot return records from a different patient', async () => {
+  const request = input();
+  request.context.measurements[0].patientId = 'SIM-999999';
+  const run = createQuestionTools(request);
+  assert.deepEqual((await invoke(run, 'get_test_results', {})).records, []);
+  assert.equal(run.seen.size, 0);
+});
+
+test('legacy free-text memories never enter model tool results', async () => {
+  const request = input('tom');
+  await request.memory.remember({ patientId, viewerId: 'tom', kind: 'preference', text: 'PRIVATE_LAB_K7Q9M2: 847.193 units' });
+  const run = createQuestionTools(request);
+  const result = await invoke(run, 'recall_preferences', {});
+  assert.doesNotMatch(JSON.stringify(result), /PRIVATE_LAB|847.193/);
+});
+
+test('trend charts use only consent-filtered evidence', async () => {
+  const denied = createQuestionTools(input('tom'));
+  assert.deepEqual((await invoke(denied, 'show_result_trend', { analyteId: 'bilirubin', unit: 'µmol/L' })).records, []);
+  assert.equal(denied.getVisualisation(), undefined);
+  const allowed = createQuestionTools(input());
+  await invoke(allowed, 'show_result_trend', { analyteId: 'bilirubin', unit: 'µmol/L' });
+  assert.equal(allowed.getVisualisation()?.points?.[0].value, 24);
+  assert.equal(allowed.seen.size, 1);
+});

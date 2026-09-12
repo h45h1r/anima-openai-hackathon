@@ -8,8 +8,8 @@ export const careCircleStateSchema = {
 } as const;
 export type CareCircleAdkApp = AdkApp<typeof careCircleStateSchema>;
 
-export function createCareCircleAdkApp(): CareCircleAdkApp {
-  return adk({ name: 'carecircle', schema: careCircleStateSchema });
+export function createCareCircleAdkApp(onModelContext?: (events: string) => void): CareCircleAdkApp {
+  return adk({ hooks: onModelContext ? [{ name: 'eval_model_context', beforeModel: (_ctx, renderCtx) => { onModelContext(JSON.stringify(renderCtx.events)); } }] : [], name: 'carecircle', schema: careCircleStateSchema });
 }
 
 export function createAskAgent(app: CareCircleAdkApp, modelName: string, tools: ReturnType<CareCircleAdkApp['tool']>[]) {

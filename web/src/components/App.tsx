@@ -15,11 +15,10 @@ import CircleOfCare from "./patient/CircleOfCare";
 import SharingLevels from "./patient/SharingLevels";
 import FamilyHome from "./family/FamilyHome";
 import EhrView from "./clinician/EhrView";
-import AskPanel from "./clinical/AskPanel";
 import CarePanel from "./clinical/CarePanel";
 import type { CareClinical } from "@/hooks/useCareClinical";
 
-type Tab = "home" | "circle" | "kindred" | "ask" | "care" | "activity" | "levels";
+type Tab = "home" | "circle" | "kindred" | "care" | "activity" | "levels";
 
 interface TabDef {
   id: Tab;
@@ -32,6 +31,12 @@ export default function App() {
   const { state, connected, actions } = useKindred();
   const params = useSearchParams();
   const router = useRouter();
+  useEffect(() => {
+    if (params.get("tab") !== "ask") return;
+    const query = new URLSearchParams(params.toString());
+    query.set("tab", "kindred");
+    router.replace(`?${query.toString()}`);
+  }, [params, router]);
   const asParamEarly = params.get("as");
   const kindredViewerId =
     state?.loaded && asParamEarly && state.people.some((p) => p.id === asParamEarly && p.accessStatus !== "revoked")
@@ -123,16 +128,14 @@ export default function App() {
           { id: "home", label: "Home", icon: <HomeIcon />, badge: pending },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
           { id: "circle", label: "Circle", icon: <LockIcon size={20} /> },
-          { id: "ask", label: "Ask", icon: <AskIcon /> },
           { id: "care", label: "Care", icon: <CareIcon /> },
         ]
       : [
           { id: "home", label: patient.shortName, icon: <HomeIcon /> },
-          { id: "ask", label: "Ask", icon: <AskIcon /> },
           { id: "care", label: "Care", icon: <CareIcon /> },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
         ];
-  const tabParam = params.get("tab") as Tab | null;
+  const tabParam = (params.get("tab") === "ask" ? "kindred" : params.get("tab")) as Tab | null;
   const tab: Tab =
     tabParam &&
     (tabs.some((t) => t.id === tabParam) ||
@@ -149,10 +152,9 @@ export default function App() {
     if (t !== "home") q.set("tab", t);
     router.replace(`?${q.toString()}`);
   };
-  /** Clinical Ask tab (CareCircle API behind one Kindred shell). */
   const askClinical = (question?: string) => {
-    if (question) sessionStorage.setItem("kindred.draftQuestion", question);
-    go({ tab: "ask" });
+    if (question) sessionStorage.setItem(`kindred.draftQuestion:${state.patient.simId}:${viewerId}`, question);
+    go({ tab: "kindred" });
   };
   const runCheck = async () => {
     setRunning(true);
@@ -325,15 +327,6 @@ function Screen({
       </div>
     );
   }
-  if (tab === "ask") {
-    return (
-      <div className="app-main-h">
-        <div className="mx-auto h-full w-full max-w-3xl lg:py-4">
-          <AskPanel state={state} viewer={viewer} care={care} onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })} />
-        </div>
-      </div>
-    );
-  }
   if (tab === "care") {
     return (
       <CarePanel
@@ -352,7 +345,7 @@ function Screen({
   return (
     <div className="app-main-h">
       <div className="mx-auto h-full w-full max-w-3xl lg:py-4">
-        <Chat state={state} actions={actions} threadId={dm.id} viewerId={viewer.id} big={isPatient} suggestions={suggestions} />
+        <Chat key={`${state.patient.simId}:${viewer.id}:${dm.id}`} state={state} actions={actions} threadId={dm.id} viewerId={viewer.id} big={isPatient} suggestions={suggestions} onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })} />
       </div>
     </div>
   );
@@ -544,9 +537,6 @@ function qDebounce(query: string) {
 
 function HomeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z" /></svg>;
-}
-function AskIcon() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19v-2.2A7 7 0 1 1 12 19H5Z" /><path d="M9.5 10.5h.01M12 10.5h.01M14.5 10.5h.01" /></svg>;
 }
 function CareIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4h8v4H8V4Z" /><path d="M6 8h12v12H6V8Z" /><path d="M10 12h4M12 10v4" /></svg>;

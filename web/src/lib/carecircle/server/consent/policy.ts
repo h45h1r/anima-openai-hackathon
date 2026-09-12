@@ -127,7 +127,7 @@ export function createDefaultPolicy(patientId: string, patientName: string): Con
 }
 
 export function getDisclosureState(policy: ConsentPolicyState, resourceId: string): DisclosureState {
-  const events = policy.disclosures.filter((d) => d.resourceId === resourceId);
+  const events = policy.disclosures.filter((d) => d.patientId === policy.patientId && d.resourceId === resourceId);
   if (!events.length) return 'cleared'; // existing historical resources default cleared unless held
   return events.sort((a, b) => a.changedAt.localeCompare(b.changedAt)).at(-1)!.state;
 }
@@ -327,6 +327,12 @@ export function evaluateConsent(input: {
   let allowedCount = 0;
 
   for (const item of input.evidence) {
+    if (item.payload.patientId !== input.policy.patientId) {
+      deniedCount++;
+      denied.add(item.informationClass);
+      reasonCodes.add('PATIENT_MISMATCH');
+      continue;
+    }
     if (viewer.relationship === 'self') {
       allowedEvidenceIds.push(item.evidenceId);
       allowedFieldsByEvidence[item.evidenceId] = item.fields;
@@ -345,6 +351,9 @@ export function evaluateConsent(input: {
 
     const grant = input.policy.grants.find(
       (g) =>
+        g.patientId === input.policy.patientId &&
+        g.scope === 'class' &&
+        Date.parse(g.startsAt) <= Date.now() &&
         g.viewerId === viewer.viewerId &&
         g.informationClass === item.informationClass &&
         !g.revokedAt &&
@@ -356,7 +365,7 @@ export function evaluateConsent(input: {
       reasonCodes.add('TOPIC_NOT_GRANTED');
       continue;
     }
-    if (grant.expiresAt && Date.parse(grant.expiresAt) < Date.now()) {
+    if (grant.expiresAt && !(Date.parse(grant.expiresAt) > Date.now())) {
       deniedCount++;
       denied.add(item.informationClass);
       reasonCodes.add('GRANT_EXPIRED');
@@ -374,7 +383,7 @@ export function evaluateConsent(input: {
   else if (deniedCount || heldCount) outcome = 'partial';
 
   const selfViewer = input.policy.viewers.find((v) => v.relationship === 'self');
-  // Default notice (intent-agnostic). Harness may refine with classifyAskIntent.
+  // The consent decision depends on access, never the wording of a question.
   const userNotice = buildUserFacingPolicyNotice({
     outcome,
     reasonCodes: [...reasonCodes],

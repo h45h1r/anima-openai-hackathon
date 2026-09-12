@@ -52,6 +52,7 @@ export function useKindred() {
     setSharingLevel: (granteeId: string, level: SharingLevel) => post("/api/sharing-level", { granteeId, level }),
     setLevelDefinition: (level: SharingLevel, categories: Category[]) => post("/api/levels", { level, categories }, "PATCH"),
     sendChat: (threadId: string, actorId: string, text: string) => post("/api/chat", { threadId, actorId, text }),
+    clearChat: (threadId: string, actorId: string) => post("/api/chat/clear", { threadId, actorId }),
     runProactive: () => post("/api/proactive"),
     reset: () => post("/api/reset"),
     switchPatient: async (patientId: string) => {

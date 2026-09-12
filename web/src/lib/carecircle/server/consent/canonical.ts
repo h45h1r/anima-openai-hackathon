@@ -11,6 +11,7 @@ const categories: Record<string, InformationClass[]> = {
 
 export async function canonicalPolicy(patientId: string, patientName: string): Promise<ConsentPolicyState> {
   const snapshot = await getConsentSnapshot(patientId);
+  if (snapshot.patient.id !== patientId) throw new Error('Consent belongs to a different patient.');
   const previous = careStore().ensurePolicy(patientId, patientName);
   const now = new Date().toISOString();
   const viewers: ConsentPolicyState['viewers'] = [

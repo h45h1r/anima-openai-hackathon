@@ -1,10 +1,4 @@
-// Agent runtime dispatcher. Three implementations behind one function:
-//   - openai:   Responses API (gpt-5.6-sol, medium reasoning) — see openai.ts
-//   - claude:   Anthropic SDK streaming tool loop — below
-//   - scripted: deterministic fallback when no credentials are present
-// All three run the SAME tools (tools.ts), so consent enforcement, audit and
-// EHR sync behave identically. The swap point for the mycontinuum ADK is here.
-
+// OpenAI chat uses the shared Anima ADK consent harness.
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { getState, addMessage, updateMessage, setThreadBusy, addAudit } from "../store";
@@ -24,7 +18,7 @@ export async function agentTurn(opts: TurnOpts): Promise<Message> {
   const state = getState();
   const { threadId, actorId, text } = opts;
   addMessage({ threadId, senderId: actorId, text, kind: "chat" });
-  const placeholder = addMessage({ threadId, senderId: state.agentId, text: "", kind: "chat", streaming: true, trace: [] });
+  const placeholder = addMessage({ threadId, senderId: state.agentId, text: "", kind: "chat", streaming: true, trace: [], audience: [actorId] });
   setThreadBusy(threadId, true);
   addAudit({ kind: "agent.turn", actorId, summary: `${personById(state, actorId).shortName} asked Kindred: “${text.slice(0, 80)}${text.length > 80 ? "…" : ""}”`, detail: { model: state.agentModel } });
 

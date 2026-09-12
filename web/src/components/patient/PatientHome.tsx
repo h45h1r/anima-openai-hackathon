@@ -152,7 +152,7 @@ export default function PatientHome({
           <Avatar person={personById(state, state.agentId)} size={44} />
           <div className="flex-1">
             <div className="font-display text-lg font-bold leading-tight">Ask about your care</div>
-            <div className="text-[15px] text-muted">“What do my latest blood tests mean?” · grounded clinical Ask</div>
+            <div className="text-[15px] text-muted">Understand your results, appointments and next steps</div>
           </div>
           <Chevron />
         </div>
@@ -166,7 +166,7 @@ export default function PatientHome({
             </span>
             <div className="flex-1">
               <div className="font-display text-lg font-bold leading-tight">Talk to Kindred about sharing</div>
-              <div className="text-[15px] text-muted">Change who can see what — same companion chat as before</div>
+              <div className="text-[15px] text-muted">Tell Kindred who can see each part of your care</div>
             </div>
             <Chevron />
           </div>

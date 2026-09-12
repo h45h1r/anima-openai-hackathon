@@ -5,6 +5,8 @@ import type { AppState, Message, ToolTrace } from "@/lib/types";
 import { personById, visibleMessages } from "@/lib/types";
 import type { KindredActions } from "@/hooks/useKindred";
 import { Avatar, KindredMark, LockIcon, Prose, fmtDay, fmtTime } from "./ui";
+import ResultChart from "./clinical/ResultChart";
+import type { AgentAnswer } from "@/lib/carecircle/server/types/domain";
 
 export default function Chat({
   state,
@@ -14,6 +16,7 @@ export default function Chat({
   big = false,
   suggestions = [],
   canCompose = true,
+  onOpenCircle,
 }: {
   state: AppState;
   actions: KindredActions;
@@ -22,15 +25,27 @@ export default function Chat({
   big?: boolean;
   suggestions?: string[];
   canCompose?: boolean;
+  onOpenCircle?: () => void;
 }) {
   const thread = state.threads[threadId];
   const msgs = visibleMessages(state, threadId, viewerId);
-  const busy = state.busyThreads.includes(threadId);
+  const [pending, setPending] = useState(false);
+  const busy = pending || state.busyThreads.includes(threadId);
   const [draft, setDraft] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const lastCount = useRef(0);
   const lastText = useRef("");
+
+  useEffect(() => {
+    if (thread.kind !== "direct") return;
+    const key = `kindred.draftQuestion:${state.patient.simId}:${viewerId}`;
+    const saved = sessionStorage.getItem(key);
+    if (saved) {
+      setDraft(saved);
+      sessionStorage.removeItem(key);
+    }
+  }, [state.patient.simId, viewerId, thread.kind]);
 
   useEffect(() => {
     const last = msgs[msgs.length - 1];
@@ -43,16 +58,32 @@ export default function Chat({
 
   const send = async (text: string) => {
     if (!text.trim() || busy) return;
+    setPending(true);
     setDraft("");
     setErr(null);
     try {
       await actions.sendChat(threadId, viewerId, text.trim());
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setPending(false);
     }
   };
 
   const isGroup = thread.kind === "group";
+  const latestAnswerId = [...msgs].reverse().find(m => m.clinicalAnswer)?.id;
+  const clear = async () => {
+    if (busy) return;
+    setPending(true);
+    setErr(null);
+    try {
+      await actions.clearChat(threadId, viewerId);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+    } finally {
+      setPending(false);
+    }
+  };
   const textSize = big ? "text-[17px] leading-relaxed" : "text-[15px] leading-relaxed";
 
   return (
@@ -61,7 +92,7 @@ export default function Chat({
         {msgs.length === 0 && (
           <div className="mt-10 text-center text-sm text-muted">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-plum-soft text-plum"><KindredMark size={26} /></div>
-            Ask Kindred anything about {viewerId === state.patientId ? "your" : `${personById(state, state.patientId).shortName}'s`} care.
+            Ask Kindred anything about {viewerId === state.patientId ? "your" : `${personById(state, state.patientId).shortName}'s`} care — results, appointments, sharing and what matters to you.
           </div>
         )}
         {msgs.map((m, i) => {
@@ -94,6 +125,7 @@ export default function Chat({
                       <span className="inline-flex items-center gap-1 text-plum"><LockIcon size={11} /> only you</span>
                     )}
                   </div>
+                  {isAgent && m.id === latestAnswerId && m.clinicalAnswer && <ClinicalAnswerDetails answer={m.clinicalAnswer} onOpenCircle={onOpenCircle} />}
                   {isAgent && m.trace && m.trace.length > 0 && <TraceDisclosure trace={m.trace} state={state} />}
                 </div>
               </div>
@@ -122,6 +154,7 @@ export default function Chat({
             }}
           >
             <textarea
+              aria-label={isGroup ? "Message the family" : "Ask Kindred"}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
@@ -138,9 +171,35 @@ export default function Chat({
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </form>
+          {!isGroup && <div className="mt-1.5 flex items-center justify-between gap-2 px-1 text-[11px] text-muted">
+            <span className="inline-flex items-center gap-1"><LockIcon size={11} /> Filtered for {personById(state, viewerId).shortName}
+              {onOpenCircle && <button type="button" onClick={onOpenCircle} className="font-semibold text-plum hover:underline">Circle</button>}
+            </span>
+            {msgs.some(m => m.kind === "chat") && <button type="button" disabled={busy} onClick={() => void clear()} className="font-semibold hover:text-ink disabled:opacity-40">Clear conversation</button>}
+          </div>}
           {err && <div className="mt-2 text-xs text-rust">{err}</div>}
         </div>
       )}
+    </div>
+  );
+}
+
+function ClinicalAnswerDetails({ answer, onOpenCircle }: { answer: AgentAnswer; onOpenCircle?: () => void }) {
+  const chart = answer.visualisationSpec;
+  return (
+    <div className="flex w-full flex-col gap-1.5 px-1">
+      {answer.policyNotice && <div className="rounded-xl border border-plum/25 bg-plum-soft px-3 py-2 text-[13px] text-ink">
+        {answer.policyNotice}{" "}
+        {onOpenCircle && <button type="button" onClick={onOpenCircle} className="font-semibold text-plum underline">Open Circle</button>}
+      </div>}
+      {chart?.points?.length ? <div className="overflow-hidden rounded-xl border border-line bg-paper p-2"><ResultChart {...chart} points={chart.points} /></div> : null}
+      {answer.facts.length > 0 && <details><summary className="cursor-pointer text-[11px] font-semibold text-plum">Key points</summary>
+        <ul className="mt-1 list-disc space-y-1 rounded-xl border border-line bg-paper p-2 pl-5 text-[12px] text-muted">{answer.facts.map((fact, i) => <li key={i}>{fact.text}</li>)}</ul>
+      </details>}
+      {answer.citations.length > 0 && <details><summary className="cursor-pointer text-[11px] font-semibold text-plum">Sources · {answer.citations.length}</summary>
+        <ul className="mt-1 space-y-1 rounded-xl border border-line bg-paper p-2 text-[11px] leading-snug text-muted">{answer.citations.map(source => <li key={source.evidenceId}>{source.title}{source.date ? ` · ${source.date.slice(0, 10)}` : ""}</li>)}</ul>
+      </details>}
+      {answer.uncertainty && <p className="text-[11px] leading-relaxed text-muted">{answer.uncertainty}</p>}
     </div>
   );
 }

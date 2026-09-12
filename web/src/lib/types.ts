@@ -163,6 +163,7 @@ export interface Message {
   text: string;
   ts: string;
   kind: "chat" | "notification" | "system";
+  clinicalAnswer?: import('./carecircle/server/types/domain').AgentAnswer;
   trace?: ToolTrace[];
   streaming?: boolean;
   audience?: string[]; // if set, only these person ids (plus the patient) can see it

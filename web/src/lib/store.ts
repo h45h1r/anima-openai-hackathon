@@ -513,6 +513,14 @@ export function updateMessage(id: string, patch: Partial<Message>) {
   });
 }
 
+export function clearDirectChat(threadId: string, actorId: string) {
+  const state = getState();
+  const thread = state.threads[threadId];
+  if (!thread || thread.kind !== 'direct' || !thread.memberIds.includes(actorId) || !thread.memberIds.includes(state.agentId)) throw new Error('Choose your direct Kindred conversation.');
+  if (state.busyThreads.includes(threadId)) throw new Error('Wait for the current reply to finish.');
+  mutate(d => { d.messages = d.messages.filter(message => message.threadId !== threadId || message.kind !== 'chat'); });
+}
+
 export function setThreadBusy(threadId: string, busy: boolean) {
   mutate((d) => {
     d.busyThreads = busy ? Array.from(new Set([...d.busyThreads, threadId])) : d.busyThreads.filter((t) => t !== threadId);

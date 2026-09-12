@@ -9,7 +9,8 @@
     "test": "node --test src/lib/nhs-demo/model.test.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint",
-    "test:care": "node --import tsx --test src/lib/carecircle/server/agent/harness.test.ts src/lib/carecircle/server/store/runtime.test.ts src/lib/carecircle/server/neon/client.test.ts"
+    "test:care": "node --import tsx --test src/lib/carecircle/server/agent/harness.test.ts src/lib/carecircle/server/agent/adversarial.test.ts src/lib/carecircle/server/store/runtime.test.ts src/lib/carecircle/server/neon/client.test.ts",
+    "eval:consent": "node --import tsx src/lib/carecircle/server/agent/evals/consent.ts"
   },
   "dependencies": {
     "@animahealth/adk": "^0.6.0",

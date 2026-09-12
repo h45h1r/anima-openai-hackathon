@@ -57,6 +57,7 @@ export async function adkTurn(messageId: string, threadId: string, actorId: stri
       { name: 'set_sharing_level_definition', description: 'Change which record categories a sharing level includes. This affects everyone assigned to that level; use only when the patient asks to change the level itself.', schema: z.object({ level: z.enum(['everything', 'practical', 'updates']), categories: z.array(z.enum(['appointments', 'medications', 'lab_results', 'conditions', 'care_notes', 'mental_health'])) }), execute: args => setLevelDefinition({ level: args.level as 'everything' | 'practical' | 'updates', categories: args.categories as Category[], actorId }) },
     );
     const history = visibleMessages(initial, threadId, actorId).filter(m => m.kind === 'chat' && !m.streaming && m.id !== messageId).slice(-13, -1).map(m => ({ role: m.senderId === initial.agentId ? 'assistant' as const : 'user' as const, content: m.text }));
+    const liveTraces: ToolTrace[] = [];
     const result = await runAgentQuestion({ client, context, policy, viewerId, question: text, history,
       openaiApiKey: process.env.OPENAI_API_KEY, openaiModel: initial.agentModel, memory: careMemory(), additionalTools,
       refreshPolicy: () => canonicalPolicy(patientId, initial.patient.name),
@@ -65,11 +66,15 @@ export async function adkTurn(messageId: string, threadId: string, actorId: stri
         await refreshConsent(true);
         if (getState().ehr.syncError || [...consentReads].some(category => !checkConsent(actorId, category).allowed)) throw new Error('Sharing changed while replying. Please ask again.');
       },
+      onToolObservation: tool => {
+        liveTraces.push({ name: tool.tool, input: tool.arguments, summary: tool.detail, ok: tool.status === 'ok', ms: tool.latencyMs, callId: tool.callId, source: 'model' });
+        updateMessage(messageId, { trace: [...liveTraces] });
+      },
       onEvent: event => { if (event.type === 'status') updateMessage(messageId, { text: '' }); },
     });
     const traces: ToolTrace[] = result.tools.map(tool => ({ name: tool.tool, input: tool.arguments, summary: tool.detail, ok: tool.status === 'ok', ms: tool.latencyMs, callId: tool.callId, source: 'model' }));
     for (const trace of traces) addAudit({ kind: 'tool.call', actorId, summary: `${trace.name}: ${trace.summary}`, detail: trace, ok: trace.ok });
     careStore().addRun(result);
-    updateMessage(messageId, { text: result.answer.answer, streaming: false, trace: traces });
+    updateMessage(messageId, { text: result.answer.answer, streaming: false, trace: traces, clinicalAnswer: result.answer });
   }, sessionId);
 }

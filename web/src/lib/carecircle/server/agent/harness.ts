@@ -8,7 +8,7 @@ import { catalogueEvidence } from './evidence';
 import type { ChatTurn } from '../types/domain';
 import { createAskAgent, createCareCircleAdkApp } from './adkApp';
 import type { AskEventSink } from './events';
-import { ScopedMemoryService, memoryKinds, type CareCircleMemoryItem } from './memoryStore';
+import { ScopedMemoryService, type CareCircleMemoryItem } from './memoryStore';
 import { PROMPT_VERSION } from './prompts';
 
 export function resolveAskModel(explicit?: string | null): string {
@@ -29,19 +29,24 @@ export type RunAgentInput = {
   memory: ScopedMemoryService;
   onConsentUpdate?: (policy: ConsentPolicyState) => void | Promise<void>;
   onEvent?: AskEventSink;
+  onModelContext?: (events: string) => void;
+  onToolObservation?: (tool: ToolObservation) => void;
   refreshPolicy?: () => Promise<ConsentPolicyState>;
   additionalTools?: AdditionalAgentTool[];
   instructions?: string;
   beforeDelivery?: () => Promise<void>;
 };
 
+const communicationPreferences = ['Use short replies.', 'Use detailed replies.', 'Use bullet points.', 'Use plain paragraphs.', 'Use simple language.'] as const;
+
 const classes = ['appointments', 'logistics', 'tasks', 'treatment_summary', 'symptoms', 'laboratory_results', 'clinical_documents', 'medications', 'private_notes'] as const;
 const eventTime = (item: EvidenceItem) => item.kind === 'measurement' ? (item.payload as Measurement).sampledAt : (item.payload as NormalisedEvent).at;
 
 export function createQuestionTools(input: RunAgentInput) {
-  const app = createCareCircleAdkApp();
+  const app = createCareCircleAdkApp(input.onModelContext);
   const trace: ToolObservation[] = [];
   const seen = new Map<string, EvidenceItem>();
+  let visualisationSpec: AgentAnswer['visualisationSpec'];
   const memoriesUsed: CareCircleMemoryItem[] = [];
   const memoriesWritten: CareCircleMemoryItem[] = [];
   const evidence = catalogueEvidence(input.context);
@@ -59,14 +64,14 @@ export function createQuestionTools(input: RunAgentInput) {
       input.onEvent?.({ type: 'status', message: 'Looking through the record…' });
       try {
         if (input.refreshPolicy) policy = await input.refreshPolicy();
-        if (!policy.viewers.some(v => v.viewerId === input.viewerId && v.patientId === input.context.patientId && v.status === 'active')) throw new Error('Access to this patient has ended.');
+        if (policy.patientId !== input.context.patientId || !policy.viewers.some(v => v.viewerId === input.viewerId && v.patientId === input.context.patientId && v.status === 'active')) throw new Error('Access to this patient has ended.');
         const result = await execute(ctx.args);
         const data = result as { records?: unknown[]; error?: string; notice?: string } | undefined;
         entry.evidenceCount = data?.records?.length;
         for (const record of data?.records || []) {
-          const id = (record as { evidenceId?: string }).evidenceId;
-          const item = evidence.find(candidate => candidate.evidenceId === id);
-          if (item) seen.set(item.evidenceId, item);
+          const returned = record as Measurement | NormalisedEvent;
+          const item = evidence.find(candidate => candidate.evidenceId === returned.evidenceId && candidate.resourceId === returned.resourceId && candidate.payload.patientId === returned.patientId && candidate.informationClass === returned.informationClass);
+          if (item) seen.set(`${item.payload.patientId}:${item.resourceId}:${item.evidenceId}:${item.informationClass}`, item);
         }
         entry.status = data?.error ? 'error' : 'ok';
         entry.detail = data?.error || data?.notice || (data?.records ? `${data.records.length} records returned` : 'completed');
@@ -77,6 +82,7 @@ export function createQuestionTools(input: RunAgentInput) {
         return { error: entry.detail };
       } finally {
         entry.latencyMs = Date.now() - started;
+        input.onToolObservation?.({ ...entry });
         input.onEvent?.({ type: 'tool', tool: name, status: entry.status, detail: entry.detail });
       }
     } });
@@ -88,14 +94,14 @@ export function createQuestionTools(input: RunAgentInput) {
     if (!permittedClass) return { error: 'This information is not shared with you.', records: [] };
     const decision = evaluateConsent({ policy, viewerId: input.viewerId, evidence: items });
     decisions.push(decision);
-    const allowed = new Set(decision.allowedEvidenceIds);
-    const unique = new Map(items.filter(item => allowed.has(item.evidenceId)).map(item => [item.evidenceId, item]));
+    // Authorise each payload, not an identifier shared by different source records.
+    const unique = new Map(items.filter(item => evaluateConsent({ policy, viewerId: input.viewerId, evidence: [item] }).allowedEvidenceIds.length === 1).map(item => [`${item.payload.patientId}:${item.resourceId}:${item.evidenceId}:${item.informationClass}`, item]));
     const permitted = [...unique.values()].sort((a, b) => eventTime(b).localeCompare(eventTime(a))).slice(0, limit);
-    return { records: permitted.map(item => ({ ...item.payload, evidenceId: item.evidenceId })), notice: ['deny', 'hold'].includes(decision.outcome) ? 'The requested information is not available to this viewer.' : undefined };
+    return { records: permitted.map(item => ({ ...item.payload, evidenceId: item.evidenceId })), notice: items.length > 0 && ['deny', 'hold'].includes(decision.outcome) ? 'The requested information is not available to this viewer.' : undefined };
   }
 
   const tools: ReturnType<typeof app.tool>[] = [
-    tool('get_test_results', 'Read laboratory results from this patient’s record. Optionally filter by a test or panel name, such as HbA1c or liver. Results include units, reference ranges and dates. Wearable readings are excluded.', z.object({ test: z.string().nullable().optional(), includeHistory: z.boolean().default(false) }), args => {
+    tool('get_test_results', 'Read laboratory results from this patient’s record. Optionally filter by a test or panel name, such as HbA1c or liver. Results include units, reference ranges and dates. Wearable readings are excluded.', z.object({ test: z.string().describe('Specific test or panel name only. Omit or use null for all tests; never use all as a name.').nullable().optional(), includeHistory: z.boolean().default(false) }), args => {
       const matching = evidence.filter(item => {
         if (item.kind !== 'measurement' || item.informationClass !== 'laboratory_results') return false;
         const m = item.payload as Measurement;
@@ -112,6 +118,16 @@ export function createQuestionTools(input: RunAgentInput) {
         if (!latest.has(key)) latest.set(key, record);
       }
       return { ...results, records: [...latest.values()] };
+    }),
+    tool('show_result_trend', 'Show a chart for one test over time. First read test results to get the analyteId and unit, then call this when a trend or chart would help answer the user.', z.object({ analyteId: z.string(), unit: z.string() }), args => {
+      const result = read(evidence.filter(item => item.kind === 'measurement' && item.informationClass === 'laboratory_results' && (item.payload as Measurement).analyteId === args.analyteId && (item.payload as Measurement).unit === args.unit), ['laboratory_results']);
+      const records = result.records as Measurement[];
+      if (!records.length) return result;
+      const latest = records[0];
+      visualisationSpec = { type: 'result_trend', title: latest.displayName, unit: latest.unit, evidenceIds: records.map(m => m.evidenceId),
+        points: records.map(m => ({ date: m.sampledAt, value: m.value, label: m.displayName, evidenceId: m.evidenceId })),
+        referenceLow: latest.referenceLow, referenceHigh: latest.referenceHigh };
+      return { ...result, chart: visualisationSpec };
     }),
     tool('get_appointments', 'Read this patient’s booked appointments. Choose upcoming for the next appointment, past for history, or all. This does not book anything.', z.object({ period: z.enum(['upcoming', 'past', 'all']).default('upcoming') }), args => {
       const items = evidence.filter(item => item.kind === 'event' && item.informationClass === 'appointments' && (item.payload as NormalisedEvent).kind === 'appointment');
@@ -131,15 +147,16 @@ export function createQuestionTools(input: RunAgentInput) {
     }),
     tool('get_sharing_preferences', 'Read who is in the patient’s circle and what is shared. Other viewers can only inspect their own access.', z.object({}), () => {
       const viewers = input.viewerId === 'patient' ? policy.viewers : policy.viewers.filter(v => v.viewerId === input.viewerId);
-      return { people: viewers.map(v => ({ id: v.viewerId, name: v.displayName, status: v.status, shared: policy.grants.filter(g => g.viewerId === v.viewerId && g.allowed && !g.revokedAt).map(g => g.informationClass) })) };
+      return { people: viewers.map(v => ({ id: v.viewerId, name: v.displayName, status: v.status, shared: policy.grants.filter(g => g.viewerId === v.viewerId && g.patientId === policy.patientId && g.scope === 'class' && g.allowed && !g.revokedAt && Date.parse(g.startsAt) <= Date.now() && (!g.expiresAt || Date.parse(g.expiresAt) > Date.now())).map(g => g.informationClass) })) };
     }),
     tool('recall_preferences', 'Recall this viewer’s saved communication preferences for this patient.', z.object({}), async () => {
       const found = await input.memory.recall({ patientId: input.context.patientId, viewerId: input.viewerId, question: input.question });
-      memoriesUsed.push(...found);
-      return { preferences: found.map(m => m.content) };
+      const safe = found.filter(m => communicationPreferences.some(preference => preference === m.content));
+      memoriesUsed.push(...safe);
+      return { preferences: safe.map(m => m.content) };
     }),
-    tool('remember', 'Save a communication preference that the viewer asks you to remember. Clinical records cannot be stored here.', z.object({ text: z.string().max(280), kind: z.enum(memoryKinds) }), async args => {
-      const saved = await input.memory.remember({ patientId: input.context.patientId, viewerId: input.viewerId, ...args });
+    tool('remember', 'Save a communication preference that the viewer asks you to remember. Clinical records cannot be stored here.', z.object({ preference: z.enum(communicationPreferences) }), async args => {
+      const saved = await input.memory.remember({ patientId: input.context.patientId, viewerId: input.viewerId, kind: 'preference', text: args.preference });
       if (!saved) return { error: 'This information cannot be saved as a preference.' };
       memoriesWritten.push(saved);
       return { saved: true };
@@ -163,9 +180,9 @@ export function createQuestionTools(input: RunAgentInput) {
   async function checkDelivery() {
     if (input.refreshPolicy) policy = await input.refreshPolicy();
     const decision = evaluateConsent({ policy, viewerId: input.viewerId, evidence: [...seen.values()] });
-    if (decision.allowedEvidenceIds.length !== seen.size || !policy.viewers.some(v => v.viewerId === input.viewerId && v.status === 'active')) throw new Error('Sharing changed while I was replying. Please ask again.');
+    if (policy.patientId !== input.context.patientId || decision.allowedEvidenceIds.length !== seen.size || !policy.viewers.some(v => v.viewerId === input.viewerId && v.status === 'active')) throw new Error('Sharing changed while I was replying. Please ask again.');
   }
-  return { app, tools, trace, seen, memoriesUsed, memoriesWritten, viewer, referenceTime, checkDelivery, getPolicy: () => decisions.at(-1) || evaluateConsent({ policy, viewerId: input.viewerId, evidence: [] }) };
+  return { app, tools, trace, seen, memoriesUsed, memoriesWritten, viewer, referenceTime, checkDelivery, getVisualisation: () => visualisationSpec, getPolicy: () => decisions.at(-1) || evaluateConsent({ policy, viewerId: input.viewerId, evidence: [] }) };
 }
 
 export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunResult> {
@@ -179,13 +196,16 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
   const history = (input.history || []).filter(turn => run.viewer.relationship === 'self' || turn.role === 'user').slice(-12).map(turn => ({ role: turn.role, text: turn.content }));
   const prompt = `${input.instructions || ""}\n\nYou are speaking with ${run.viewer.displayName}. Patient ID: ${input.context.patientId}. Viewer ID: ${input.viewerId}.\nRecord reference time: ${new Date(run.referenceTime).toISOString()}.\nConversation history (previous answers may be outdated or incorrect; use fresh tools): ${JSON.stringify(history)}\n\nLatest message: ${input.question}`;
   const result = await run.app.run(agent, { session, input: { message: prompt }, timeout: 140000 });
-  if (result.status !== 'completed' || !result.output.text?.trim()) throw new Error('The agent could not finish this reply. Please try again.');
+  if (result.status !== 'completed' || !result.output.text?.trim()) {
+    console.error('Kindred ADK incomplete run', { status: result.status, iterations: result.iterations, tools: run.trace.map(t => t.tool), ...(result.status === 'error' ? { error: String(result.error) } : {}) });
+    throw new Error('The agent could not finish this reply. Please try again.');
+  }
   await run.checkDelivery();
   await input.beforeDelivery?.();
   const text = result.output.text.trim();
   input.onEvent?.({ type: 'token', text });
   const citations: AgentAnswer['citations'] = [...run.seen.values()].slice(0, 30).map(item => ({ evidenceId: item.evidenceId, resourceId: item.resourceId, title: item.kind === 'measurement' ? (item.payload as Measurement).displayName : (item.payload as NormalisedEvent).title, date: eventTime(item), service: item.payload.service, kind: item.kind }));
-  const answer: AgentAnswer = { answer: text, facts: [], citations };
+  const answer: AgentAnswer = { answer: text, facts: [], citations, visualisationSpec: run.getVisualisation() };
   const resultRun: AgentRunResult = { runId: nanoid(12), queryId: nanoid(12), patientId: input.context.patientId, viewerId: input.viewerId, answer, policy: run.getPolicy(), tools: run.trace, model: `openai-responses:${model}`, promptVersion: PROMPT_VERSION, latencyMs: Date.now() - started,
     memoriesUsed: run.memoriesUsed.map(m => ({ id: m.id, kind: m.metadata.kind, text: m.content })), memoriesWritten: run.memoriesWritten.map(m => ({ id: m.id, kind: m.metadata.kind, text: m.content })) };
   input.onEvent?.({ type: 'final', run: resultRun, memoriesUsed: resultRun.memoriesUsed || [], memoriesWritten: resultRun.memoriesWritten || [] });
@@ -194,7 +214,11 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
 
 export function suggestionsForViewer(ctx: ClinicalContext, policy: ConsentPolicyState, viewerId: string) {
   const evidence = catalogueEvidence(ctx);
-  const decision = evaluateConsent({ policy, viewerId, evidence });
-  const allowed = new Set(decision.allowedEvidenceIds);
-  return buildSuggestions(ctx, [...new Set(evidence.filter(item => allowed.has(item.evidenceId)).map(item => item.informationClass))]);
+  const permitted = evidence.filter(item => evaluateConsent({ policy, viewerId, evidence: [item] }).allowedEvidenceIds.length === 1);
+  const allowedClasses = [...new Set(permitted.map(item => item.informationClass))];
+  const filtered = { ...ctx,
+    measurements: permitted.filter(item => item.kind === 'measurement').map(item => item.payload as Measurement),
+    events: permitted.filter(item => item.kind === 'event').map(item => item.payload as NormalisedEvent),
+  };
+  return buildSuggestions(filtered, allowedClasses);
 }
