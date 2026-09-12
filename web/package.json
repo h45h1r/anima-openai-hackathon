@@ -8,18 +8,21 @@
     "start": "next start",
     "test": "node --test src/lib/nhs-demo/model.test.mjs",
     "typecheck": "next typegen && tsc --noEmit",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:care": "node --import tsx --test src/lib/carecircle/server/agent/grounding.test.ts src/lib/carecircle/server/store/runtime.test.ts"
   },
   "dependencies": {
+    "@animahealth/adk": "^0.6.0",
     "@anthropic-ai/sdk": "^0.125.0",
     "@types/three": "^0.186.0",
+    "nanoid": "^5.1.16",
     "next": "16.3.5",
     "openai": "^7.15.0",
     "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "three": "^0.186.0",
-    "zod": "^4.6.2"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@gltf-transform/cli": "^4.5.0",
@@ -35,6 +38,12 @@
     "eslint-config-next": "16.3.5",
     "meshoptimizer": "^1.2.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@animahealth/adk": {
+      "openai": "$openai"
+    }
   }
 }

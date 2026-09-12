@@ -7,6 +7,7 @@
     "dev": "npm run dev --prefix web -- --port 3111",
     "dev:sim": "npm start --prefix sim-app",
     "dev:neon": "npm run start:neon --prefix sim-app",
+    "dev:product": "npx --yes concurrently -n sim,web -c magenta,blue \"npm run dev:sim\" \"npm run dev\"",
     "dev:prototype": "node --env-file-if-exists=.env.local prototype/server.mjs",
     "build": "npm run build --prefix web",
     "typecheck": "npm run typecheck --prefix web",

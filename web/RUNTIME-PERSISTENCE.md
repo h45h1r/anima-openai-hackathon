@@ -24,3 +24,10 @@ KINDRED_RUNTIME_TEST_DATABASE=development node --env-file=sim-app/.env.neon.deve
 ```
 
 Tests use unique namespaces and remove only their own rows. They check independent connections/cold-start recovery, concurrent writes, committed reads, patient isolation, transaction rollback, and preservation of canonical state during snapshot restoration.
+
+
+## Clinical Ask
+
+Ask uses `public.kindred_care_state` with one JSON snapshot per session. It persists session metadata, short chat history, memories and completed runs. Requests for one session are serialized; different sessions can run concurrently. Streaming forwards progress immediately and sends the final response after the database commit. `npm run test:care` checks the answer range wording; with the development database environment it also checks persistence, concurrency, session isolation and rollback.
+
+Ask refreshes canonical Circle members and category grants from the consent service before using clinical data. Consent edits go through that service, including its member version check and GP record sync. Kindred's selected patient is kept in an HTTP-only browser cookie; runtime storage remains separated by patient.

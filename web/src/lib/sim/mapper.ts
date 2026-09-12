@@ -3,7 +3,7 @@
 // from the sim's GP workspace; the circle (who is family) comes from circle.ts
 // and each member's identity is looked up in the sim directory.
 
-import { AGENT, CLINICIAN_DEFAULTS, FAMILY, PATIENT_SIM_ID } from "../data/circle";
+import { AGENT, CLINICIAN_DEFAULTS, circleFor } from "../data/circle";
 import type { AgentMode, AppState, Appointment, CareNote, Category, Condition, ConsentMap, LabResult, Medication, MentalHealthEntry, NextAction, Person, Thread } from "../types";
 import { CATEGORIES, ageAt, firstName, initialsOf } from "../types";
 import { sim, type SimPatient, type SimResource } from "./client";
@@ -31,8 +31,21 @@ function needToPrep(need: string): string | null {
   return null;
 }
 
-export async function loadStateFromSim(agentMode: AgentMode, agentModel: string): Promise<AppState> {
-  const patientSimId = PATIENT_SIM_ID;
+function uniquePersonId(base: string, used: Set<string>): string {
+  let id = base || "member";
+  if (!used.has(id)) {
+    used.add(id);
+    return id;
+  }
+  let n = 2;
+  while (used.has(`${id}-${n}`)) n += 1;
+  const next = `${id}-${n}`;
+  used.add(next);
+  return next;
+}
+
+export async function loadStateFromSim(agentMode: AgentMode, agentModel: string, patientSimId: string): Promise<AppState> {
+  const circle = circleFor(patientSimId);
   const [team, view, patientSearch] = await Promise.all([
     sim.team().catch(() => undefined),
     sim.view("gp", patientSimId),
@@ -58,6 +71,7 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string)
   const now = iso(nowMs);
   const patientId = slug(firstName(simPatient.name));
   const agentId = AGENT.id;
+  const usedIds = new Set<string>([patientId, agentId]);
 
   // ---- People ----
   const people: Person[] = [
@@ -65,11 +79,40 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string)
     { id: agentId, name: AGENT.name, shortName: AGENT.name, role: "agent", relation: "Care companion", color: AGENT.color, initials: "K" },
   ];
   const consent: ConsentMap = {};
-  for (const m of FAMILY) {
-    const sp = relatives.find((p) => p.id === m.simId) ?? (await sim.searchPatients(m.simId).then((r) => r.items.find((p) => p.id === m.simId)).catch(() => undefined));
-    if (!sp) continue;
-    const id = slug(firstName(sp.name));
-    people.push({ id, name: sp.name, shortName: firstName(sp.name), role: m.role, relation: m.relation, color: m.color, initials: initialsOf(sp.name), simId: sp.id, birthDate: sp.birthDate });
+  for (const m of circle.family) {
+    if (m.simId) {
+      const sp =
+        relatives.find((p) => p.id === m.simId) ??
+        (await sim.searchPatients(m.simId).then((r) => r.items.find((p) => p.id === m.simId)).catch(() => undefined));
+      if (sp) {
+        const id = uniquePersonId(slug(firstName(sp.name)), usedIds);
+        people.push({
+          id,
+          name: sp.name,
+          shortName: firstName(sp.name),
+          role: m.role,
+          relation: m.relation,
+          color: m.color,
+          initials: initialsOf(sp.name),
+          simId: sp.id,
+          birthDate: sp.birthDate,
+        });
+        consent[id] = scope(m.consent);
+        continue;
+      }
+    }
+    // Synthetic Kindred-owned relative (not an EHR fact).
+    const displayName = m.name ?? m.relation;
+    const id = uniquePersonId(slug(firstName(displayName)), usedIds);
+    people.push({
+      id,
+      name: displayName,
+      shortName: firstName(displayName),
+      role: m.role,
+      relation: m.relation,
+      color: m.color,
+      initials: initialsOf(displayName),
+    });
     consent[id] = scope(m.consent);
   }
 
@@ -88,7 +131,7 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string)
   let ci = 0;
   const clinicianIdByName = new Map<string, string>();
   for (const [name, meta] of clinicianNames) {
-    const id = slug(name);
+    const id = uniquePersonId(slug(name), usedIds);
     clinicianIdByName.set(name, id);
     people.push({ id, name, shortName: /^(dr|nurse)/i.test(name) ? `${name.split(" ")[0]} ${name.split(" ").pop()}` : firstName(name), role: "clinician", relation: meta.role, color: clinicianColors[ci++ % clinicianColors.length], initials: initialsOf(name), org: meta.org });
     consent[id] = scope(CLINICIAN_DEFAULTS[meta.kind]);

@@ -1,17 +1,37 @@
+# Secrets — never commit
 .env*
 !.env.example
+**/.env
+**/.env.*
+!**/.env.example
+**/carecircle_anima_key*
+**/secrets/
+*.pem
+*.key
+
+# Dependencies / build
 node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+coverage/
+.vite/
+.next/
+.vercel/
+*.tsbuildinfo
+
+# Local runtime / dumps
+**/data/
+!web/src/lib/data/
+!web/src/lib/data/**
+*.log
+*.dump
+*.sql.gz
 .DS_Store
 .playwright-mcp/
 prototype/.cache/
-*.log
-*.tsbuildinfo
-coverage/
 test-results/
-.next/
-.vercel/
-*.dump
-*.sql.gz
 
 # Browser captures are local evidence; keep the images referenced by docs.
 docs/research/screenshots/*

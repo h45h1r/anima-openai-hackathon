@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useKindred } from "@/hooks/useKindred";
+import { useCareClinical } from "@/hooks/useCareClinical";
 import type { AppState, Person } from "@/lib/types";
 import { personById } from "@/lib/types";
 import { Avatar, Button, KindredMark, LockIcon, Pill } from "./ui";
@@ -14,8 +15,11 @@ import CircleOfCare from "./patient/CircleOfCare";
 import SharingLevels from "./patient/SharingLevels";
 import FamilyHome from "./family/FamilyHome";
 import EhrView from "./clinician/EhrView";
+import AskPanel from "./clinical/AskPanel";
+import CarePanel from "./clinical/CarePanel";
+import type { CareClinical } from "@/hooks/useCareClinical";
 
-type Tab = "home" | "circle" | "kindred" | "activity" | "levels";
+type Tab = "home" | "circle" | "kindred" | "ask" | "care" | "activity" | "levels";
 
 interface TabDef {
   id: Tab;
@@ -28,7 +32,37 @@ export default function App() {
   const { state, connected, actions } = useKindred();
   const params = useSearchParams();
   const router = useRouter();
+  const asParamEarly = params.get("as");
+  const kindredViewerId =
+    state?.loaded && asParamEarly && state.people.some((p) => p.id === asParamEarly && p.accessStatus !== "revoked")
+      ? asParamEarly
+      : state?.loaded
+        ? state.patientId
+        : null;
+  const care = useCareClinical(state, kindredViewerId);
   const [running, setRunning] = useState(false);
+  const patientPrefApplied = useRef(false);
+
+  // Restore last demo patient pick after a full refresh (server memory resets).
+  useEffect(() => {
+    if (!state?.loaded || patientPrefApplied.current) return;
+    patientPrefApplied.current = true;
+    try {
+      const pref = localStorage.getItem("kindred.patientSimId");
+      if (pref && pref !== state.patient.simId) {
+        void actions.switchPatient(pref).catch(() => {
+          try {
+            localStorage.removeItem("kindred.patientSimId");
+          } catch {
+            /* ignore */
+          }
+        });
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [state, actions]);
+
   const [showAudit, setShowAudit] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -89,13 +123,24 @@ export default function App() {
           { id: "home", label: "Home", icon: <HomeIcon />, badge: pending },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
           { id: "circle", label: "Circle", icon: <LockIcon size={20} /> },
+          { id: "ask", label: "Ask", icon: <AskIcon /> },
+          { id: "care", label: "Care", icon: <CareIcon /> },
         ]
       : [
           { id: "home", label: patient.shortName, icon: <HomeIcon /> },
+          { id: "ask", label: "Ask", icon: <AskIcon /> },
+          { id: "care", label: "Care", icon: <CareIcon /> },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
         ];
   const tabParam = params.get("tab") as Tab | null;
-  const tab: Tab = tabParam && (tabs.some((t) => t.id === tabParam) || tabParam === "activity" || (tabParam === "levels" && isPatient)) ? tabParam : "home";
+  const tab: Tab =
+    tabParam &&
+    (tabs.some((t) => t.id === tabParam) ||
+      tabParam === "activity" ||
+      tabParam === "kindred" ||
+      (tabParam === "levels" && isPatient))
+      ? tabParam
+      : "home";
 
   const go = (next: { as?: string; tab?: Tab }) => {
     const q = new URLSearchParams();
@@ -104,10 +149,10 @@ export default function App() {
     if (t !== "home") q.set("tab", t);
     router.replace(`?${q.toString()}`);
   };
-  const ask = (question: string) => {
-    const dm = Object.values(state.threads).find((t) => t.kind === "direct" && t.memberIds.includes(viewerId));
-    if (dm) actions.sendChat(dm.id, viewerId, question).catch(() => {});
-    go({ tab: "kindred" });
+  /** Clinical Ask tab (CareCircle API behind one Kindred shell). */
+  const askClinical = (question?: string) => {
+    if (question) sessionStorage.setItem("kindred.draftQuestion", question);
+    go({ tab: "ask" });
   };
   const runCheck = async () => {
     setRunning(true);
@@ -149,7 +194,26 @@ export default function App() {
             <button onClick={toggleAudit} className={`hidden h-9 w-9 items-center justify-center rounded-full border lg:flex ${showAudit ? "border-plum bg-plum-soft text-plum" : "border-line text-muted hover:bg-paper"}`} title={showAudit ? "Hide activity" : "Show activity"} aria-pressed={showAudit}>
               <ActivityIcon />
             </button>
-            <AccountMenu viewer={viewer} personas={personas} onSwitch={(id) => go({ as: id, tab: "home" })} onReload={() => actions.reset()} onActivity={() => go({ tab: "activity" })} onRunCheck={runCheck} running={running} status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }} />
+            <AccountMenu
+              viewer={viewer}
+              personas={personas}
+              patient={state.patient}
+              onSwitchPersona={(id) => go({ as: id, tab: "home" })}
+              onSwitchPatient={async (simId) => {
+                await actions.switchPatient(simId);
+                try {
+                  localStorage.setItem("kindred.patientSimId", simId);
+                } catch {
+                  /* ignore */
+                }
+                router.replace("?tab=home");
+              }}
+              onReload={() => actions.reset()}
+              onActivity={() => go({ tab: "activity" })}
+              onRunCheck={runCheck}
+              running={running}
+              status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }}
+            />
           </div>
         </div>
       </header>
@@ -165,7 +229,15 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <Screen state={state} actions={actions} viewer={viewer} tab={tab} onAsk={ask} go={go} />
+            <Screen
+              state={state}
+              actions={actions}
+              viewer={viewer}
+              tab={tab}
+              care={care}
+              onAskClinical={askClinical}
+              go={go}
+            />
           )}
         </main>
         {showAudit && (
@@ -190,7 +262,23 @@ export default function App() {
   );
 }
 
-function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; actions: ReturnType<typeof useKindred>["actions"]; viewer: Person; tab: Tab; onAsk: (q: string) => void; go: (n: { tab?: Tab }) => void }) {
+function Screen({
+  state,
+  actions,
+  viewer,
+  tab,
+  care,
+  onAskClinical,
+  go,
+}: {
+  state: AppState;
+  actions: ReturnType<typeof useKindred>["actions"];
+  viewer: Person;
+  tab: Tab;
+  care: CareClinical;
+  onAskClinical: (q?: string) => void;
+  go: (n: { tab?: Tab }) => void;
+}) {
   const isPatient = viewer.id === state.patientId;
   const patient = personById(state, state.patientId);
   const dm = Object.values(state.threads).find((t) => t.kind === "direct" && t.memberIds.includes(viewer.id));
@@ -206,7 +294,18 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
   if (tab === "home") {
     return (
       <div className="page">
-        {isPatient ? <PatientHome state={state} actions={actions} onOpenChat={() => go({ tab: "kindred" })} onAsk={onAsk} /> : <FamilyHome state={state} actions={actions} viewerId={viewer.id} onAsk={onAsk} />}
+        {isPatient ? (
+          <PatientHome
+            state={state}
+            actions={actions}
+            onOpenCircle={() => go({ tab: "circle" })}
+            onOpenChat={() => onAskClinical()}
+            onOpenCompanion={() => go({ tab: "kindred" })}
+            onAsk={onAskClinical}
+          />
+        ) : (
+          <FamilyHome state={state} actions={actions} viewerId={viewer.id} onAsk={onAskClinical} />
+        )}
       </div>
     );
   }
@@ -226,6 +325,26 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
       </div>
     );
   }
+  if (tab === "ask") {
+    return (
+      <div className="app-main-h">
+        <div className="mx-auto h-full w-full max-w-3xl lg:py-4">
+          <AskPanel state={state} viewer={viewer} care={care} onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })} />
+        </div>
+      </div>
+    );
+  }
+  if (tab === "care") {
+    return (
+      <CarePanel
+        state={state}
+        viewer={viewer}
+        care={care}
+        onAsk={onAskClinical}
+        onOpenCircle={() => go({ tab: isPatient ? "circle" : "home" })}
+      />
+    );
+  }
   if (!dm) return null;
   const suggestions = isPatient
     ? [firstFamily ? `Let ${firstFamily.shortName} see my test results` : "Who can see what?", "Who can see what?", "What's coming up this week?", "Explain my latest blood tests"]
@@ -239,9 +358,39 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
   );
 }
 
-function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCheck, running, status }: { viewer: Person; personas: Person[]; onSwitch: (id: string) => void; onReload: () => void; onActivity: () => void; onRunCheck: () => void; running: boolean; status: { data: string; agent: string; world?: string } }) {
+type PatientPick = { simId: string; name: string; blurb: string; active?: boolean; demo?: boolean };
+
+function AccountMenu({
+  viewer,
+  personas,
+  patient,
+  onSwitchPersona,
+  onSwitchPatient,
+  onReload,
+  onActivity,
+  onRunCheck,
+  running,
+  status,
+}: {
+  viewer: Person;
+  personas: Person[];
+  patient: AppState["patient"];
+  onSwitchPersona: (id: string) => void;
+  onSwitchPatient: (simId: string) => Promise<void>;
+  onReload: () => void;
+  onActivity: () => void;
+  onRunCheck: () => void;
+  running: boolean;
+  status: { data: string; agent: string; world?: string };
+}) {
   const [open, setOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+  const [switchError, setSwitchError] = useState<string | null>(null);
+  const [patients, setPatients] = useState<PatientPick[]>([]);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
@@ -255,6 +404,46 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const t = setTimeout(() => {
+      setSearching(true);
+      const q = query.trim();
+      fetch(`/api/patient${q ? `?q=${encodeURIComponent(q)}` : ""}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (cancelled) return;
+          setPatients((data.items || []) as PatientPick[]);
+        })
+        .catch(() => {
+          if (!cancelled) setPatients([]);
+        })
+        .finally(() => {
+          if (!cancelled) setSearching(false);
+        });
+    }, qDebounce(query));
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [open, query]);
+
+  const choosePatient = async (simId: string) => {
+    if (simId === patient.simId || switching) return;
+    setSwitching(true);
+    setSwitchError(null);
+    try {
+      await onSwitchPatient(simId);
+      setOpen(false);
+    } catch (err) {
+      setSwitchError(err instanceof Error ? err.message : "Could not switch patient");
+    } finally {
+      setSwitching(false);
+    }
+  };
+
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen(!open)} className="flex items-center gap-2 rounded-full border border-line bg-card py-1 pl-1 pr-2 text-sm font-semibold hover:bg-paper" aria-haspopup="menu" aria-expanded={open}>
@@ -263,17 +452,18 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-muted"><path d="M6 9l6 6 6-6" /></svg>
       </button>
       {open && (
-        <div role="menu" className="rise absolute right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-line bg-card shadow-xl">
-          <div className="border-b border-line px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Signed in as · demo switch</div>
+        <div role="menu" className="rise absolute right-0 mt-2 w-[22rem] max-h-[min(80vh,36rem)] overflow-y-auto overflow-x-hidden rounded-2xl border border-line bg-card shadow-xl">
+          <div className="border-b border-line px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Signed in as · persona</div>
           {personas.map((p) => (
             <button
               key={p.id}
               role="menuitem"
+              disabled={switching}
               onClick={() => {
                 setOpen(false);
-                onSwitch(p.id);
+                onSwitchPersona(p.id);
               }}
-              className={`flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-paper ${p.id === viewer.id ? "bg-plum-soft/60" : ""}`}
+              className={`flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-paper disabled:opacity-50 ${p.id === viewer.id ? "bg-plum-soft/60" : ""}`}
             >
               <Avatar person={p} size={32} />
               <span className="min-w-0 flex-1">
@@ -283,11 +473,60 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
               {p.id === viewer.id && <span className="text-plum"><CheckIcon /></span>}
             </button>
           ))}
+
+          <div className="border-t border-line px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Patient record · switch</div>
+          <div className="px-3 pb-2 text-xs text-muted">
+            Whose clinical record Kindred is connected to. Persona (<code className="text-[10px]">?as=</code>) stays who you&apos;re viewing as.
+          </div>
+          <div className="px-3 pb-2">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search Amira, Eleanor, SIM-…"
+              aria-label="Search patients"
+              disabled={switching}
+              className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-plum"
+            />
+          </div>
+          {searching ? <div className="px-3 pb-2 text-xs text-muted">Searching…</div> : null}
+          {switchError ? <div className="mx-3 mb-2 rounded-xl bg-rust/10 px-3 py-2 text-xs text-rust">{switchError}</div> : null}
+          {switching ? <div className="px-3 pb-2 text-xs text-plum pulse-soft">Loading patient + synthetic family…</div> : null}
+          <div className="max-h-56 overflow-y-auto">
+            {patients.map((p) => {
+              const active = p.simId === patient.simId || p.active;
+              return (
+                <button
+                  key={p.simId}
+                  role="menuitem"
+                  disabled={switching}
+                  onClick={() => void choosePatient(p.simId)}
+                  className={`flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-paper disabled:opacity-50 ${active ? "bg-moss/10" : ""}`}
+                >
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss text-[11px] font-bold text-white">
+                    {p.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold">{p.name}</span>
+                    <span className="block text-xs text-muted">
+                      {p.simId}
+                      {p.blurb ? ` · ${p.blurb}` : ""}
+                      {p.demo ? " · demo cohort" : ""}
+                    </span>
+                  </span>
+                  {active && <span className="text-moss"><CheckIcon /></span>}
+                </button>
+              );
+            })}
+            {!searching && patients.length === 0 ? (
+              <div className="px-3 pb-3 text-xs text-muted">No patients matched. Try Amira or SIM-000001.</div>
+            ) : null}
+          </div>
+
           <div className="border-t border-line p-2">
             <div className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Demo controls</div>
-            <button role="menuitem" disabled={running} onClick={() => { setOpen(false); onRunCheck(); }} title="Simulates Kindred's scheduled job: finds appointments in the next 7 days and tells the family" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ClockIcon /> {running ? "Running scheduled check…" : "Run scheduled check"}</button>
-            <button role="menuitem" onClick={() => { setOpen(false); onActivity(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper"><ActivityIcon /> Activity log</button>
-            <button role="menuitem" onClick={() => { setOpen(false); onReload(); }} className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted hover:bg-paper hover:text-ink">Reload record from NHS-SIM</button>
+            <button role="menuitem" disabled={running || switching} onClick={() => { setOpen(false); onRunCheck(); }} title="Simulates Kindred's scheduled job: finds appointments in the next 7 days and tells the family" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ClockIcon /> {running ? "Running scheduled check…" : "Run scheduled check"}</button>
+            <button role="menuitem" disabled={switching} onClick={() => { setOpen(false); onActivity(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ActivityIcon /> Activity log</button>
+            <button role="menuitem" disabled={switching} onClick={() => { setOpen(false); onReload(); }} className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted hover:bg-paper hover:text-ink disabled:opacity-50">Reload record from NHS-SIM</button>
           </div>
           <dl className="border-t border-line bg-paper/60 px-3 py-2 text-[11px] leading-relaxed text-muted">
             <div className="flex gap-2"><dt className="w-10 shrink-0 font-semibold uppercase tracking-wider">Data</dt><dd className="truncate">{status.data}{status.world ? ` · ${status.world}` : ""}</dd></div>
@@ -299,8 +538,18 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCh
   );
 }
 
+function qDebounce(query: string) {
+  return query.trim() ? 280 : 0;
+}
+
 function HomeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z" /></svg>;
+}
+function AskIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 19v-2.2A7 7 0 1 1 12 19H5Z" /><path d="M9.5 10.5h.01M12 10.5h.01M14.5 10.5h.01" /></svg>;
+}
+function CareIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4h8v4H8V4Z" /><path d="M6 8h12v12H6V8Z" /><path d="M10 12h4M12 10v4" /></svg>;
 }
 function RecordIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" /><path d="M14 3v6h6M9 13h6M9 17h6" /></svg>;

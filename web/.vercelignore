@@ -3,3 +3,7 @@
 node_modules
 .next
 scripts/.cache
+
+/data/
+!src/lib/data/
+!src/lib/data/**

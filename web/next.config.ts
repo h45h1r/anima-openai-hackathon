@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Clinical Ask runs in-process under /api/care — no Express proxy.
+  serverExternalPackages: ["@animahealth/adk"],
 };
 
 export default nextConfig;

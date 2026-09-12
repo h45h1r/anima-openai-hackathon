@@ -2,13 +2,22 @@
 
 A care companion for older people and patients with chronic conditions. Patients choose what to share with family members and carers; their choices appear in the GP consent view.
 
-The main app is the existing **Kindred** Next.js app in `web/`. Its Circle screen manages family membership, sharing levels and six permission categories. Consent changes persist through the backend in `sim-app/`, which updates the GP observation and consent audit in one PostgreSQL transaction.
+**One product:** open Kindred at [http://localhost:3111](http://localhost:3111). Home, Circle (people / sharing levels), Ask (clinical, grounded), Care / Results, and Family all live in that single shell. Personas use Kindred `?as=` — there is no separate CareCircle app.
 
-[Mission statement](mission-statement.md) · [Neon setup](sim-app/deployment/README.md) · [Backend details](sim-app/README.md)
+[Mission statement](mission-statement.md) · [Design system](docs/design-system.md) · [Neon setup](sim-app/deployment/README.md) · [Backend details](sim-app/README.md)
 
-## Start locally
+## What you run
 
-Use Node.js 22.18 or newer. Install each service's locked dependencies:
+| Piece | Path | Port | Role |
+| --- | --- | --- | --- |
+| **Kindred app** (the product) | `web/` | **:3111** | UI + clinical Ask/SSE API in-process |
+| Companion backend | `sim-app/` | **:4192** | Postgres consent / GP observation |
+
+Kindred owns people, circle, sharing levels, and `?as=` personas. Clinical Ask (Anima grounding, SSE) runs as Kindred routes under `/api/care/*` — no second UI and no Express process on :8787.
+
+## Start
+
+Use Node.js 22.18 or newer.
 
 ```sh
 npm ci --prefix web
@@ -16,30 +25,42 @@ npm ci --prefix sim-app
 cp web/.env.example web/.env.local
 ```
 
-Set `SIM_API_KEY` in `web/.env.local` to read the synthetic patient record. Agent API keys are optional; the existing scripted fallback works without them. Keep credentials in ignored environment files.
+Set in `web/.env.local`:
 
-Start the backend and frontend in separate terminals:
+- `SIM_API_KEY` — Kindred patient record (Anima sim)
+- `ANIMA_API_KEY` — grounded clinical Ask (same team key is fine)
+- `OPENAI_API_KEY` — optional; improves Ask phrasing (deterministic grounding still works without it)
 
 ```sh
-# Terminal 1: uses the existing local app PostgreSQL database
-npm run dev:sim
-
-# Terminal 2
-npm run dev
+# Companion + Kindred (Ask included)
+npm run dev:product
 ```
 
-Open [Kindred](http://localhost:3111/?as=eleanor&tab=circle) and [GP consent](http://localhost:4192/gp/consent/?patient=SIM-000006).
+Or two terminals:
 
-The local backend expects the imported `anima_sim_app_20260912` database on `/tmp`. A fresh checkout needs either a database restore following [the backend guide](sim-app/README.md), or Neon credentials. For the prepared Neon development branch, use `npm run dev:neon` instead of `dev:sim`. Database dumps and connection credentials are not included in Git.
+```sh
+npm run dev:sim    # :4192
+npm run dev        # :3111 Kindred (UI + clinical Ask)
+```
+
+Open **one URL:** [http://localhost:3111/?as=eleanor&tab=circle](http://localhost:3111/?as=eleanor&tab=circle)
+
+- Circle / sharing levels → Kindred
+- Ask / Care → Kindred tabs (`/api/care`)
+- Switch family viewers → account menu (`?as=`)
+
+GP consent (optional): [http://localhost:4192/gp/consent/?patient=SIM-000006](http://localhost:4192/gp/consent/?patient=SIM-000006)
+
+Without `ANIMA_API_KEY`, Circle and companion chat still work; Ask/Care explain how to add the key.
 
 ## What's connected
 
 - Add a family member with sharing off, choose a sharing level or individual categories, and remove their access.
-- The app, approved consent requests and agent consent tools use the same persisted permission store. The GP page receives live updates.
-- Clinical records are read from the configured Anima simulator. The local copy also provides GP, hospital, pharmacy, community, wearable, messaging and reception screens.
-- Consent writes target the configured companion backend. They create a local GP observation; they are **not** native FHIR Consent writes to the remote simulator.
+- Ask uses in-process Anima grounding and maps Kindred `?as=` personas onto Ask viewers; Circle remains the access authority.
+- Consent changes persist through `sim-app/`, which updates the GP observation and consent audit in one PostgreSQL transaction.
+- Clinical records for Kindred home/circle are read from the configured Anima simulator.
 
-The existing people and family relationships are demo configuration, not verified relatives. The persona switcher and demo sessions are not production authentication. Consent and memberships persist in PostgreSQL; conversations and other agent state still use the app's in-memory store. See the [deployment notes](sim-app/deployment/README.md) for the remaining work before public hosting.
+The existing people and family relationships are demo configuration, not verified relatives. The persona switcher and demo sessions are not production authentication.
 
 ## Body view
 
@@ -49,25 +70,18 @@ The existing people and family relationships are demo configuration, not verifie
 
 | Directory | Purpose |
 | --- | --- |
-| `web/` | Active Kindred app, Circle, family views and agent tools |
-| `sim-app/` | Copied simulator frontend, local workflow API, consent service and tests |
-| `sim-app/deployment/` | Neon project metadata, migration verification and hosting configuration examples |
-| `replica/` | Read-only capture/import tools, SQL schema and database documentation |
-| `docs/` | Simulator/ADK research and example agent integrations. Start with the [design system](docs/design-system.md) before building a screen |
-| `prototype/` | Earlier GP reconstruction retained for the research notes; not the default app |
-| `vendor/adk/` | Pinned upstream ADK submodule used by the research examples |
-
-The original simulator assets retain attribution in [`sim-app/public/ATTRIBUTION.txt`](sim-app/public/ATTRIBUTION.txt). They are required by the copied screens.
+| `web/` | **The product** — Kindred shell, Circle, Ask, Care, Family, clinical API |
+| `sim-app/` | Companion backend, GP consent, Neon notes |
+| `docs/` | Design system and research notes |
+| `carecircle/` | Removed as a product — see short deprecation note only |
 
 ## ADK
-
-The ADK is pinned as a Git submodule. Fetch it only when working on the agent integration examples:
 
 ```sh
 git submodule update --init vendor/adk
 ```
 
-Its dependencies and compiled output are not committed here. See [ADK notes](docs/adk-notes.md) for installation and the current integration plan. The web app's runtime has not yet been migrated to ADK.
+See [ADK notes](docs/adk-notes.md). Clinical Ask uses `@animahealth/adk` inside Kindred (`web/src/lib/carecircle/server`).
 
 ## Checks
 
@@ -76,5 +90,3 @@ npm test
 npm run typecheck
 npm run build
 ```
-
-`npm test` runs the backend, NHS demo model and earlier prototype tests. Manual `sim-app/integration-*.mjs` scripts also exist; they write synthetic test records and some advance the simulation clock, so run them deliberately against a development database.
