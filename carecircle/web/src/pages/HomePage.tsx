@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../lib/state';
+import { Button, Card, fmtDay } from '../components/ui';
 
 export default function HomePage() {
   const app = useApp();
@@ -10,8 +11,8 @@ export default function HomePage() {
 
   return (
     <div className="stack">
-      <div className="panel">
-        <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>
+      <Card>
+        <h1 className="page-title">
           {viewer?.relationship === 'self'
             ? `Hello, ${app.session?.selectedPatientName}`
             : `You are viewing ${app.session?.selectedPatientName}'s shared care as ${viewer?.displayName || 'a family member'}`}
@@ -19,19 +20,21 @@ export default function HomePage() {
         <p className="muted">What would you like to understand or arrange?</p>
         <div className="pill-row">
           <Link to={`/patient/${app.session?.selectedPatientId}/ask`}>
-            <button type="button">Ask CareCircle</button>
+            <Button type="button" variant="plum">
+              Ask CareCircle
+            </Button>
           </Link>
-          <button type="button" className="secondary" onClick={() => app.refreshContext()}>
+          <Button type="button" variant="secondary" onClick={() => app.refreshContext()}>
             Refresh live record
-          </button>
-          <button type="button" className="secondary" onClick={() => app.advanceClock(121)}>
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => app.advanceClock(121)}>
             Advance clock +121m
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
       <div className="grid-2">
-        <div className="panel stack">
+        <Card className="stack" tone={next.length ? 'amber' : undefined}>
           <div className="section-title">Needs attention</div>
           {app.context?.sparse ? (
             <div className="info-banner">Sparse data — few or no visible resources returned for this patient.</div>
@@ -45,9 +48,9 @@ export default function HomePage() {
             next.map((e: any) => (
               <button key={e.evidenceId} type="button" className="list-item" onClick={() => app.openSource(e)}>
                 <div>
-                  <strong>{e.title}</strong>
+                  <strong className="font-display">{e.title}</strong>
                   <div className="muted small">
-                    {e.status} · {new Date(e.at).toLocaleDateString('en-GB')}
+                    {e.status} · {fmtDay(e.at)}
                   </div>
                 </div>
               </button>
@@ -55,13 +58,13 @@ export default function HomePage() {
           ) : (
             <p className="muted">No time-sensitive items in the current permitted view.</p>
           )}
-        </div>
-        <div className="panel stack">
+        </Card>
+        <Card className="stack">
           <div className="section-title">People helping</div>
           {people.map((p: any) => (
             <div key={p.viewerId} className="list-item">
               <div>
-                <strong>{p.displayName}</strong>
+                <strong className="font-display">{p.displayName}</strong>
                 <div className="muted small">{p.relationship.replaceAll('_', ' ')}</div>
               </div>
             </div>
@@ -69,13 +72,13 @@ export default function HomePage() {
           <div className="section-title">Record classes returned</div>
           <div className="pill-row">
             {(app.context?.recordClasses || []).map((c: string) => (
-              <span className="chip" key={c}>
+              <span className="chip" key={c} style={{ cursor: 'default' }}>
                 {c}
               </span>
             ))}
             {!app.context?.recordClasses?.length ? <span className="muted">None yet</span> : null}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

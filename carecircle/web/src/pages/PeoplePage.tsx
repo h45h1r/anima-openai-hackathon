@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../lib/state';
+import { Button, Card } from '../components/ui';
 
 const CLASSES = [
   'appointments',
@@ -38,28 +39,31 @@ export default function PeoplePage() {
   }
 
   return (
-    <div className="panel stack">
-      <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>People and access</h1>
+    <Card className="stack">
+      <h1 className="page-title">People and access</h1>
       <p className="muted">
         CareCircle prototype permissions (not Anima accounts). Version {app.policy?.policyVersion}. Only patient mode can
         save changes.
       </p>
       {!isPatient ? (
-        <div className="info-banner">Switch to the patient viewer to edit the permission matrix.</div>
+        <div className="info-banner" style={{ background: 'var(--plum-soft)', color: 'var(--plum)', borderColor: 'transparent' }}>
+          Switch to the patient viewer to edit the permission matrix.
+        </div>
       ) : null}
       <div className="pill-row">
         {family.map((v: any) => (
-          <button
+          <Button
             key={v.viewerId}
             type="button"
-            className={target === v.viewerId ? undefined : 'secondary'}
+            variant={target === v.viewerId ? 'plum' : 'secondary'}
+            size="sm"
             onClick={() => {
               setTarget(v.viewerId);
               setDraft({});
             }}
           >
             {v.displayName}
-          </button>
+          </Button>
         ))}
       </div>
       <table className="matrix">
@@ -87,12 +91,12 @@ export default function PeoplePage() {
         </tbody>
       </table>
       <div className="pill-row">
-        <button type="button" disabled={!isPatient || !Object.keys(draft).length} onClick={save}>
+        <Button type="button" variant="plum" disabled={!isPatient || !Object.keys(draft).length} onClick={save}>
           Save permissions
-        </button>
-        <button type="button" className="secondary" onClick={() => app.resetDemo()}>
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => app.resetDemo()}>
           Reset CareCircle demo state
-        </button>
+        </Button>
       </div>
       <div className="section-title">Audit</div>
       <ul className="small muted">
@@ -106,6 +110,6 @@ export default function PeoplePage() {
             </li>
           ))}
       </ul>
-    </div>
+    </Card>
   );
 }

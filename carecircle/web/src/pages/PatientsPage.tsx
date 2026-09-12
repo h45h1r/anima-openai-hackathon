@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp, type PatientSummary } from '../lib/state';
+import { Button, Card } from '../components/ui';
 
 export default function PatientsPage() {
   const app = useApp();
@@ -60,9 +61,9 @@ export default function PatientsPage() {
   }
 
   return (
-    <div className="panel stack">
+    <Card className="stack">
       <div>
-        <h1 style={{ fontFamily: 'var(--serif)', margin: 0 }}>Choose a live patient</h1>
+        <h1 className="page-title">Choose a live patient</h1>
         <p className="muted">
           Results come only from Anima <code>GET /api/sites/gp/patients</code>. No hardcoded patient is auto-selected.
         </p>
@@ -78,13 +79,13 @@ export default function PatientsPage() {
         />
       </label>
       {loading && !openingId ? <div className="info-banner">Searching live directory…</div> : null}
-      {openingId ? <div className="info-banner">Opening patient…</div> : null}
+      {openingId ? <div className="info-banner pulse-soft">Opening patient…</div> : null}
       {error ? (
         <div className="error-banner">
           {error}{' '}
-          <button type="button" className="secondary" onClick={() => void runSearch(q)}>
+          <Button type="button" variant="secondary" size="sm" onClick={() => void runSearch(q)}>
             Retry
-          </button>
+          </Button>
         </div>
       ) : null}
       {!loading && !error && !openingId && items.length === 0 ? (
@@ -102,7 +103,7 @@ export default function PatientsPage() {
             aria-busy={openingId === p.id}
           >
             <div>
-              <strong>{p.name}</strong>
+              <strong className="font-display">{p.name}</strong>
               <div className="muted small">
                 {p.id} · DOB {p.birthDate} · synthetic
               </div>
@@ -117,6 +118,6 @@ export default function PatientsPage() {
       <p className="muted small">
         Showing {items.length} of {total} (page size 30).
       </p>
-    </div>
+    </Card>
   );
 }

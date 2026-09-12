@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useApp } from '../lib/state';
+import { Button, Card } from '../components/ui';
 
 type HealthInfo = {
   ok: boolean;
@@ -59,7 +60,6 @@ export default function ConnectPage() {
   }
 
   async function onUseServerEnv() {
-    // Empty body: server uses ANIMA_API_KEY / ANIMA_TEAM_NAME from .env
     await connectWith({ baseUrl });
   }
 
@@ -71,7 +71,7 @@ export default function ConnectPage() {
           Understand synthetic clinical information with the people you trust — grounded in live Anima records,
           filtered by your consent boundaries.
         </p>
-        <div className="panel" style={{ marginTop: '1.5rem', maxWidth: 520 }}>
+        <Card style={{ marginTop: '1.5rem', maxWidth: 520 }}>
           <form className="stack" onSubmit={onSubmit}>
             <p className="muted small">
               The Anima team key stays on the CareCircle server. Prefer the server <code>.env</code> key for demos —
@@ -91,9 +91,9 @@ export default function ConnectPage() {
                     <> OpenAI refine off (deterministic answers still work).</>
                   )}
                 </p>
-                <button type="button" disabled={busy} onClick={onUseServerEnv}>
+                <Button type="button" variant="plum" disabled={busy} onClick={onUseServerEnv}>
                   {busy ? 'Connecting…' : 'Continue with server key'}
-                </button>
+                </Button>
                 <p className="muted small">Or override below with a pasted key / team name.</p>
               </div>
             ) : health?.animaTeamNameConfigured ? (
@@ -101,16 +101,16 @@ export default function ConnectPage() {
                 <p className="muted small">
                   Server has <code>ANIMA_TEAM_NAME</code> — connect without pasting a key.
                 </p>
-                <button type="button" disabled={busy} onClick={onUseServerEnv}>
+                <Button type="button" variant="plum" disabled={busy} onClick={onUseServerEnv}>
                   {busy ? 'Connecting…' : 'Continue with server team name'}
-                </button>
+                </Button>
               </div>
             ) : health ? (
               <p className="muted small">
                 No server Anima key detected — paste a team bearer key or team name below.
               </p>
             ) : (
-              <p className="muted small">Checking server env…</p>
+              <p className="muted small pulse-soft">Checking server env…</p>
             )}
 
             <label className="field">
@@ -136,7 +136,7 @@ export default function ConnectPage() {
                 autoComplete="off"
               />
             </label>
-            <button type="submit" disabled={busy || !canSubmit}>
+            <Button type="submit" disabled={busy || !canSubmit}>
               {busy
                 ? 'Connecting…'
                 : apiKey.trim() || teamName.trim()
@@ -144,9 +144,9 @@ export default function ConnectPage() {
                   : canUseEnv
                     ? 'Connect using server env'
                     : 'Connect to Anima'}
-            </button>
+            </Button>
           </form>
-        </div>
+        </Card>
       </div>
       <div className="hero-visual" aria-hidden="true" />
     </section>

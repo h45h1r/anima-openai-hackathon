@@ -2,6 +2,8 @@
 
 Patient-controlled family communication over **live Anima** synthetic clinical data.
 
+UI follows the shared **Kindred design system** ([`docs/design-system.md`](../docs/design-system.md)): tokens in `web/src/styles/global.css`, primitives in `web/src/components/ui.tsx`.
+
 ## Architecture
 
 - `web/` — React + Vite UI (ports **5173**)

@@ -37,13 +37,13 @@ export default function ResultChart({
             y={y(referenceHigh)}
             width={width - pad * 2}
             height={Math.max(2, y(referenceLow) - y(referenceHigh))}
-            fill="rgba(15,122,108,0.12)"
+            fill="rgba(47,107,79,0.12)"
           />
         ) : null}
-        <path d={path} fill="none" stroke="#0f7a6c" strokeWidth="3" />
+        <path d={path} fill="none" stroke="#2f6b4f" strokeWidth="3" />
         {sorted.map((p, i) => (
           <g key={p.evidenceId}>
-            <circle cx={x(i)} cy={y(p.value)} r="5" fill="#065247">
+            <circle cx={x(i)} cy={y(p.value)} r="5" fill="#1e4a36">
               <title>{`${p.value} ${unit || ''} on ${new Date(p.date).toLocaleDateString('en-GB')}`}</title>
             </circle>
           </g>

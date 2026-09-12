@@ -11,8 +11,6 @@ import type { Measurement, NormalisedEvent } from '../src/types/domain.js';
 
 function meas(partial: Partial<Measurement> & Pick<Measurement, 'evidenceId' | 'resourceId'>): EvidenceItem {
   const payload: Measurement = {
-    evidenceId: partial.evidenceId,
-    resourceId: partial.resourceId,
     patientId: 'SIM-000001',
     panelId: 'lft',
     analyteId: 'alt',
@@ -37,15 +35,12 @@ function meas(partial: Partial<Measurement> & Pick<Measurement, 'evidenceId' | '
 
 function event(partial: Partial<NormalisedEvent> & Pick<NormalisedEvent, 'evidenceId' | 'resourceId' | 'informationClass'>): EvidenceItem {
   const payload: NormalisedEvent = {
-    evidenceId: partial.evidenceId,
-    resourceId: partial.resourceId,
     patientId: 'SIM-000001',
     kind: 'appointment',
     title: 'Follow-up',
     status: 'booked',
     at: '2026-09-12T00:00:00.000Z',
     summary: 'Practice follow-up',
-    informationClass: partial.informationClass,
     service: 'gp',
     sourceVersion: 1,
     fields: { reason: 'review' },

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import ResultChart from '../components/ResultChart';
 import { useApp } from '../lib/state';
+import { Button, Card } from '../components/ui';
 
 export default function ResultsPage() {
   const app = useApp();
@@ -47,13 +48,13 @@ export default function ResultsPage() {
 
   if (!canSeeLabs) {
     return (
-      <div className="panel">
-        <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>Results</h1>
-        <div className="info-banner">
+      <Card tone="plum">
+        <h1 className="page-title">Results</h1>
+        <p className="muted" style={{ marginBottom: 0 }}>
           Consent blocks this — laboratory results are outside this viewer&apos;s CareCircle access. Switch to the
           patient or update People and access.
-        </div>
-      </div>
+        </p>
+      </Card>
     );
   }
 
@@ -67,17 +68,17 @@ export default function ResultsPage() {
   const chart = (selected && visible.find((a) => a.id === selected)) || visible[0];
 
   return (
-    <div className="panel stack">
-      <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>Results</h1>
+    <Card className="stack">
+      <h1 className="page-title">Results</h1>
       <p className="muted">
         Exact values from Anima-derived measurements. Reference bands are illustrative simulator intervals.
       </p>
       {app.status === 'error' ? (
         <div className="error-banner">
           {app.error || 'Results failed to load.'}{' '}
-          <button type="button" className="secondary" disabled={retrying} onClick={() => void retry()}>
+          <Button type="button" variant="secondary" size="sm" disabled={retrying} onClick={() => void retry()}>
             {retrying ? 'Retrying…' : 'Retry'}
-          </button>
+          </Button>
         </div>
       ) : null}
       {!visible.length ? (
@@ -85,22 +86,23 @@ export default function ResultsPage() {
           {measurements.length
             ? 'Held result — values are held for disclosure (or filtered). Clear holds below, or switch viewer.'
             : 'No numeric result history was normalised from the live patient view.'}{' '}
-          <button type="button" className="secondary" disabled={retrying} onClick={() => void retry()}>
+          <Button type="button" variant="secondary" size="sm" disabled={retrying} onClick={() => void retry()}>
             {retrying ? 'Refreshing…' : 'Retry'}
-          </button>
+          </Button>
         </div>
       ) : (
         <>
           <div className="pill-row">
             {visible.map((a) => (
-              <button
+              <Button
                 key={a.id}
                 type="button"
-                className={chart?.id === a.id ? undefined : 'secondary'}
+                variant={chart?.id === a.id ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setSelected(a.id)}
               >
                 {a.name}
-              </button>
+              </Button>
             ))}
           </div>
           {chart ? (
@@ -124,19 +126,22 @@ export default function ResultsPage() {
             patient-informed flag.
           </p>
           <div className="pill-row">
-            {[...new Set(measurements.map((m: any) => m.resourceId))].map((id: string) => (
-              <button
+            {(Array.from(new Set(measurements.map((m: { resourceId: string }) => m.resourceId))) as string[]).map(
+              (id) => (
+              <Button
                 key={id}
                 type="button"
-                className="secondary"
+                variant="secondary"
+                size="sm"
                 onClick={() => app.setDisclosure(id, heldIds.has(id) ? 'cleared' : 'held')}
               >
                 {heldIds.has(id) ? 'Clear' : 'Hold'} {id.slice(0, 12)}
-              </button>
-            ))}
+              </Button>
+            ),
+            )}
           </div>
         </>
       )}
-    </div>
+    </Card>
   );
 }

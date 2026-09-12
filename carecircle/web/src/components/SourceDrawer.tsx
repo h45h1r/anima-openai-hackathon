@@ -1,4 +1,5 @@
 import { useApp } from '../lib/state';
+import { Button } from './ui';
 
 export default function SourceDrawer() {
   const app = useApp();
@@ -7,21 +8,25 @@ export default function SourceDrawer() {
   return (
     <div className="drawer-backdrop" onClick={() => app.openSource(null)} role="presentation">
       <aside className="drawer" role="dialog" aria-label="Source evidence" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
-          <h2 style={{ marginTop: 0, fontFamily: 'var(--serif)' }}>Source</h2>
-          <button type="button" className="secondary" onClick={() => app.openSource(null)}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center' }}>
+          <h2 className="page-title" style={{ fontSize: '1.25rem', margin: 0 }}>
+            Source
+          </h2>
+          <Button type="button" variant="secondary" size="sm" onClick={() => app.openSource(null)}>
             Close
-          </button>
+          </Button>
         </div>
         <p className="muted small">Synthetic Anima evidence · patient {app.session?.selectedPatientId}</p>
         <div className="stack">
           <div>
             <div className="section-title">Title</div>
-            <div>{s.title || s.displayName || 'Evidence'}</div>
+            <div className="font-display" style={{ fontWeight: 700 }}>
+              {s.title || s.displayName || 'Evidence'}
+            </div>
           </div>
           <div>
             <div className="section-title">Identifiers</div>
-            <div className="small">
+            <div className="small trace" style={{ whiteSpace: 'normal' }}>
               evidenceId: {s.evidenceId}
               <br />
               resourceId: {s.resourceId}
@@ -32,7 +37,7 @@ export default function SourceDrawer() {
           {s.value !== undefined ? (
             <div>
               <div className="section-title">Measurement</div>
-              <div>
+              <div className="trace">
                 {s.value} {s.unit} on {s.sampledAt || s.date}
               </div>
             </div>
