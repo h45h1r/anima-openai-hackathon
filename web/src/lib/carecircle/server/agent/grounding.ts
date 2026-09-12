@@ -527,11 +527,18 @@ export function buildDeterministicAnswer(input: {
     }
   } else {
     // Non-lab asks: only surface events when the question is about appointments/docs/general record — never invent a clinical substitute.
-    const relevantEvents = rankEvents(input.question, input.events, {
+    const ranked = rankEvents(input.question, input.events, {
       labIntent: false,
       apptIntent,
       docIntent,
-    }).slice(0, apptIntent || docIntent ? 5 : 3);
+    });
+    // Appointment asks: booked diary rows only (or timing prefs when explicitly asked) —
+    // never personal-context / contact-preference / "what matters" noise.
+    const relevantEvents = (
+      apptIntent
+        ? selectAppointmentFacts(ranked, input.question)
+        : ranked
+    ).slice(0, apptIntent || docIntent ? 5 : 3);
     // Avoid dumping appointments for vague clinical asks that didn't match lab/vitals routing.
     const allowEvents = apptIntent || docIntent || /what.*(happening|next|record|care)|status|update/i.test(input.question);
     if (allowEvents) {
@@ -730,31 +737,46 @@ function proseFromEventFacts(
       .slice(0, opts.short ? 3 : 5)
       .map((b) => `- ${b}`);
   } else if (opts.apptIntent) {
-    const intro = contextLines[0] || cleaned[0] || 'An appointment-related note is in the record.';
+    const intro = contextLines[0] || cleaned[0] || 'No booked appointment was found in the permitted record.';
     lead = `${you}${intro}${/[.!?]$/.test(intro) ? '' : '.'}`;
-    bullets = contextLines.slice(1, opts.short ? 2 : 3).map((b) => `- ${b}`);
+    // Keep appointment answers tight — date/time/title only; no preference bullets.
+    bullets = [];
   } else {
     lead = `${you}${cleaned[0] || lines[0]}`;
     bullets = cleaned.slice(1, 3).map((b) => `- ${b}`);
   }
 
+  const blob = lines.join(' ');
+  const hasBookedAppt =
+    opts.apptIntent && /booked|confirmed|scheduled|status book/i.test(blob);
+  const hasPreferenceOnly =
+    opts.apptIntent && !hasBookedAppt && /prefer|preference|afternoon|morning/i.test(blob);
+
   const meaning = opts.docIntent && actionLines.length
     ? 'These are actions already written into your record by the care team — Kindred is restating them, not adding new advice.'
     : opts.docIntent
       ? 'The shared documents describe what was recorded at that visit; they do not add a new diagnosis from Kindred.'
-      : opts.apptIntent
-        ? 'This reflects appointment status in the record only — a preference or open slot is not the same as a confirmed booking.'
-        : 'This is what the permitted record shows for that question.';
+      : hasBookedAppt
+        ? undefined
+        : hasPreferenceOnly
+          ? 'A preference or open slot is not the same as a confirmed booking.'
+          : opts.apptIntent
+            ? undefined
+            : 'This is what the permitted record shows for that question.';
 
   const next = opts.recordedNextStep
     ? stripRecordedNextPrefix(opts.recordedNextStep)
     : actionLines.length
       ? 'Follow the points above, and ask the care team if any step is unclear.'
-      : opts.apptIntent
-        ? 'Ask the care team to confirm the time if you are unsure whether it is booked.'
-        : 'Ask the care team if you want this explained in more detail.';
+      : hasBookedAppt
+        ? 'Ask the care team to confirm the time if you are unsure.'
+        : opts.apptIntent
+          ? undefined
+          : 'Ask the care team if you want this explained in more detail.';
 
-  return formatAskProse([lead, bullets.join('\n'), meaning, next].filter(Boolean));
+  return formatAskProse(
+    [lead, bullets.join('\n'), meaning, next].filter((b): b is string => Boolean(b)),
+  );
 }
 
 /** Ensure blank-line paragraphs and markdown-ish bullets for Prose rendering. */
@@ -1242,10 +1264,67 @@ function score(
     if (isLabRelatedEvent(ev)) s += 6;
     else if (/discharge|appoint|message|conversation|booking|handover/.test(hay)) s -= 8;
   }
-  if (intent?.apptIntent && /appoint|slot|book|diary/.test(hay)) s += 5;
+  if (intent?.apptIntent && /appoint|slot|book|diary/.test(hay) && !isPersonalContextNoise(hay)) s += 5;
   if (intent?.docIntent && /discharge|document|letter|handover|summary/.test(hay)) s += 5;
-  if (/appoint|task|discharge|handover|result|pharmac|follow|blood|lab/.test(hay)) s += 1;
+  if (/appoint|task|discharge|handover|result|pharmac|follow|blood|lab/.test(hay) && !isPersonalContextNoise(hay)) {
+    s += 1;
+  }
+  // Demote soft personal-context / contact-preference rows for appointment ranking.
+  if (intent?.apptIntent && isPersonalContextNoise(hay)) s -= 12;
   return s;
+}
+
+/** Soft demographic / contact / goals text — not a diary booking. */
+function isPersonalContextNoise(hay: string): boolean {
+  return /personal context|contact prefer|what matters|lives with|landline|patient app/i.test(hay);
+}
+
+function eventHay(e: NormalisedEvent): string {
+  return `${e.title} ${humaniseEventSummary(e)} ${e.kind} ${e.status} ${e.informationClass}`.toLowerCase();
+}
+
+/** True appointment-time preference (afternoon/morning), not "contact preferences". */
+function isAppointmentTimingPreferenceEvent(e: NormalisedEvent): boolean {
+  const hay = eventHay(e);
+  if (isPersonalContextNoise(hay)) return false;
+  return (
+    /(afternoon|morning|evening).{0,48}(prefer|preference|slot|appoint)/i.test(hay) ||
+    /prefer(s|ence)?.{0,24}(afternoon|morning|evening)/i.test(hay) ||
+    /appointment (time )?prefer/i.test(hay)
+  );
+}
+
+function isBookedAppointmentEvent(e: NormalisedEvent): boolean {
+  return /appoint/i.test(e.kind + e.title) && /book|confirm|scheduled|arrived/i.test(e.status + e.summary);
+}
+
+function isAppointmentRequestEvent(e: NormalisedEvent): boolean {
+  return /appoint/i.test(e.kind + e.title) && /request|waiting|pending/i.test(e.status + e.summary);
+}
+
+function isDiaryAppointmentEvent(e: NormalisedEvent): boolean {
+  const hay = eventHay(e);
+  if (isPersonalContextNoise(hay)) return false;
+  return (
+    e.informationClass === 'appointments' ||
+    /appoint|slot|book|diary|follow-?up/i.test(`${e.kind} ${e.title} ${e.status}`)
+  );
+}
+
+function asksAboutAppointmentPreferences(question: string): boolean {
+  return /\b(prefer|preference|afternoon|morning|evening)\b/i.test(question);
+}
+
+/** Facts for appointment questions: booked rows first; timing prefs only if asked. */
+function selectAppointmentFacts(events: NormalisedEvent[], question: string): NormalisedEvent[] {
+  const diary = events.filter(isDiaryAppointmentEvent);
+  const booked = diary.filter(isBookedAppointmentEvent);
+  if (booked.length) return booked;
+  if (asksAboutAppointmentPreferences(question)) {
+    return diary.filter((e) => isAppointmentTimingPreferenceEvent(e) || isAppointmentRequestEvent(e));
+  }
+  // Next-appointment asks with nothing booked: keep requests/slots only — no soft prefs.
+  return diary.filter((e) => isAppointmentRequestEvent(e) || /slot|session|diary/i.test(eventHay(e)));
 }
 
 export async function clarifyAppointment(
@@ -1253,20 +1332,18 @@ export async function clarifyAppointment(
   events: NormalisedEvent[],
   question: string,
 ): Promise<AppointmentAssist> {
-  const preference = events.find((e) => /afternoon|prefer|preference/i.test(`${e.title} ${humaniseEventSummary(e)}`));
-  const booked = events.find(
-    (e) => /appoint/i.test(e.kind + e.title) && /book|confirm|scheduled|arrived/i.test(e.status + e.summary),
-  );
-  const request = events.find(
-    (e) => /appoint/i.test(e.kind + e.title) && /request|waiting|pending/i.test(e.status + e.summary),
-  );
+  const preference = events.find(isAppointmentTimingPreferenceEvent);
+  const booked = events.find(isBookedAppointmentEvent);
+  const request = events.find(isAppointmentRequestEvent);
   const wantsNewBooking = /book|find (an |a )?afternoon|find (an |a )?appointment|available slot/i.test(question);
+  const wantsPreferenceInfo = asksAboutAppointmentPreferences(question);
 
-  const preferenceSummary = preference
-    ? truncate(`${preference.title}: ${humaniseEventSummary(preference)}`, 200)
-    : /afternoon/i.test(question)
-      ? 'Question mentions an afternoon preference; no separate preference record was found in permitted evidence.'
-      : undefined;
+  const preferenceSummary =
+    preference && (wantsPreferenceInfo || wantsNewBooking || !booked)
+      ? truncate(`${preference.title}: ${humaniseEventSummary(preference)}`, 200)
+      : wantsPreferenceInfo && /afternoon|morning|evening/i.test(question)
+        ? 'Question mentions a time-of-day preference; no separate preference record was found in permitted evidence.'
+        : undefined;
 
   const dates = [new Date(), new Date(Date.now() + 86400000)].map((d) => d.toISOString().slice(0, 10));
   const slots: AppointmentAssist['availableSlots'] = [];
@@ -1295,22 +1372,23 @@ export async function clarifyAppointment(
   }
 
   if (booked) {
+    // Next / booked appointment questions: date/time/title only — never preference or personal-context noise.
     return {
       stage: 'confirmed',
-      preferenceSummary,
-      requestSummary: request ? truncate(humaniseEventSummary(request), 180) : undefined,
-      availableSlots: slots.slice(0, 8),
+      preferenceSummary: wantsPreferenceInfo ? preferenceSummary : undefined,
+      requestSummary: wantsPreferenceInfo && request ? truncate(humaniseEventSummary(request), 180) : undefined,
+      availableSlots: wantsNewBooking ? slots.slice(0, 8) : undefined,
       confirmed: { startsAt: booked.at, resourceId: booked.resourceId },
       notice: `A booked follow-up appears in the record (${booked.title}, status ${humanStatus(booked.status)}${
         booked.at ? `, ${formatDate(booked.at)}` : ''
-      }). ${preferenceSummary ? `Preference note: ${preferenceSummary}. ` : ''}An afternoon preference is not itself a booking.`,
+      }).`,
     };
   }
 
   if (slots.length) {
     return {
       stage: 'slots',
-      preferenceSummary,
+      preferenceSummary: wantsPreferenceInfo ? preferenceSummary : undefined,
       requestSummary: request ? truncate(humaniseEventSummary(request), 180) : undefined,
       availableSlots: slots.slice(0, 8),
       notice:
@@ -1318,20 +1396,28 @@ export async function clarifyAppointment(
     };
   }
 
-  if (request || preferenceSummary) {
+  if (request) {
     return {
-      stage: request ? 'request' : 'preference',
-      preferenceSummary,
-      requestSummary: request ? truncate(`${request.title}: ${humaniseEventSummary(request)}`, 200) : undefined,
+      stage: 'request',
+      preferenceSummary: wantsPreferenceInfo ? preferenceSummary : undefined,
+      requestSummary: truncate(`${request.title}: ${humaniseEventSummary(request)}`, 200),
       notice:
-        'Kindred can clarify preferences and recorded requests. Live open slots were not returned for the queried dates, so no booking is offered.',
+        'There is a recorded appointment request, but no confirmed booking in the permitted record.',
+    };
+  }
+
+  // Preference without a booking: keep the educational line only in this case.
+  if (preferenceSummary) {
+    return {
+      stage: 'preference',
+      preferenceSummary,
+      notice: `No booked appointment was found in the permitted record. Preference note: ${preferenceSummary}. A preference is not itself a booking.`,
     };
   }
 
   return {
     stage: 'unsupported',
-    notice:
-      'No confirmed booking, open slot list, or appointment preference was found in permitted evidence for this patient.',
+    notice: 'No booked appointment was found in the permitted record for this patient.',
   };
 }
 

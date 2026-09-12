@@ -169,6 +169,9 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
     patientDisplayName: selfViewer?.displayName,
     addressName,
     viewerRole,
+    omitSoftContext:
+      classifyAskIntent(input.question, input.history) === 'appointment' &&
+      !/\b(prefer|preference|matters|contact)\b/i.test(input.question),
   });
 
   // --- Slim model skills (not observability micro-tools) ---
@@ -594,9 +597,11 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           REFINE_STYLE_INSTRUCTIONS,
           followUp || labFocus.focused
             ? `Focus: answer THIS question only. If it is a follow-up, do not repeat the full prior panel — focus on the asked analytes/topic (${labFocus.topicIds.join(', ') || 'as asked'}).`
-            : short
-              ? `Focus: short plain language in warm paragraphs. No full panel dump.`
-              : `Focus: concise highlights over a full dump unless asked.`,
+            : intent === 'appointment'
+              ? `Focus: appointment booking only — booked date/time/title, or say none is booked. Do not include preference notes, personal context, or "what matters".`
+              : short
+                ? `Focus: short plain language in warm paragraphs. No full panel dump.`
+                : `Focus: concise highlights over a full dump unless asked.`,
         ]
           .filter(Boolean)
           .join('\n');
@@ -1152,6 +1157,8 @@ function buildAskPatientBrief(input: {
   patientDisplayName?: string;
   addressName?: string;
   viewerRole: string;
+  /** Skip needs/goals/personal context (e.g. next-appointment asks). */
+  omitSoftContext?: boolean;
 }): string {
   const first =
     input.addressName ||
@@ -1166,6 +1173,10 @@ function buildAskPatientBrief(input: {
     bits.push(`Patient ${input.patientId}`);
   }
   bits.push(`Viewer role: ${input.viewerRole}.`);
+
+  if (input.omitSoftContext) {
+    return bits.join(' ');
+  }
 
   try {
     // Optional soft context from Kindred companion when the same patient is loaded.
