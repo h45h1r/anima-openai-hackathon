@@ -66,8 +66,8 @@ export default function BodyView({ state, viewerId, onAsk, embedded = false }: {
       </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
-        <div className={`relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(ellipse_at_50%_35%,#ffffff_0%,#eef4f6_45%,#e3ecf0_100%)] ${embedded ? "h-[52vh] min-h-[400px]" : "h-[62vh] min-h-[440px]"}`}>
+      <div className={`grid gap-4 ${embedded ? "lg:grid-cols-[minmax(0,1fr)_360px]" : "lg:grid-cols-[minmax(0,1fr)_400px]"}`}>
+        <div className={`relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(ellipse_at_50%_35%,#ffffff_0%,#eef4f6_45%,#e3ecf0_100%)] ${embedded ? "h-[74vh] min-h-[560px]" : "h-[62vh] min-h-[440px]"}`}>
           <BodyScene focus={focus} tint={tint} onPick={(id) => setFocus((f) => (f === id ? null : id))} reducedMotion={reduced} allowZoom={!embedded} />
           <div className="pointer-events-none absolute left-4 top-4 font-mono text-[10.5px] uppercase tracking-wider text-muted">
             <div>{patient.name} · {state.patient.age}</div>
