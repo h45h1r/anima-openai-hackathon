@@ -6,21 +6,20 @@ import Link from "next/link";
 import { useKindred } from "@/hooks/useKindred";
 import { useCareClinical } from "@/hooks/useCareClinical";
 import type { AppState, Person } from "@/lib/types";
-import { personById, visibleMessages } from "@/lib/types";
+import { personById } from "@/lib/types";
 import { Avatar, Button, KindredMark, LockIcon, Pill } from "./ui";
 import AuditRail from "./AuditRail";
 import Chat from "./Chat";
 import PatientHome from "./patient/PatientHome";
 import CircleOfCare from "./patient/CircleOfCare";
 import SharingLevels from "./patient/SharingLevels";
-import BodyView from "./body/BodyView";
 import FamilyHome from "./family/FamilyHome";
 import EhrView from "./clinician/EhrView";
 import AskPanel from "./clinical/AskPanel";
 import CarePanel from "./clinical/CarePanel";
 import type { CareClinical } from "@/hooks/useCareClinical";
 
-type Tab = "home" | "body" | "circle" | "family" | "kindred" | "ask" | "care" | "activity" | "levels";
+type Tab = "home" | "circle" | "kindred" | "ask" | "care" | "activity" | "levels";
 
 interface TabDef {
   id: Tab;
@@ -94,27 +93,22 @@ export default function App() {
   const primaryClinician = clinicians.find((p) => p.relation === "GP") ?? clinicians[0];
   const personas = [...state.people.filter((p) => p.accessStatus !== 'revoked' && (p.role === "patient" || p.role === "family" || p.role === "carer")), ...(primaryClinician ? [primaryClinician] : [])];
 
-  const familyUnread = visibleMessages(state, "family-group", viewerId).filter((m) => m.kind === "notification").length;
   const pending = isPatient ? state.consentRequests.filter((r) => r.status === "pending").length : 0;
   const tabs: TabDef[] = isClinician
     ? [{ id: "home", label: "Record", icon: <RecordIcon /> }]
     : isPatient
       ? [
           { id: "home", label: "Home", icon: <HomeIcon />, badge: pending },
-          { id: "body", label: "Body", icon: <BodyIcon /> },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
           { id: "circle", label: "Circle", icon: <LockIcon size={20} /> },
           { id: "ask", label: "Ask", icon: <AskIcon /> },
           { id: "care", label: "Care", icon: <CareIcon /> },
-          { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
         ]
       : [
           { id: "home", label: patient.shortName, icon: <HomeIcon /> },
-          { id: "body", label: "Body", icon: <BodyIcon /> },
           { id: "ask", label: "Ask", icon: <AskIcon /> },
           { id: "care", label: "Care", icon: <CareIcon /> },
           { id: "kindred", label: "Kindred", icon: <KindredMark size={22} /> },
-          { id: "family", label: "Family", icon: <PeopleIcon />, badge: familyUnread },
         ];
   const tabParam = params.get("tab") as Tab | null;
   const tab: Tab =
@@ -132,12 +126,6 @@ export default function App() {
     const t = next.tab ?? (next.as && next.as !== viewerId ? "home" : tab);
     if (t !== "home") q.set("tab", t);
     router.replace(`?${q.toString()}`);
-  };
-  /** Companion / consent chat (existing Kindred agent). */
-  const askCompanion = (question: string) => {
-    const dm = Object.values(state.threads).find((t) => t.kind === "direct" && t.memberIds.includes(viewerId));
-    if (dm) actions.sendChat(dm.id, viewerId, question).catch(() => {});
-    go({ tab: "kindred" });
   };
   /** Clinical Ask tab (CareCircle API behind one Kindred shell). */
   const askClinical = (question?: string) => {
@@ -181,14 +169,10 @@ export default function App() {
                 {connected ? "Live" : "Reconnecting"}
               </Pill>
             </span>
-            <Button variant="plum" size="sm" disabled={running} onClick={runCheck} title="Simulates Kindred's scheduled check: finds appointments in the next 7 days and tells the family">
-              <ClockIcon />
-              <span className="hidden sm:inline">{running ? "Checking…" : "Run check"}</span>
-            </Button>
             <button onClick={toggleAudit} className={`hidden h-9 w-9 items-center justify-center rounded-full border lg:flex ${showAudit ? "border-plum bg-plum-soft text-plum" : "border-line text-muted hover:bg-paper"}`} title={showAudit ? "Hide activity" : "Show activity"} aria-pressed={showAudit}>
               <ActivityIcon />
             </button>
-            <AccountMenu viewer={viewer} personas={personas} onSwitch={(id) => go({ as: id, tab: "home" })} onReload={() => actions.reset()} onActivity={() => go({ tab: "activity" })} status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }} />
+            <AccountMenu viewer={viewer} personas={personas} onSwitch={(id) => go({ as: id, tab: "home" })} onReload={() => actions.reset()} onActivity={() => go({ tab: "activity" })} onRunCheck={runCheck} running={running} status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }} />
           </div>
         </div>
       </header>
@@ -210,7 +194,6 @@ export default function App() {
               viewer={viewer}
               tab={tab}
               care={care}
-              onAskCompanion={askCompanion}
               onAskClinical={askClinical}
               go={go}
             />
@@ -244,7 +227,6 @@ function Screen({
   viewer,
   tab,
   care,
-  onAskCompanion,
   onAskClinical,
   go,
 }: {
@@ -253,7 +235,6 @@ function Screen({
   viewer: Person;
   tab: Tab;
   care: CareClinical;
-  onAskCompanion: (q: string) => void;
   onAskClinical: (q?: string) => void;
   go: (n: { tab?: Tab }) => void;
 }) {
@@ -279,17 +260,11 @@ function Screen({
             onOpenCircle={() => go({ tab: "circle" })}
             onOpenChat={() => onAskClinical()}
             onOpenCompanion={() => go({ tab: "kindred" })}
+            onAsk={onAskClinical}
           />
         ) : (
           <FamilyHome state={state} actions={actions} viewerId={viewer.id} onAsk={onAskClinical} />
         )}
-      </div>
-    );
-  }
-  if (tab === "body") {
-    return (
-      <div className="page page-wide">
-        <BodyView state={state} viewerId={viewer.id} onAsk={onAskClinical} />
       </div>
     );
   }
@@ -329,15 +304,6 @@ function Screen({
       />
     );
   }
-  if (tab === "family") {
-    return (
-      <div className="app-main-h">
-        <div className="mx-auto h-full w-full max-w-3xl lg:py-4">
-          <Chat state={state} actions={actions} threadId="family-group" viewerId={viewer.id} big={isPatient} canCompose={false} />
-        </div>
-      </div>
-    );
-  }
   if (!dm) return null;
   const suggestions = isPatient
     ? [firstFamily ? `Let ${firstFamily.shortName} see my test results` : "Who can see what?", "Who can see what?", "What's coming up this week?", "Explain my latest blood tests"]
@@ -351,7 +317,7 @@ function Screen({
   );
 }
 
-function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, status }: { viewer: Person; personas: Person[]; onSwitch: (id: string) => void; onReload: () => void; onActivity: () => void; status: { data: string; agent: string; world?: string } }) {
+function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCheck, running, status }: { viewer: Person; personas: Person[]; onSwitch: (id: string) => void; onReload: () => void; onActivity: () => void; onRunCheck: () => void; running: boolean; status: { data: string; agent: string; world?: string } }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -396,6 +362,8 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, status 
             </button>
           ))}
           <div className="border-t border-line p-2">
+            <div className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Demo controls</div>
+            <button role="menuitem" disabled={running} onClick={() => { setOpen(false); onRunCheck(); }} title="Simulates Kindred's scheduled job: finds appointments in the next 7 days and tells the family" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ClockIcon /> {running ? "Running scheduled check…" : "Run scheduled check"}</button>
             <button role="menuitem" onClick={() => { setOpen(false); onActivity(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper"><ActivityIcon /> Activity log</button>
             <button role="menuitem" onClick={() => { setOpen(false); onReload(); }} className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted hover:bg-paper hover:text-ink">Reload record from NHS-SIM</button>
           </div>
@@ -409,9 +377,6 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, status 
   );
 }
 
-function BodyIcon() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="4.5" r="2.5" /><path d="M8 9h8l-1 6h-6zM10 15l-1.5 6M14 15l1.5 6M8 9l-3 3M16 9l3 3" /></svg>;
-}
 function HomeIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z" /></svg>;
 }
@@ -420,9 +385,6 @@ function AskIcon() {
 }
 function CareIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 4h8v4H8V4Z" /><path d="M6 8h12v12H6V8Z" /><path d="M10 12h4M12 10v4" /></svg>;
-}
-function PeopleIcon() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.5" /><circle cx="17" cy="10" r="2.5" /><path d="M3 20a6 6 0 0 1 12 0M15 20a4 4 0 0 1 6 0" /></svg>;
 }
 function RecordIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" /><path d="M14 3v6h6M9 13h6M9 17h6" /></svg>;

@@ -4,10 +4,11 @@ import type { AppState } from "@/lib/types";
 import { CATEGORIES, personById } from "@/lib/types";
 import type { KindredActions } from "@/hooks/useKindred";
 import { Avatar, Button, Card, LockIcon, Pill, fmtClock, fmtLongDay, fmtDay } from "../ui";
-import HealthOverview, { direction } from "./HealthOverview";
-import AfterAppointment, { nextStepsFromRecord } from "./AfterAppointment";
+import { direction } from "./HealthOverview";
+import { nextStepsFromRecord } from "./AfterAppointment";
+import BodyView from "../body/BodyView";
 
-// Home in three time bands: How things are now, What's happened, What's next.
+// Home: today and what's next side by side, then the body view.
 // Every line is derived from the live record; nothing here is a diagnosis.
 
 export default function PatientHome({
@@ -16,30 +17,23 @@ export default function PatientHome({
   onOpenCircle,
   onOpenChat,
   onOpenCompanion,
+  onAsk,
 }: {
   state: AppState;
   actions: KindredActions;
   onOpenCircle: () => void;
   onOpenChat: () => void;
   onOpenCompanion?: () => void;
+  onAsk?: (q: string) => void;
 }) {
-  const patient = personById(state, state.patientId);
   const next = state.appointments[0];
   const pending = state.consentRequests.filter((r) => r.status === "pending");
   const sharedCount = Object.values(state.consent).reduce((n, s) => n + CATEGORIES.filter((c) => s[c.id]).length, 0);
-  const hour = new Date(state.now).getUTCHours() + 1; // Europe/London in September
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   const nowOut = state.labs.filter((l) => l.flag !== "normal");
   const worseningOut = nowOut.filter((l) => direction(l) === "worse");
   const clinicActions = state.nextActions.filter((a) => !a.done && a.owner === "clinic");
   const daysToNext = next ? Math.round((new Date(next.start).getTime() - new Date(state.now).getTime()) / 86400000) : null;
-
-  // History strip: what the record holds this year.
-  const year = new Date(state.now).getFullYear();
-  const visits = state.careNotes.filter((n) => n.kind !== "letter" && n.date.startsWith(String(year))).length;
-  const letters = state.careNotes.filter((n) => n.kind === "letter").length;
-  const testDates = new Set(state.labs.flatMap((l) => l.history.map((h) => h.date))).size;
 
   // Today: one sentence, one action, worded for the reading level.
   let today: { text: string; action?: { label: string; onClick: () => void }; tone: "amber" | "moss" };
@@ -67,11 +61,6 @@ export default function PatientHome({
 
   return (
     <div className="space-y-5">
-      <div>
-        <div className="text-sm font-semibold text-muted">{fmtLongDay(state.now)}</div>
-        <h1 className="font-display text-[28px] font-bold leading-tight sm:text-4xl">{greeting}, {patient.shortName}</h1>
-      </div>
-
       {pending.map((r) => {
         const who = personById(state, r.requesterId);
         const cat = CATEGORIES.find((c) => c.id === r.category)!;
@@ -92,58 +81,59 @@ export default function PatientHome({
         );
       })}
 
-      {/* NOW */}
+      {/* NOW: today and what's next, side by side */}
       <section aria-labelledby="now-h" className="space-y-3">
         <SectionHead id="now-h" kicker="Now" title="How things are" />
-        <Card tone={today.tone}>
-          <Pill tone={today.tone === "amber" ? "amber" : "moss"}>Today</Pill>
-          <p className="mt-2 text-[19px] leading-snug sm:text-[21px]">{today.text}</p>
-          {today.action && <div className="mt-3"><Button variant="secondary" size="lg" onClick={today.action.onClick}>{today.action.label}</Button></div>}
-        </Card>
-        <HealthOverview state={state} onAsk={onOpenChat} />
+        <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+          <Card tone={today.tone} className="flex flex-col">
+            <Pill tone={today.tone === "amber" ? "amber" : "moss"} className="self-start">Today</Pill>
+            <p className="mt-2 text-[19px] leading-snug sm:text-[21px]">{today.text}</p>
+            {today.action && <div className="mt-auto pt-3"><Button variant="secondary" size="lg" onClick={today.action.onClick}>{today.action.label}</Button></div>}
+          </Card>
+          {next ? (
+            <Card tone="amber" className="flex flex-col">
+              <div className="flex items-center justify-between">
+                <Pill tone="amber">Next</Pill>
+                <span className="text-sm font-semibold text-[#7a520c]">{daysUntil(state.now, next.start)}</span>
+              </div>
+              <div className="mt-2 font-display text-[22px] font-bold leading-tight">{next.title}</div>
+              <div className="mt-1 text-[16px]">{fmtLongDay(next.start)} at {fmtClock(next.start)}</div>
+              <div className="text-[15px] text-muted">{next.location}{next.mode ? ` · ${next.mode}` : ""} · with {personById(state, next.clinicianId).name}</div>
+              {next.prep.length > 0 && (
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-[15px] font-semibold text-[#7a520c]">On your record for this visit</summary>
+                  <ul className="mt-2 space-y-1.5 pl-5 text-[15px]">{next.prep.map((p) => <li key={p} className="list-disc">{p}</li>)}</ul>
+                </details>
+              )}
+              {nextSteps.length > 0 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-[15px] font-semibold text-[#7a520c]">What happens next</summary>
+                  <ul className="mt-2 space-y-1.5 text-[15px] leading-relaxed">
+                    {nextSteps.map((s, i) => <li key={i} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" /><span>{s}</span></li>)}
+                  </ul>
+                </details>
+              )}
+              <div className="mt-auto pt-3 text-sm">{next.announcedToFamily ? <span className="text-moss-deep">Your family have been told.</span> : <span className="text-muted">Kindred will remind your family a week before.</span>}</div>
+            </Card>
+          ) : (
+            <Card className="flex flex-col">
+              <Pill tone="neutral" className="self-start">Next</Pill>
+              <div className="mt-2 font-display text-lg font-bold">No date booked yet</div>
+              <p className="mt-1 text-[16px] text-muted">{clinicActions[0] ? clinicActions[0].text : "Nothing is in the practice diary for you right now."}</p>
+              {nextSteps.length > 0 && (
+                <ul className="mt-3 space-y-1.5 text-[15px] leading-relaxed">
+                  {nextSteps.map((s, i) => <li key={i} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" /><span>{s}</span></li>)}
+                </ul>
+              )}
+              <div className="mt-auto pt-3"><Button variant="secondary" size="lg" onClick={onOpenChat}>Ask Kindred about what&rsquo;s next</Button></div>
+            </Card>
+          )}
+        </div>
       </section>
 
-      {/* PAST */}
-      <section aria-labelledby="past-h" className="space-y-3">
-        <SectionHead id="past-h" kicker="Before" title="What's happened" sub={`This year on your record: ${visits} practice contact${visits === 1 ? "" : "s"}, ${testDates} blood test${testDates === 1 ? "" : "s"}, ${letters} hospital letter${letters === 1 ? "" : "s"}.`} />
-        <AfterAppointment state={state} onAsk={onOpenChat} />
-      </section>
-
-      {/* FUTURE */}
-      <section aria-labelledby="next-h" className="space-y-3">
-        <SectionHead id="next-h" kicker="Next" title="What's coming" />
-        {next ? (
-          <Card tone="amber">
-            <div className="flex items-center justify-between">
-              <Pill tone="amber">Appointment</Pill>
-              <span className="text-sm font-semibold text-[#7a520c]">{daysUntil(state.now, next.start)}</span>
-            </div>
-            <div className="mt-2 font-display text-[22px] font-bold leading-tight">{next.title}</div>
-            <div className="mt-1 text-[16px]">{fmtLongDay(next.start)} at {fmtClock(next.start)}</div>
-            <div className="text-[15px] text-muted">{next.location}{next.mode ? ` · ${next.mode}` : ""} · with {personById(state, next.clinicianId).name}</div>
-            {next.prep.length > 0 && (
-              <details className="mt-3">
-                <summary className="cursor-pointer text-[15px] font-semibold text-[#7a520c]">On your record for this visit</summary>
-                <ul className="mt-2 space-y-1.5 pl-5 text-[15px]">{next.prep.map((p) => <li key={p} className="list-disc">{p}</li>)}</ul>
-              </details>
-            )}
-            {next.announcedToFamily ? <div className="mt-3 text-sm text-moss-deep">Your family have been told.</div> : <div className="mt-3 text-sm text-muted">Kindred will remind your family a week before.</div>}
-          </Card>
-        ) : (
-          <Card>
-            <div className="font-display text-lg font-bold">No date booked yet</div>
-            <p className="mt-1 text-[16px] text-muted">{clinicActions[0] ? clinicActions[0].text : "Nothing is in the practice diary for you right now."}</p>
-          </Card>
-        )}
-        {nextSteps.length > 0 && (
-          <Card>
-            <div className="font-display text-lg font-bold">What happens next</div>
-            <ul className="mt-2 space-y-2 text-[16px] leading-relaxed">
-              {nextSteps.map((s, i) => <li key={i} className="flex gap-3"><span className="mt-2.5 h-2 w-2 shrink-0 rounded-full bg-amber" /><span>{s}</span></li>)}
-            </ul>
-            <div className="mt-3"><Button variant="secondary" size="lg" onClick={onOpenChat}>Ask Kindred about what&rsquo;s next</Button></div>
-          </Card>
-        )}
+      {/* BODY */}
+      <section aria-labelledby="body-h" className="space-y-3">
+        <BodyView state={state} viewerId={state.patientId} embedded onAsk={onAsk ?? (() => onOpenChat())} />
       </section>
 
       <button onClick={onOpenCircle} className="w-full rounded-2xl border border-plum/30 bg-plum-soft p-4 text-left transition hover:brightness-[0.98]">
