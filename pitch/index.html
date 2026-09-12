@@ -145,6 +145,10 @@ p { margin: 0; }
 .under b { color: var(--ink); font-weight: 600; }
 .under .pill { display: inline-flex; width: auto; margin-left: 0.5rem; vertical-align: middle; }
 .under b { display: inline; }
+.pillars.big { margin-top: 2.4rem; gap: clamp(1rem, 2vw, 1.8rem); }
+.pillars.big .pillar { padding: 1.3rem 1.4rem 1.5rem; border-top-width: 4px; }
+.pillars.big .pillar b { font-size: clamp(1.2rem, 1.8vw, 1.7rem); }
+.pillars.big .pillar span { font-size: clamp(1rem, 1.3vw, 1.25rem); margin-top: 0.6rem; line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -197,25 +201,11 @@ p { margin: 0; }
 <section class="slide">
   <span class="kicker">The solution</span>
   <div class="body">
-    <h2 style="max-width:36ch"><span class="product">Kindred</span> turns every result into the right explanation and next action for every trusted person, <em>under the patient's control.</em></h2>
-    <div class="pillars">
-      <div class="pillar rust"><b>1. Sees it coming</b><span>Proactive, longitudinal. A year of bloods and a week of watch data become improving, watch, worsening, on the Home boxes and a nine-system Body view.</span></div>
-      <div class="pillar amber"><b>2. Tells her first</b><span>Transparency. The disclosure gate: nothing goes to the family until she has been told.</span></div>
-      <div class="pillar plum"><b>3. Tells the right people the right way</b><span>Consent. Three levels over six record categories, enforced in every tool call, a version per person.</span></div>
-    </div>
-    <div class="flow">
-      <div class="rust"><b>Trend engine</b>reads a year of bloods</div>
-      <div class="rust"><b>Flags worsening</b>improving, watch, worsening</div>
-      <div class="amber"><b>Result lands</b>or a trend is flagged</div>
-      <div class="amber"><b>Has she been told?</b>the gate checks</div>
-      <div class="amber"><b>Held / Released</b>held until she has been talked through it</div>
-      <div class="plum"><b>Her consent</b>big news waits for her yes</div>
-      <div class="plum"><b>Per-person version</b>Grace numbers, Idris logistics, Thomas yes/no</div>
-      <div class="moss"><b>Act</b>explain, notify, or raise a task</div>
-    </div>
-    <div class="under">
-      <p><b>If nobody tells her within three days,</b> the agent raises a GP task and phones her landline.</p>
-      <p>On Eleanor's real values the engine flags her liver trend as <span class="lab w">worsening</span> and her white cells as <span class="lab k">watch</span>.</p>
+    <h2 style="max-width:30ch"><span class="product">Kindred</span> turns every result into the right explanation and next action for every trusted person, <em>under the patient's control.</em></h2>
+    <div class="pillars big">
+      <div class="pillar rust"><b>1. Sees it coming</b><span>Reads the whole trend, not one result.</span></div>
+      <div class="pillar amber"><b>2. Tells her first</b><span>Nothing reaches the family until she has been told and says yes.</span></div>
+      <div class="pillar plum"><b>3. Tells the right people the right way</b><span>Daughter gets the numbers. Husband gets the lift to arrange. Son gets a yes or no.</span></div>
     </div>
   </div>
   <div class="foot"><span class="src">Proxy access gives a person the record. <span class="product">Kindred</span> gives each person their role.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>

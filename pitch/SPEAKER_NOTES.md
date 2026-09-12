@@ -99,6 +99,8 @@ If asked for a UK carer anxiety figure: Carers UK State of Caring 2025, 74% of c
 
 ## Slide 4: The solution (30 seconds)
 
+Removed from the slide on 12 Sep evening and kept here to say aloud: the eight-step flow (trend engine reads a year of bloods, flags worsening, result lands or trend flagged, has she been told, held or released, her consent for big news, per-person version, act); "if nobody tells her within three days, the agent raises a GP task and phones her landline"; and "on Eleanor's real values the engine flags her liver trend as worsening and her white cells as watch".
+
 **Script**
 
 "CareCircle turns every result into the right explanation and next action for every trusted person, under the patient's control. Three pillars, one loop. One: it sees it coming. A trend engine reads a year of bloods and the watch data and says improving, watch or worsening; on Eleanor's real values it flags her liver trend as worsening and her white cells as watch. Two: it tells her first. When a result lands or a trend is flagged, the gate asks one question, has she been told, and holds everything until she has been talked through it. Big news waits for her yes. If nobody tells her within three days, the agent raises a GP task and phones her landline. Three: it tells the right people the right way. Three sharing levels over six record categories, enforced inside every tool call, mirrored to her GP's consent view. Grace gets the numbers, Idris gets the logistics, Thomas gets a yes or no. Proxy access gives a person the record. Kindred gives each person their role."
