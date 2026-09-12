@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kindred · Pitch</title>
+<title>CareCircle · Pitch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -132,16 +132,6 @@ p { margin: 0; }
       <div class="brand"><svg class="mark" width="0.78em" height="0.78em" viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="24" r="14" fill="none" stroke="#2F6B4F" stroke-width="5"/><circle cx="30" cy="24" r="14" fill="none" stroke="#6D2E5B" stroke-width="5"/></svg><span class="product">Kindred</span></div>
       <p class="tagline">A care companion for older people and patients with chronic conditions. Patients choose what to share with family members and carers; their choices appear in the GP consent view.</p>
     </div>
-    <div class="card">
-      <div class="who">Eleanor Chen, 83 <span class="pill mono">SIM-000006</span></div>
-      <ul class="facts">
-        <li>Four abnormal blood panels since May, white cells <span class="lab">2.7 · 1.6 · 1.3 · 2.1 ×10⁹/L</span> against a range of 4 to 11. <b>Each one was filed. Nobody looked at them together.</b> The only message she ever received was about paperwork.</li>
-        <li>Admitted at <b>04:20 this morning</b>. A GP appointment still booked for 08:30.</li>
-        <li>Landline only. Her husband could not drive her to her last review. <b>Nothing in her record has gone to her family.</b></li>
-      </ul>
-      <p class="close">She is the human middleware between her clinicians and her family.</p>
-      <p class="voice">“I want to know what that is. I want to know what’s going on. I want to be aware.”</p>
-    </div>
   </div>
   <div class="foot"><span class="src">Built on the Anima simulated NHS neighbourhood. All patient data synthetic, authored by the simulator, not by us. Fictional demo, not an official NHS product.</span><span class="legal">Team 5</span></div>
 </section>
@@ -265,7 +255,7 @@ p { margin: 0; }
 <div class="pager" id="pager"></div>
 <script>
 // Product name lives here only. Change it once and every slide, the title and the pager follow.
-const PRODUCT = "Kindred";
+const PRODUCT = "CareCircle";
 for (const el of document.querySelectorAll(".product")) el.textContent = PRODUCT;
 document.title = `${PRODUCT} · Pitch`;
 const deck = document.getElementById("deck"), slides = [...document.querySelectorAll(".slide")], pager = document.getElementById("pager");
