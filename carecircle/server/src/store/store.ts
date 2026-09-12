@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import type { ConsentPolicyState } from '../consent/policy.js';
 import { createDefaultPolicy } from '../consent/policy.js';
 import type { AgentRunResult, ToolObservation } from '../types/domain.js';
+import type { CareCircleMemoryItem } from '../agent/memoryStore.js';
 
 export interface SessionState {
   sessionId: string;
@@ -27,6 +28,8 @@ export interface CareCircleStoreData {
   policies: Record<string, ConsentPolicyState>; // keyed by patientId
   runs: AgentRunResult[];
   toolLog: ToolObservation[];
+  /** Viewer+patient scoped UX memories (never raw protected clinical dumps). */
+  memories: CareCircleMemoryItem[];
 }
 
 export class CareCircleStore {
@@ -37,11 +40,27 @@ export class CareCircleStore {
     fs.mkdirSync(dataDir, { recursive: true });
     this.filePath = path.join(dataDir, 'store.json');
     if (fs.existsSync(this.filePath)) {
-      this.data = JSON.parse(fs.readFileSync(this.filePath, 'utf8')) as CareCircleStoreData;
+      const loaded = JSON.parse(fs.readFileSync(this.filePath, 'utf8')) as Partial<CareCircleStoreData>;
+      this.data = {
+        sessions: loaded.sessions || {},
+        policies: loaded.policies || {},
+        runs: loaded.runs || [],
+        toolLog: loaded.toolLog || [],
+        memories: loaded.memories || [],
+      };
     } else {
-      this.data = { sessions: {}, policies: {}, runs: [], toolLog: [] };
+      this.data = { sessions: {}, policies: {}, runs: [], toolLog: [], memories: [] };
       this.persist();
     }
+  }
+
+  listMemories(): CareCircleMemoryItem[] {
+    return this.data.memories || [];
+  }
+
+  saveMemories(items: CareCircleMemoryItem[]) {
+    this.data.memories = items.slice(-500);
+    this.persist();
   }
 
   private persist() {
@@ -97,10 +116,12 @@ export class CareCircleStore {
     if (patientId) {
       delete this.data.policies[patientId];
       this.data.runs = this.data.runs.filter((r) => r.patientId !== patientId);
+      this.data.memories = (this.data.memories || []).filter((m) => m.metadata.patientId !== patientId);
     } else {
       this.data.policies = {};
       this.data.runs = [];
       this.data.toolLog = [];
+      this.data.memories = [];
     }
     this.persist();
   }

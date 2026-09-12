@@ -205,6 +205,12 @@ export interface ToolObservation {
   evidenceCount?: number;
 }
 
+export interface MemorySnippet {
+  id: string;
+  kind: string;
+  text: string;
+}
+
 export interface AgentRunResult {
   runId: string;
   queryId: string;
@@ -216,4 +222,6 @@ export interface AgentRunResult {
   model: string;
   promptVersion: string;
   latencyMs: number;
+  memoriesUsed?: MemorySnippet[];
+  memoriesWritten?: MemorySnippet[];
 }

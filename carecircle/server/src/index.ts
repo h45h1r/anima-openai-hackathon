@@ -1,11 +1,15 @@
 import './env.js';
 import cors from 'cors';
 import express from 'express';
+import http from 'node:http';
 import path from 'node:path';
+import { WebSocketServer, type WebSocket } from 'ws';
 import { rootDir } from './env.js';
 import { AnimaClient, AnimaClientError, normalisePatientSearchResponse } from './anima/client.js';
 import { buildClinicalContext } from './anima/normalise.js';
 import { runAgentQuestion, suggestionsForViewer } from './agent/harness.js';
+import { ScopedMemoryService } from './agent/memoryStore.js';
+import type { AskStreamEvent } from './agent/events.js';
 import {
   clearResource,
   evaluateConsent,
@@ -18,6 +22,10 @@ import type { InformationClass } from './types/domain.js';
 
 const dataDir = path.resolve(rootDir, process.env.CARE_CIRCLE_DATA_DIR || './data');
 const store = new CareCircleStore(dataDir);
+const memoryService = new ScopedMemoryService({
+  initial: store.listMemories(),
+  persist: (items) => store.saveMemories(items),
+});
 const PORT = Number(process.env.PORT || 8787);
 const DEFAULT_BASE = process.env.ANIMA_BASE_URL || 'https://sim.animahacks.com';
 
@@ -56,6 +64,8 @@ app.get('/api/health', (_req, res) => {
     openaiModel: openaiConfigured ? process.env.OPENAI_MODEL || 'gpt-4o-mini' : null,
     animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY),
     animaTeamNameConfigured: Boolean(process.env.ANIMA_TEAM_NAME),
+    askTransport: ['rest', 'websocket'],
+    wsPath: '/ws/ask',
   });
 });
 
@@ -320,12 +330,16 @@ app.post('/api/ask', async (req, res) => {
       question,
       openaiApiKey: process.env.OPENAI_API_KEY,
       openaiModel: process.env.OPENAI_MODEL,
+      memory: memoryService,
+      onConsentUpdate: (next) => store.savePolicy(next),
     });
     store.addRun(run);
     res.json({
       freshness: context.fetchedAt,
       run,
       suggestions: suggestionsForViewer(context, store.getPolicy(patientId)!, authenticatedViewer),
+      memoriesUsed: run.memoriesUsed || [],
+      memoriesWritten: run.memoriesWritten || [],
     });
   } catch (err) {
     respondAnimaError(res, err);
@@ -575,7 +589,120 @@ function cryptoRandom() {
   return globalThis.crypto?.randomUUID?.() || `cc-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-app.listen(PORT, () => {
+async function executeAsk(input: {
+  session: NonNullable<ReturnType<typeof store.getSession>>;
+  patientId: string;
+  viewerId: string;
+  question: string;
+  onEvent?: (event: AskStreamEvent) => void;
+}) {
+  const client = clientFor(input.session);
+  const context = await loadContext(client, input.patientId, input.session);
+  const policy = store.ensurePolicy(input.patientId, input.session.selectedPatientName || input.patientId);
+  detectAndHoldNewResults(input.session.sessionId, input.patientId, context, policy);
+  const run = await runAgentQuestion({
+    client,
+    context,
+    policy: store.getPolicy(input.patientId)!,
+    viewerId: input.viewerId,
+    question: input.question,
+    openaiApiKey: process.env.OPENAI_API_KEY,
+    openaiModel: process.env.OPENAI_MODEL,
+    memory: memoryService,
+    onConsentUpdate: (next) => store.savePolicy(next),
+    onEvent: input.onEvent,
+  });
+  store.addRun(run);
+  const suggestions = suggestionsForViewer(context, store.getPolicy(input.patientId)!, input.viewerId);
+  return { context, run, suggestions };
+}
+
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server, path: '/ws/ask' });
+
+wss.on('connection', (socket: WebSocket, req) => {
+  const url = new URL(req.url || '/ws/ask', `http://${req.headers.host || 'localhost'}`);
+  const sid = url.searchParams.get('sessionId') || '';
+
+  const send = (event: AskStreamEvent) => {
+    if (socket.readyState === socket.OPEN) {
+      socket.send(JSON.stringify(event));
+    }
+  };
+
+  socket.on('message', async (raw) => {
+    try {
+      const msg = JSON.parse(String(raw)) as {
+        type?: string;
+        sessionId?: string;
+        patientId?: string;
+        viewerId?: string;
+        question?: string;
+      };
+      if (msg.type && msg.type !== 'ask') {
+        send({ type: 'error', message: 'unsupported_message', code: 'bad_request' });
+        return;
+      }
+      const sessionKey = msg.sessionId || sid;
+      const session = sessionKey ? store.getSession(sessionKey) : undefined;
+      if (!session?.animaApiKey) {
+        send({ type: 'error', message: 'Connect to Anima first.', code: 'disconnected' });
+        return;
+      }
+      const patientId = String(msg.patientId || session.selectedPatientId || '');
+      const question = String(msg.question || '').trim();
+      const viewerId = String(msg.viewerId || session.activeViewerId);
+      if (!patientId || session.selectedPatientId !== patientId) {
+        send({ type: 'error', message: 'Bind a patient before asking.', code: 'patient_mismatch' });
+        return;
+      }
+      if (!question) {
+        send({ type: 'error', message: 'question_required', code: 'bad_request' });
+        return;
+      }
+      if (viewerId !== session.activeViewerId) {
+        send({
+          type: 'error',
+          message: 'Viewer must match session. Use the viewer switcher.',
+          code: 'viewer_mismatch',
+        });
+        return;
+      }
+
+      send({ type: 'status', message: 'Connected — running Ask CareCircle…' });
+      const { run, suggestions } = await executeAsk({
+        session,
+        patientId,
+        viewerId,
+        question,
+        onEvent: (event) => {
+          // final is sent once below with suggestions
+          if (event.type !== 'final') send(event);
+        },
+      });
+      send({
+        type: 'final',
+        run,
+        memoriesUsed: run.memoriesUsed || [],
+        memoriesWritten: run.memoriesWritten || [],
+        suggestions,
+      });
+    } catch (err) {
+      const message =
+        err instanceof AnimaClientError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Ask failed';
+      send({ type: 'error', message, code: err instanceof AnimaClientError ? err.kind : 'internal' });
+    }
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`CareCircle API on http://localhost:${PORT}`);
-  console.log(`ANIMA_API_KEY: ${process.env.ANIMA_API_KEY ? 'set' : 'missing'} | OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'set' : 'missing'}`);
+  console.log(`Ask WebSocket ws://localhost:${PORT}/ws/ask`);
+  console.log(
+    `ANIMA_API_KEY: ${process.env.ANIMA_API_KEY ? 'set' : 'missing'} | OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'set' : 'missing'}`,
+  );
 });

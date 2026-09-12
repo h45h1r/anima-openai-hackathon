@@ -37,19 +37,28 @@ npm run dev
 
 \*Or paste the key / team name in the Connect screen.
 
+
+## Agent stack (hackathon MVP)
+
+- **OpenAI Responses API** via `@animahealth/adk/openai` (not Chat Completions). Direct `/v1/responses` is the only fallback.
+- **Prompt caching**: static system prefix is tagged `cacheable` + `prompt_cache_key` / explicit breakpoint; dynamic role, memories, and permitted evidence are appended *after* the cacheable prefix (see `server/src/agent/prompts.ts`).
+- **Slim skills (4)**: `get_permitted_evidence`, `appointment_assist`, `remember`, `update_consent` — consent/disclosure stay code-enforced.
+- **Memories**: ADK `memory()` + local embedder, scoped by `patientId` + `viewerId`. UX prefs only — clinical dumps are rejected.
+- **Streaming**: `ws://localhost:8787/ws/ask` emits `status` / `tool` / `token` / `final`. Ask UI prefers WS; REST `/api/ask` remains as fallback.
+
 ## Tests & evals
 
 ```bash
 npm test
 ```
 
-Covers consent leakage, held results, identity manipulation, grounding/visualisation equality, patient binding, booking safety.
+Covers consent leakage, held results, identity manipulation, grounding/visualisation equality, patient binding, booking safety, memory scoping.
 
 ## Judge demo journey
 
 1. Open http://localhost:5173/connect → paste Anima key (or team name) → **Connect**
 2. Search **Amira** / `SIM-000001` (or any returned patient) → Open
-3. **Ask CareCircle** a free-form question (e.g. latest blood tests / follow-up)
+3. **Ask CareCircle** a free-form question (e.g. latest blood tests / “I prefer afternoon appointments”) — watch WS streaming + “Remembered for next time”
 4. Open a **source** chip; inspect visualisation if measurements exist
 5. Switch viewer to **Sarah** then **Tom** → ask the same question
 6. As patient, open **People and access** → change a grant → Save → re-ask as Tom

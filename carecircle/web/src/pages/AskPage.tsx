@@ -35,9 +35,15 @@ export default function AskPage() {
         <p className="muted small">
           Answers retrieve live evidence for <strong>{app.session?.selectedPatientId}</strong>, apply consent for{' '}
           <strong>{app.session?.activeViewerId}</strong>, then explain with citations. Prompt identity claims are ignored.
+          {app.askTransport ? (
+            <>
+              {' '}
+              Transport: <strong>{app.askTransport === 'ws' ? 'WebSocket stream' : 'REST fallback'}</strong>.
+            </>
+          ) : null}
         </p>
 
-        {!run ? (
+        {!run && !busy ? (
           <div className="stack">
             <div className="section-title">Suggested from available records</div>
             <div className="pill-row">
@@ -51,12 +57,35 @@ export default function AskPage() {
         ) : null}
 
         {localError ? <div className="error-banner">{localError}</div> : null}
-        {busy ? <div className="info-banner">Retrieving evidence and checking consent…</div> : null}
+        {busy ? (
+          <div className="info-banner">
+            {app.askStatus || 'Retrieving evidence and checking consent…'}
+            {app.askStreamText ? (
+              <p className="stream-preview" style={{ marginTop: '0.75rem', whiteSpace: 'pre-wrap' }}>
+                {app.askStreamText}
+                <span className="stream-caret">▍</span>
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {run ? (
           <article className="answer">
             <h2>{run.answer.answer}</h2>
             {run.answer.policyNotice ? <div className="info-banner">{run.answer.policyNotice}</div> : null}
+            {(app.memoriesWritten?.length || run.memoriesWritten?.length) ? (
+              <div className="info-banner remembered">
+                Remembered for next time:{' '}
+                {(app.memoriesWritten?.length ? app.memoriesWritten : run.memoriesWritten)
+                  .map((m: { text: string }) => m.text)
+                  .join(' · ')}
+              </div>
+            ) : null}
+            {run.memoriesUsed?.length ? (
+              <p className="muted small">
+                Used prior memory: {run.memoriesUsed.map((m: { text: string }) => m.text).join(' · ')}
+              </p>
+            ) : null}
             {run.answer.facts?.length ? (
               <div>
                 <div className="section-title">What the record says</div>
@@ -126,6 +155,8 @@ export default function AskPage() {
                     policy: run.policy,
                     tools: run.tools,
                     latencyMs: run.latencyMs,
+                    memoriesUsed: run.memoriesUsed,
+                    memoriesWritten: run.memoriesWritten,
                   },
                   null,
                   2,
@@ -143,7 +174,7 @@ export default function AskPage() {
             id="ask"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="e.g. Explain my latest blood tests"
+            placeholder="e.g. Explain my latest blood tests — I prefer afternoon appointments"
           />
           <button type="submit" disabled={busy || !question.trim()}>
             {busy ? 'Working…' : 'Ask'}

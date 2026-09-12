@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { api } from './api';
+import { api, askViaWebSocket } from './api';
 
 export interface SessionView {
   sessionId: string;
@@ -36,6 +36,10 @@ export interface AppState {
   error: string | null;
   lastAnswer: any | null;
   sourceOpen: any | null;
+  askStatus: string | null;
+  askStreamText: string;
+  askTransport: 'ws' | 'rest' | null;
+  memoriesWritten: { id: string; kind: string; text: string }[];
 }
 
 interface AppContextValue extends AppState {
@@ -67,6 +71,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     error: null,
     lastAnswer: null,
     sourceOpen: null,
+    askStatus: null,
+    askStreamText: '',
+    askTransport: null,
+    memoriesWritten: [],
   });
 
   const sid = state.session?.sessionId || localStorage.getItem(SESSION_KEY);
@@ -198,21 +206,68 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const ask = useCallback(
     async (question: string) => {
-      if (!state.session?.selectedPatientId) throw new Error('Select a patient first');
-      const res = await api<any>('/api/ask', {
-        method: 'POST',
-        sessionId: sid,
-        body: JSON.stringify({
-          patientId: state.session.selectedPatientId,
-          viewerId: state.session.activeViewerId,
-          question,
-        }),
-      });
+      if (!state.session?.selectedPatientId || !sid) throw new Error('Select a patient first');
+      const patientId = state.session.selectedPatientId;
+      const viewerId = state.session.activeViewerId;
       setState((s) => ({
         ...s,
-        lastAnswer: res.run,
-        suggestions: res.suggestions || s.suggestions,
+        askStatus: 'Connecting…',
+        askStreamText: '',
+        askTransport: null,
+        memoriesWritten: [],
+        lastAnswer: null,
       }));
+
+      try {
+        const res = await askViaWebSocket(
+          { sessionId: sid, patientId, viewerId, question },
+          (event) => {
+            if (event.type === 'status') {
+              setState((s) => ({ ...s, askStatus: event.message, askTransport: 'ws' }));
+            } else if (event.type === 'tool') {
+              setState((s) => ({
+                ...s,
+                askStatus: `${event.tool}: ${event.detail || event.status}`,
+                askTransport: 'ws',
+              }));
+            } else if (event.type === 'token') {
+              setState((s) => ({
+                ...s,
+                askStreamText: s.askStreamText + event.text,
+                askStatus: 'Streaming answer…',
+                askTransport: 'ws',
+              }));
+            }
+          },
+        );
+        setState((s) => ({
+          ...s,
+          lastAnswer: res.run,
+          suggestions: res.suggestions || s.suggestions,
+          askStatus: null,
+          askStreamText: '',
+          askTransport: 'ws',
+          memoriesWritten: res.run?.memoriesWritten || [],
+        }));
+        return;
+      } catch {
+        // REST fallback when WS unavailable
+        setState((s) => ({ ...s, askStatus: 'Falling back to REST…', askTransport: 'rest' }));
+        const res = await api<any>('/api/ask', {
+          method: 'POST',
+          sessionId: sid,
+          body: JSON.stringify({ patientId, viewerId, question }),
+        });
+        setState((s) => ({
+          ...s,
+          lastAnswer: res.run,
+          suggestions: res.suggestions || s.suggestions,
+          askStatus: null,
+          askStreamText: '',
+          askTransport: 'rest',
+          memoriesWritten: res.run?.memoriesWritten || res.memoriesWritten || [],
+        }));
+      }
     },
     [sid, state.session?.selectedPatientId, state.session?.activeViewerId],
   );
