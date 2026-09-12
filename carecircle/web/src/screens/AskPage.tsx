@@ -1,11 +1,11 @@
+'use client';
+
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import ResultChart from '../components/ResultChart';
 import { useApp, type AskThreadMessage } from '../lib/state';
 
 export default function AskPage() {
   const app = useApp();
-  const location = useLocation();
   const [question, setQuestion] = useState('');
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -15,11 +15,12 @@ export default function AskPage() {
   const thread = app.askThread;
 
   useEffect(() => {
-    const draft = (location.state as { draftQuestion?: string } | null)?.draftQuestion;
-    if (draft && typeof draft === 'string') {
+    const draft = sessionStorage.getItem('carecircle.draftQuestion');
+    if (draft) {
       setQuestion(draft);
+      sessionStorage.removeItem('carecircle.draftQuestion');
     }
-  }, [location.state]);
+  }, []);
 
   useEffect(() => {
     threadEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -93,7 +94,7 @@ export default function AskPage() {
           {app.askTransport ? (
             <>
               {' '}
-              · <strong>{app.askTransport === 'ws' ? 'WebSocket' : 'REST'}</strong>
+              · <strong>{app.askTransport === 'sse' ? 'SSE' : 'REST'}</strong>
             </>
           ) : null}
           . Follow-ups like “what about potassium?” use this thread plus live evidence.

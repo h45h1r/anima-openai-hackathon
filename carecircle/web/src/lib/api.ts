@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '';
 
 export class ApiError extends Error {
   constructor(
@@ -12,12 +12,12 @@ export class ApiError extends Error {
   }
 }
 
-/** Semantic Ask/WS failures should not trigger REST fallback. */
+/** Semantic Ask/SSE failures should not trigger REST fallback. */
 export class AskClientError extends Error {
   constructor(
     message: string,
     public code?: string,
-    public transport: 'ws' | 'rest' = 'ws',
+    public transport: 'sse' | 'rest' = 'sse',
   ) {
     super(message);
     this.name = 'AskClientError';
@@ -29,7 +29,7 @@ export function isTransportFailure(err: unknown): boolean {
     return !err.code || err.code === 'transport';
   }
   if (!(err instanceof Error)) return true;
-  return /WebSocket|timed out|closed before|connection failed|Failed to fetch|NetworkError/i.test(err.message);
+  return /SSE|timed out|closed before|connection failed|Failed to fetch|NetworkError|stream/i.test(err.message);
 }
 
 export async function api<T>(
@@ -88,7 +88,7 @@ function humanizeCode(code: string): string {
   return map[code] || `Request failed (${code})`;
 }
 
-export type AskWsEvent =
+export type AskStreamEvent =
   | { type: 'status'; message: string }
   | { type: 'tool'; tool: string; status: 'ok' | 'error' | 'skipped'; detail?: string }
   | { type: 'stream_reset' }
@@ -102,17 +102,11 @@ export type AskWsEvent =
     }
   | { type: 'error'; message: string; code?: string };
 
-function wsUrl(path: string): string {
-  if (API_BASE) {
-    const base = API_BASE.replace(/^http/, 'ws');
-    return `${base.replace(/\/$/, '')}${path}`;
-  }
-  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${proto}//${window.location.host}${path}`;
-}
-
-/** Prefer WebSocket streaming; throw AskClientError for semantic failures, Error for transport. */
-export function askViaWebSocket(
+/**
+ * Prefer Kindred-style SSE (`text/event-stream`, `data: {json}\\n\\n`).
+ * POST body carries ask payload (EventSource is GET-only).
+ */
+export async function askViaSse(
   input: {
     sessionId: string;
     patientId: string;
@@ -120,69 +114,122 @@ export function askViaWebSocket(
     question: string;
     history?: { role: 'user' | 'assistant'; content: string }[];
   },
-  onEvent: (event: AskWsEvent) => void,
+  onEvent: (event: AskStreamEvent) => void,
 ): Promise<{ run: any; suggestions?: string[] }> {
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    const url = `${wsUrl('/ws/ask')}?sessionId=${encodeURIComponent(input.sessionId)}`;
-    let socket: WebSocket;
-    try {
-      socket = new WebSocket(url);
-    } catch (err) {
-      reject(err);
-      return;
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 90000);
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/ask/stream`, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        Accept: 'text/event-stream',
+        'Content-Type': 'application/json',
+        'x-carecircle-session': input.sessionId,
+      },
+      body: JSON.stringify({
+        patientId: input.patientId,
+        viewerId: input.viewerId,
+        question: input.question,
+        history: input.history || [],
+      }),
+    });
+  } catch (err) {
+    window.clearTimeout(timer);
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new Error('SSE ask timed out');
     }
+    throw new Error('SSE connection failed');
+  }
 
-    const fail = (err: Error) => {
-      if (settled) return;
+  if (!res.ok || !res.body) {
+    window.clearTimeout(timer);
+    const text = await res.text().catch(() => '');
+    try {
+      const j = JSON.parse(text) as { error?: string; message?: string };
+      throw new AskClientError(j.message || humanizeCode(j.error || 'internal'), j.error, 'sse');
+    } catch (e) {
+      if (e instanceof AskClientError) throw e;
+      throw new Error(`SSE ask failed (${res.status})`);
+    }
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let settled = false;
+  let finalResult: { run: any; suggestions?: string[] } | null = null;
+
+  const consumeDataLine = (data: string) => {
+    if (!data || data === '[DONE]') return;
+    const event = JSON.parse(data) as AskStreamEvent;
+    onEvent(event);
+    if (event.type === 'error') {
       settled = true;
-      try {
-        socket.close();
-      } catch {
-        /* ignore */
-      }
-      reject(err);
-    };
+      throw new AskClientError(event.message || humanizeCode(event.code || 'internal'), event.code, 'sse');
+    }
+    if (event.type === 'final') {
+      settled = true;
+      finalResult = { run: event.run, suggestions: event.suggestions };
+    }
+  };
 
-    const timer = window.setTimeout(() => fail(new Error('WebSocket ask timed out')), 90000);
-
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          type: 'ask',
-          sessionId: input.sessionId,
-          patientId: input.patientId,
-          viewerId: input.viewerId,
-          question: input.question,
-          history: input.history || [],
-        }),
-      );
-    };
-
-    socket.onerror = () => fail(new Error('WebSocket connection failed'));
-    socket.onclose = () => {
-      if (!settled) fail(new Error('WebSocket closed before final answer'));
-    };
-
-    socket.onmessage = (ev) => {
-      try {
-        const event = JSON.parse(String(ev.data)) as AskWsEvent;
-        onEvent(event);
-        if (event.type === 'error') {
-          window.clearTimeout(timer);
-          fail(new AskClientError(event.message || humanizeCode(event.code || 'internal'), event.code, 'ws'));
-          return;
+  try {
+    while (!settled) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n');
+      buffer = parts.pop() || '';
+      let dataLines: string[] = [];
+      for (const rawLine of parts) {
+        const line = rawLine.replace(/\r$/, '');
+        if (line.startsWith(':')) continue; // keepalive comment (Kindred-style)
+        if (line.startsWith('data:')) {
+          dataLines.push(line.slice(5).trimStart());
+          continue;
         }
-        if (event.type === 'final') {
-          window.clearTimeout(timer);
-          settled = true;
-          socket.close();
-          resolve({ run: event.run, suggestions: event.suggestions });
+        if (line === '' && dataLines.length) {
+          consumeDataLine(dataLines.join('\n'));
+          dataLines = [];
+          if (settled) break;
         }
-      } catch (err) {
-        window.clearTimeout(timer);
-        fail(err instanceof Error ? err : new Error('Bad WebSocket payload'));
       }
-    };
-  });
+      if (settled && dataLines.length === 0) break;
+      // If stream ended mid-event without blank line, flush remaining data lines after loop.
+      if (!settled) {
+        /* keep accumulating */
+      }
+    }
+    if (!settled && buffer.trim()) {
+      for (const rawLine of buffer.split('\n')) {
+        const line = rawLine.replace(/\r$/, '');
+        if (line.startsWith('data:')) {
+          consumeDataLine(line.slice(5).trimStart());
+        }
+      }
+    }
+  } catch (err) {
+    window.clearTimeout(timer);
+    try {
+      await reader.cancel();
+    } catch {
+      /* ignore */
+    }
+    throw err;
+  }
+
+  window.clearTimeout(timer);
+  try {
+    await reader.cancel();
+  } catch {
+    /* ignore */
+  }
+
+  if (!finalResult) {
+    throw new Error('SSE closed before final answer');
+  }
+  return finalResult;
 }

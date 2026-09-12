@@ -1,5 +1,7 @@
+'use client';
+
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { api, ApiError, AskClientError, askViaWebSocket, isTransportFailure } from './api';
+import { api, ApiError, AskClientError, askViaSse, isTransportFailure } from './api';
 
 /** Default live demo patient — only selected when Anima search returns this ID. */
 export const DEFAULT_PATIENT_ID = 'SIM-000001';
@@ -59,7 +61,7 @@ export interface AppState {
   sourceOpen: any | null;
   askStatus: string | null;
   askStreamText: string;
-  askTransport: 'ws' | 'rest' | null;
+  askTransport: 'sse' | 'rest' | null;
   memoriesWritten: { id: string; kind: string; text: string }[];
 }
 
@@ -90,6 +92,33 @@ interface AppContextValue extends AppState {
 const Ctx = createContext<AppContextValue | null>(null);
 const SESSION_KEY = 'carecircle.sessionId';
 
+function readStoredSessionId(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(SESSION_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredSessionId(id: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(SESSION_KEY, id);
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearStoredSessionId() {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function threadKey(patientId?: string, viewerId?: string) {
   return `${patientId || ''}::${viewerId || ''}`;
 }
@@ -113,7 +142,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     memoriesWritten: [],
   });
 
-  const sid = state.session?.sessionId || localStorage.getItem(SESSION_KEY);
+  const sid = state.session?.sessionId || readStoredSessionId();
   const selectLock = useRef(false);
   const threadScope = useRef('');
   const bootStarted = useRef(false);
@@ -125,7 +154,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         body: JSON.stringify(input),
       });
-      localStorage.setItem(SESSION_KEY, res.session.sessionId);
+      writeStoredSessionId(res.session.sessionId);
       threadScope.current = '';
       setState((s) => ({
         ...s,
@@ -220,7 +249,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const selectDefaultPatient = useCallback(
     async (sessionId?: string): Promise<BootstrapResult> => {
-      const activeSid = sessionId || localStorage.getItem(SESSION_KEY) || sid;
+      const activeSid = sessionId || readStoredSessionId() || sid;
       if (!activeSid) {
         setState((s) => ({ ...s, bootPhase: 'needs_key' }));
         return { outcome: 'needs_key' };
@@ -250,7 +279,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const hydrateFromSession = useCallback(async (session: SessionView): Promise<BootstrapResult> => {
-    localStorage.setItem(SESSION_KEY, session.sessionId);
+    writeStoredSessionId(session.sessionId);
     setState((s) => ({
       ...s,
       session,
@@ -308,7 +337,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         animaTeamNameConfigured?: boolean;
       }>('/api/health');
 
-      const existingSid = localStorage.getItem(SESSION_KEY);
+      const existingSid = readStoredSessionId();
       if (existingSid) {
         try {
           const restored = await api<{ session: SessionView }>('/api/session', { sessionId: existingSid });
@@ -316,7 +345,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             return await hydrateFromSession(restored.session);
           }
         } catch {
-          localStorage.removeItem(SESSION_KEY);
+          clearStoredSessionId();
         }
       }
 
@@ -436,7 +465,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         askThread: [...s.askThread, userMsg],
       }));
 
-      const finishOk = (res: { run: any; suggestions?: string[] }, transport: 'ws' | 'rest') => {
+      const finishOk = (res: { run: any; suggestions?: string[] }, transport: 'sse' | 'rest') => {
         const assistant: AskThreadMessage = {
           id: `a_${res.run?.runId || Date.now()}`,
           role: 'assistant',
@@ -456,52 +485,52 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
 
       try {
-        const res = await askViaWebSocket(
+        const res = await askViaSse(
           { sessionId: sid, patientId, viewerId, question, history },
           (event) => {
             if (event.type === 'status') {
               setState((s) => ({
                 ...s,
                 askStatus: calmAskStatus(event.message),
-                askTransport: 'ws',
+                askTransport: 'sse',
               }));
             } else if (event.type === 'tool') {
               setState((s) => ({
                 ...s,
                 askStatus: calmToolStatus(event.tool),
-                askTransport: 'ws',
+                askTransport: 'sse',
               }));
             } else if (event.type === 'stream_reset') {
               setState((s) => ({
                 ...s,
                 askStreamText: '',
                 askStatus: s.askStatus || 'Writing…',
-                askTransport: 'ws',
+                askTransport: 'sse',
               }));
             } else if (event.type === 'token') {
               setState((s) => ({
                 ...s,
                 askStreamText: s.askStreamText + event.text,
                 askStatus: 'Writing…',
-                askTransport: 'ws',
+                askTransport: 'sse',
               }));
             }
           },
         );
-        finishOk(res, 'ws');
+        finishOk(res, 'sse');
         return;
-      } catch (wsErr) {
-        if (wsErr instanceof AskClientError || !isTransportFailure(wsErr)) {
-          const message = wsErr instanceof Error ? wsErr.message : 'Ask failed';
+      } catch (sseErr) {
+        if (sseErr instanceof AskClientError || !isTransportFailure(sseErr)) {
+          const message = sseErr instanceof Error ? sseErr.message : 'Ask failed';
           setState((s) => ({
             ...s,
             askStatus: null,
             askStreamText: '',
-            askTransport: 'ws',
+            askTransport: 'sse',
             error: message,
             // Keep the user turn so they can retry; remove only if empty thread edge case.
           }));
-          throw wsErr instanceof Error ? wsErr : new Error(message);
+          throw sseErr instanceof Error ? sseErr : new Error(message);
         }
         setState((s) => ({ ...s, askStatus: 'Falling back to REST…', askTransport: 'rest' }));
         try {

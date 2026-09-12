@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
 import { useApp } from '../lib/state';
 import { Button, Card, fmtDay } from '../components/ui';
 
@@ -19,7 +21,7 @@ export default function HomePage() {
         </h1>
         <p className="muted">What would you like to understand or arrange?</p>
         <div className="pill-row">
-          <Link to={`/patient/${app.session?.selectedPatientId}/ask`}>
+          <Link href={`/patient/${app.session?.selectedPatientId}/ask`}>
             <Button type="button" variant="plum">
               Ask CareCircle
             </Button>

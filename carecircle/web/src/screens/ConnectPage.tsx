@@ -1,5 +1,7 @@
+'use client';
+
 import { FormEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { api } from '../lib/api';
 import { DEFAULT_ANIMA_BASE, DEFAULT_PATIENT_ID, useApp } from '../lib/state';
 import { Button, Card } from '../components/ui';
@@ -18,7 +20,7 @@ type HealthInfo = {
  */
 export default function ConnectPage() {
   const app = useApp();
-  const nav = useNavigate();
+  const nav = useRouter();
   const [apiKey, setApiKey] = useState('');
   const [teamName, setTeamName] = useState('');
   const [baseUrl, setBaseUrl] = useState(DEFAULT_ANIMA_BASE);
@@ -48,10 +50,10 @@ export default function ConnectPage() {
   async function finishAfterConnect() {
     const result = await app.selectDefaultPatient();
     if (result.outcome === 'ready') {
-      nav(`/patient/${result.patientId}`, { replace: true });
+      nav.replace(`/patient/${result.patientId}`);
       return;
     }
-    nav('/patients', { replace: true });
+    nav.replace('/patients');
   }
 
   async function connectWith(input: { apiKey?: string; teamName?: string; baseUrl?: string }) {
@@ -91,7 +93,7 @@ export default function ConnectPage() {
         {alreadyInApp ? (
           <p className="muted small" style={{ marginTop: '0.75rem' }}>
             Demo patient defaults to <strong>{DEFAULT_PATIENT_ID}</strong> after reconnect.{' '}
-            <button type="button" className="linkish" onClick={() => nav(`/patient/${app.session?.selectedPatientId}`)}>
+            <button type="button" className="linkish" onClick={() => nav.push(`/patient/${app.session?.selectedPatientId}`)}>
               Back to Home
             </button>
           </p>

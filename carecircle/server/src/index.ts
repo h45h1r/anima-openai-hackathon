@@ -1,9 +1,7 @@
 import './env.js';
 import cors from 'cors';
 import express from 'express';
-import http from 'node:http';
 import path from 'node:path';
-import { WebSocketServer, type WebSocket } from 'ws';
 import { rootDir } from './env.js';
 import { AnimaClient, AnimaClientError, normalisePatientSearchResponse } from './anima/client.js';
 import { buildClinicalContext } from './anima/normalise.js';
@@ -84,8 +82,8 @@ app.get('/api/health', (_req, res) => {
     openaiModel: openaiConfigured ? process.env.OPENAI_MODEL || 'gpt-4o-mini' : null,
     animaEnvKeyConfigured: Boolean(process.env.ANIMA_API_KEY),
     animaTeamNameConfigured: Boolean(process.env.ANIMA_TEAM_NAME),
-    askTransport: ['rest', 'websocket'],
-    wsPath: '/ws/ask',
+    askTransport: ['sse', 'rest'],
+    ssePath: '/api/ask/stream',
   });
 });
 
@@ -365,6 +363,95 @@ app.post('/api/ask', async (req, res) => {
     });
   } catch (err) {
     respondAnimaError(res, err);
+  }
+});
+
+/**
+ * Kindred-aligned Ask streaming: POST text/event-stream with `data: {AskStreamEvent}\n\n`
+ * (same event shapes as the former WS path; unnamed SSE frames like Kindred `/api/events`).
+ */
+app.post('/api/ask/stream', async (req, res) => {
+  const session = requireSession(req, res);
+  if (!session) return;
+
+  const patientId = String(req.body.patientId || session.selectedPatientId || '');
+  const question = String(req.body.question || '').trim();
+  const viewerId = String(req.body.viewerId || session.activeViewerId);
+  const authenticatedViewer = session.activeViewerId;
+
+  const send = (event: AskStreamEvent) => {
+    if (res.writableEnded) return;
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  };
+
+  const fail = (code: CareCircleErrorCode, status = 400) => {
+    if (!res.headersSent) {
+      res.status(status);
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+    }
+    send({ type: 'error', message: humanMessage(code), code });
+    res.end();
+  };
+
+  if (!patientId || session.selectedPatientId !== patientId) {
+    return fail(patientId ? 'patient_mismatch' : 'no_patient', 409);
+  }
+  if (!question) return fail('question_required', 400);
+  if (viewerId !== authenticatedViewer) return fail('viewer_mismatch', 400);
+
+  res.status(200);
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  if (typeof (res as express.Response & { flushHeaders?: () => void }).flushHeaders === 'function') {
+    (res as express.Response & { flushHeaders: () => void }).flushHeaders();
+  }
+
+  const keepalive = setInterval(() => {
+    if (res.writableEnded) return;
+    try {
+      res.write(`: ping\n\n`);
+    } catch {
+      /* closed */
+    }
+  }, 15000);
+
+  req.on('close', () => clearInterval(keepalive));
+
+  try {
+    send({ type: 'status', message: 'Retrieving…' });
+    const { run, suggestions } = await executeAsk({
+      session,
+      patientId,
+      viewerId: authenticatedViewer,
+      question,
+      history: sanitizeHistory(req.body.history),
+      onEvent: (event) => {
+        if (event.type !== 'final') send(event);
+      },
+    });
+    send({
+      type: 'final',
+      run,
+      memoriesUsed: run.memoriesUsed || [],
+      memoriesWritten: run.memoriesWritten || [],
+      suggestions,
+    });
+    clearInterval(keepalive);
+    res.end();
+  } catch (err) {
+    clearInterval(keepalive);
+    if (err instanceof AnimaClientError) {
+      send({ type: 'error', message: humanizeAnimaError(err), code: err.kind });
+      res.end();
+      return;
+    }
+    console.error(err);
+    send({ type: 'error', message: humanMessage('internal'), code: 'internal' });
+    res.end();
   }
 });
 
@@ -665,93 +752,9 @@ function mergeHistory(
   return base.slice(-6);
 }
 
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: '/ws/ask' });
-
-wss.on('connection', (socket: WebSocket, req) => {
-  const url = new URL(req.url || '/ws/ask', `http://${req.headers.host || 'localhost'}`);
-  const sid = url.searchParams.get('sessionId') || '';
-
-  const send = (event: AskStreamEvent) => {
-    if (socket.readyState === socket.OPEN) {
-      socket.send(JSON.stringify(event));
-    }
-  };
-
-  socket.on('message', async (raw) => {
-    try {
-      const msg = JSON.parse(String(raw)) as {
-        type?: string;
-        sessionId?: string;
-        patientId?: string;
-        viewerId?: string;
-        question?: string;
-        history?: { role: 'user' | 'assistant'; content: string }[];
-      };
-      if (msg.type && msg.type !== 'ask') {
-        send({ type: 'error', message: humanMessage('unsupported_message'), code: 'unsupported_message' });
-        return;
-      }
-      const sessionKey = msg.sessionId || sid;
-      const session = sessionKey ? store.getSession(sessionKey) : undefined;
-      if (!session?.animaApiKey) {
-        send({ type: 'error', message: humanMessage('disconnected'), code: 'disconnected' });
-        return;
-      }
-      const patientId = String(msg.patientId || session.selectedPatientId || '');
-      const question = String(msg.question || '').trim();
-      const viewerId = String(msg.viewerId || session.activeViewerId);
-      if (!patientId || session.selectedPatientId !== patientId) {
-        const code = patientId ? 'patient_mismatch' : 'no_patient';
-        send({ type: 'error', message: humanMessage(code), code });
-        return;
-      }
-      if (!question) {
-        send({ type: 'error', message: humanMessage('question_required'), code: 'question_required' });
-        return;
-      }
-      if (viewerId !== session.activeViewerId) {
-        send({
-          type: 'error',
-          message: humanMessage('viewer_mismatch'),
-          code: 'viewer_mismatch',
-        });
-        return;
-      }
-
-      send({ type: 'status', message: 'Retrieving…' });
-      const { run, suggestions } = await executeAsk({
-        session,
-        patientId,
-        viewerId,
-        question,
-        history: msg.history,
-        onEvent: (event) => {
-          // final is sent once below with suggestions
-          if (event.type !== 'final') send(event);
-        },
-      });
-      send({
-        type: 'final',
-        run,
-        memoriesUsed: run.memoriesUsed || [],
-        memoriesWritten: run.memoriesWritten || [],
-        suggestions,
-      });
-    } catch (err) {
-      if (err instanceof AnimaClientError) {
-        send({ type: 'error', message: humanizeAnimaError(err), code: err.kind });
-        return;
-      }
-      console.error(err);
-      send({ type: 'error', message: humanMessage('internal'), code: 'internal' });
-    }
-  });
-});
-
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`CareCircle API on http://localhost:${PORT}`);
-  console.log(`Ask WebSocket ws://localhost:${PORT}/ws/ask`);
+  console.log(`Ask SSE POST http://localhost:${PORT}/api/ask/stream`);
   console.log(
     `ANIMA_API_KEY: ${process.env.ANIMA_API_KEY ? 'set' : 'missing'} | OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'set' : 'missing'}`,
   );

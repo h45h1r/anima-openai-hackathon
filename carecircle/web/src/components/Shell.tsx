@@ -1,23 +1,39 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { useApp } from './lib/state';
-import ConnectPage from './pages/ConnectPage';
-import PatientsPage from './pages/PatientsPage';
-import HomePage from './pages/HomePage';
-import AskPage from './pages/AskPage';
-import CarePage from './pages/CarePage';
-import ResultsPage from './pages/ResultsPage';
-import PeoplePage from './pages/PeoplePage';
-import SourceDrawer from './components/SourceDrawer';
-import ViewerSwitcher from './components/ViewerSwitcher';
-import { Button, CareCircleMark, Pill } from './components/ui';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useApp } from '@/lib/state';
+import SourceDrawer from '@/components/SourceDrawer';
+import ViewerSwitcher from '@/components/ViewerSwitcher';
+import { Button, CareCircleMark, Pill } from '@/components/ui';
 
 type Tab = { to: string; label: string; end?: boolean; icon: React.ReactNode };
 
-function Shell({ children }: { children: React.ReactNode }) {
+function NavItem({
+  href,
+  end,
+  children,
+  className,
+}: {
+  href: string;
+  end?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const pathname = usePathname() || '';
+  const active = end ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+  return (
+    <Link href={href} className={`${className || ''} ${active ? 'active' : ''}`.trim()}>
+      {children}
+    </Link>
+  );
+}
+
+export function Shell({ children }: { children: React.ReactNode }) {
   const app = useApp();
-  const loc = useLocation();
-  const nav = useNavigate();
+  const pathname = usePathname();
+  const nav = useRouter();
   const patientId = app.session?.selectedPatientId;
   const base = patientId ? `/patient/${patientId}` : '';
   const connected = Boolean(app.session?.connected && patientId);
@@ -53,7 +69,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             type="button"
             className="brand-btn"
             aria-label="CareCircle home"
-            onClick={() => nav(connected ? base : '/')}
+            onClick={() => nav.push(connected ? base : '/')}
           >
             <span className="brand-mark">
               <CareCircleMark size={22} />
@@ -64,17 +80,14 @@ function Shell({ children }: { children: React.ReactNode }) {
           {tabs.length ? (
             <nav className="header-nav" aria-label="Primary">
               {tabs.map((t) => (
-                <NavLink key={t.to} to={t.to} end={t.end} className={({ isActive }) => (isActive ? 'active' : '')}>
+                <NavItem key={t.to} href={t.to} end={t.end}>
                   {t.icon}
                   {t.label}
-                </NavLink>
+                </NavItem>
               ))}
-              <NavLink
-                to="/patients"
-                className={({ isActive }) => (isActive || loc.pathname === '/patients' ? 'active' : '')}
-              >
+              <NavItem href="/patients" className={pathname === '/patients' ? 'active' : ''}>
                 Switch patient
-              </NavLink>
+              </NavItem>
             </nav>
           ) : null}
 
@@ -102,7 +115,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 variant="secondary"
                 size="sm"
                 className="switch-patient-mobile"
-                onClick={() => nav('/patients')}
+                onClick={() => nav.push('/patients')}
               >
                 Switch patient
               </Button>
@@ -126,7 +139,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                     role="menuitem"
                     onClick={() => {
                       setMenuOpen(false);
-                      nav('/connect');
+                      nav.push('/connect');
                     }}
                   >
                     Connection / API
@@ -137,7 +150,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                       role="menuitem"
                       onClick={() => {
                         setMenuOpen(false);
-                        nav('/patients');
+                        nav.push('/patients');
                       }}
                     >
                       Switch patient
@@ -173,7 +186,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 Dismiss
               </Button>
               {app.bootPhase === 'default_patient_missing' || !app.session?.selectedPatientId ? (
-                <Button variant="secondary" size="sm" type="button" onClick={() => nav('/patients')}>
+                <Button variant="secondary" size="sm" type="button" onClick={() => nav.push('/patients')}>
                   Switch patient
                 </Button>
               ) : app.session?.selectedPatientId ? (
@@ -201,10 +214,10 @@ function Shell({ children }: { children: React.ReactNode }) {
         <nav className="tabbar" aria-label="Primary">
           <div className="tabbar-grid" style={{ gridTemplateColumns: `repeat(${Math.min(tabs.length, 5)}, 1fr)` }}>
             {tabs.slice(0, 5).map((t) => (
-              <NavLink key={t.to} to={t.to} end={t.end} className={({ isActive }) => (isActive ? 'active' : '')}>
+              <NavItem key={t.to} href={t.to} end={t.end}>
                 {t.icon}
                 {t.label}
-              </NavLink>
+              </NavItem>
             ))}
           </div>
         </nav>
@@ -215,115 +228,16 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function BootingScreen() {
-  return (
-    <div className="boot-screen">
-      <span className="brand-mark" style={{ width: '3rem', height: '3rem' }}>
-        <CareCircleMark size={26} />
-      </span>
-      <p className="muted pulse-soft">Connecting to Anima and opening the demo patient…</p>
-    </div>
-  );
-}
-
-function EntryRedirect() {
-  const app = useApp();
-  if (app.bootPhase === 'idle' || app.bootPhase === 'booting') return <BootingScreen />;
-  if (app.bootPhase === 'needs_key') return <Navigate to="/connect" replace />;
-  if (app.bootPhase === 'default_patient_missing') return <Navigate to="/patients" replace />;
-  if (app.session?.selectedPatientId) {
-    return <Navigate to={`/patient/${app.session.selectedPatientId}`} replace />;
-  }
-  if (app.session?.connected) return <Navigate to="/patients" replace />;
-  return <Navigate to="/connect" replace />;
-}
-
-function RequireConnection({ children }: { children: React.ReactNode }) {
-  const app = useApp();
-  if (app.bootPhase === 'idle' || app.bootPhase === 'booting') return <BootingScreen />;
-  if (!app.session?.connected) return <Navigate to="/connect" replace />;
-  return <>{children}</>;
-}
-
-function RequirePatient({ children }: { children: React.ReactNode }) {
-  const app = useApp();
-  if (app.bootPhase === 'default_patient_missing') return <Navigate to="/patients" replace />;
-  if (!app.session?.selectedPatientId) return <Navigate to="/patients" replace />;
-  return <>{children}</>;
-}
-
-export default function App() {
-  return (
-    <Shell>
-      <Routes>
-        <Route path="/" element={<EntryRedirect />} />
-        <Route path="/connect" element={<ConnectPage />} />
-        <Route
-          path="/patients"
-          element={
-            <RequireConnection>
-              <PatientsPage />
-            </RequireConnection>
-          }
-        />
-        <Route
-          path="/patient/:id"
-          element={
-            <RequireConnection>
-              <RequirePatient>
-                <HomePage />
-              </RequirePatient>
-            </RequireConnection>
-          }
-        />
-        <Route
-          path="/patient/:id/ask"
-          element={
-            <RequireConnection>
-              <RequirePatient>
-                <AskPage />
-              </RequirePatient>
-            </RequireConnection>
-          }
-        />
-        <Route
-          path="/patient/:id/care"
-          element={
-            <RequireConnection>
-              <RequirePatient>
-                <CarePage />
-              </RequirePatient>
-            </RequireConnection>
-          }
-        />
-        <Route
-          path="/patient/:id/results"
-          element={
-            <RequireConnection>
-              <RequirePatient>
-                <ResultsPage />
-              </RequirePatient>
-            </RequireConnection>
-          }
-        />
-        <Route
-          path="/patient/:id/people"
-          element={
-            <RequireConnection>
-              <RequirePatient>
-                <PeoplePage />
-              </RequirePatient>
-            </RequireConnection>
-          }
-        />
-        <Route path="*" element={<EntryRedirect />} />
-      </Routes>
-    </Shell>
-  );
-}
-
 function iconProps(size = 18) {
-  return { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, 'aria-hidden': true as const };
+  return {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    'aria-hidden': true as const,
+  };
 }
 
 function HomeIcon() {
@@ -366,7 +280,10 @@ function PeopleIcon() {
     <svg {...iconProps()}>
       <circle cx="9" cy="9" r="3.2" />
       <circle cx="16.5" cy="10" r="2.4" />
-      <path d="M3.5 19c.7-3 2.8-4.5 5.5-4.5S13.8 16 14.5 19M14 15.2c1.6-.4 3.1.1 4.5 1.6" strokeLinecap="round" />
+      <path
+        d="M3.5 19c.7-3 2.8-4.5 5.5-4.5S13.8 16 14.5 19M14 15.2c1.6-.4 3.1.1 4.5 1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

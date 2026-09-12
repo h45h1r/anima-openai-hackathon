@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useState } from 'react';
 import ResultChart from '../components/ResultChart';
 import { useApp } from '../lib/state';

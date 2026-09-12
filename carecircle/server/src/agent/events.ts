@@ -1,6 +1,6 @@
 import type { AgentRunResult, MemorySnippet } from '../types/domain.js';
 
-/** Wire events for /ws/ask (and optional REST progress hooks). */
+/** Wire events for POST /api/ask/stream (SSE) and optional REST progress hooks. */
 export type AskStreamEvent =
   | { type: 'status'; message: string }
   | { type: 'tool'; tool: string; status: 'ok' | 'error' | 'skipped'; detail?: string }

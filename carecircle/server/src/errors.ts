@@ -1,6 +1,6 @@
 import { AnimaClientError, type AnimaErrorKind } from './anima/client.js';
 
-/** Short, judge-friendly copy for API + WebSocket surfaces. */
+/** Short, judge-friendly copy for API + SSE surfaces. */
 export const HUMAN_MESSAGES = {
   missing_session: 'Connect to Anima first.',
   disconnected: 'Not connected — reconnect to Anima.',
@@ -24,7 +24,7 @@ export const HUMAN_MESSAGES = {
   malformed: 'Anima returned an unexpected response — retry.',
   booking_not_submitted: 'Booking not submitted (API limitation or rejected slot).',
   unsupported_action: 'That action is not supported.',
-  unsupported_message: 'Unsupported WebSocket message.',
+  unsupported_message: 'Unsupported Ask stream message.',
   internal: 'Something went wrong in CareCircle — retry.',
 } as const;
 

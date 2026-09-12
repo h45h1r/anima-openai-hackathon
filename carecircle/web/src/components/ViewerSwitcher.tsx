@@ -1,3 +1,5 @@
+'use client';
+
 import { useApp } from '../lib/state';
 import { Button } from './ui';
 

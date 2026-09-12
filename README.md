@@ -8,13 +8,13 @@ The main app is the existing **Kindred** Next.js app in `web/`. Its Circle scree
 
 ## CareCircle (feature branch)
 
-[`carecircle/`](./carecircle/) is a patient-controlled family communication demo on synthetic Anima clinical data, with consent-gated answers and an optional OpenAI refine pass. It follows the Kindred design system (tokens, typography, layout patterns) while keeping its own Vite + API stack.
+[`carecircle/`](./carecircle/) is a patient-controlled family communication demo on synthetic Anima clinical data, with consent-gated answers and an optional OpenAI refine pass. It matches Kindred’s **Next.js App Router** + **SSE** coding language and design system, while keeping a separate Express API for live Anima ADK agents.
 
 ```bash
 cd carecircle
 cp .env.example .env   # add ANIMA_API_KEY; optional OPENAI_API_KEY
 npm install
-npm run dev            # API :8787 · web :5173
+npm run dev            # API :8787 · Next web :3112
 ```
 
 ## Start Kindred locally
@@ -57,7 +57,7 @@ The existing people and family relationships are demo configuration, not verifie
 | Directory | Purpose |
 | --- | --- |
 | `web/` | Active Kindred app, Circle, family views and agent tools |
-| `carecircle/` | CareCircle hackathon MVP (API + Vite web), design-system aligned |
+| `carecircle/` | CareCircle hackathon MVP (Express API + Next.js web, SSE Ask) |
 | `sim-app/` | Copied simulator frontend, local workflow API, consent service and tests |
 | `sim-app/deployment/` | Neon project metadata, migration verification and hosting configuration examples |
 | `replica/` | Read-only capture/import tools, SQL schema and database documentation |

@@ -1,11 +1,13 @@
+'use client';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { DEFAULT_PATIENT_ID, DEFAULT_PATIENT_NAME, useApp, type PatientSummary } from '../lib/state';
 import { Button, Card } from '../components/ui';
 
 export default function PatientsPage() {
   const app = useApp();
-  const nav = useNavigate();
+  const nav = useRouter();
   const [q, setQ] = useState('Amira');
   const [items, setItems] = useState<PatientSummary[]>([]);
   const [total, setTotal] = useState(0);
@@ -52,7 +54,7 @@ export default function PatientsPage() {
     setError(null);
     try {
       await app.selectPatient(id);
-      nav(`/patient/${id}`);
+      nav.push(`/patient/${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not open patient');
     } finally {
@@ -66,7 +68,7 @@ export default function PatientsPage() {
     setError(null);
     try {
       const result = await app.selectDefaultPatient();
-      if (result.outcome === 'ready') nav(`/patient/${result.patientId}`);
+      if (result.outcome === 'ready') nav.push(`/patient/${result.patientId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not open default patient');
     } finally {

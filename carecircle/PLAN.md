@@ -4,8 +4,8 @@
 Ship a polished vertical slice: connect to live Anima → select a returned patient (Amira Khan `SIM-000001` preferred) → ask grounded questions → inspect sources → visualise real measurements → switch family roles → edit consent → clarify appointments safely.
 
 ## Stack
-- **Web:** React + Vite + TypeScript
-- **API:** Node.js + Express + TypeScript
+- **Web:** Next.js 16 App Router + TypeScript (Kindred-aligned)
+- **API:** Node.js + Express + TypeScript (SSE Ask stream + REST fallback)
 - **Store:** JSON file / in-memory CareCircle store (consent, disclosure holds, agent traces)
 - **LLM:** OpenAI optional — deterministic grounded answers always; richer phrasing when `OPENAI_API_KEY` set
 - **Anima:** Server-side adapter only; key never in browser

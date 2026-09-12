@@ -1,5 +1,7 @@
+'use client';
+
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { api } from '../lib/api';
 import { useApp } from '../lib/state';
 import { Button, Card, fmtDay, fmtTime } from '../components/ui';
@@ -27,7 +29,7 @@ function isTaskOrStep(e: CareEvent) {
 
 export default function CarePage() {
   const app = useApp();
-  const nav = useNavigate();
+  const nav = useRouter();
   const events: CareEvent[] = app.context?.events || [];
   const [retrying, setRetrying] = useState(false);
   const [requesting, setRequesting] = useState(false);
@@ -67,7 +69,8 @@ export default function CarePage() {
 
   function goAsk(question: string) {
     if (!patientId) return;
-    nav(`/patient/${patientId}/ask`, { state: { draftQuestion: question } });
+    sessionStorage.setItem('carecircle.draftQuestion', question);
+    nav.push(`/patient/${patientId}/ask`);
   }
 
   async function requestAssist() {
