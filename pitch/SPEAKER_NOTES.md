@@ -124,6 +124,12 @@ Honesty: the right-hand column is what the demo shows across the app and the pro
 
 ---
 
+## Slides removed 12 Sep evening
+
+The demo, plan-fit and close slides were cut; the deck now ends on "What happens to Eleanor now" and the demo runs live after it. The demo script, the three plan quotes and the close line are kept below for the presenter.
+
+---
+
 ## Slide 5: The demo (90 seconds)
 
 **Script, while clicking**
