@@ -499,7 +499,7 @@ describe('grounding and visualisation', () => {
         { role: 'assistant', content: 'Latest liver (LFT) results include ALT 48 U/L.' },
       ],
     });
-    assert.ok(/People|sharing|consent|access/i.test(run.answer.answer));
+    assert.ok(/People|Circle|sharing|consent|access|Kindred/i.test(run.answer.answer));
     assert.ok(!/\bALT\b|LFT|48|ALP/i.test(run.answer.answer));
     assert.ok(!/afternoon appointment/i.test(run.answer.answer));
     assert.ok(!run.answer.facts.some((f) => /ALT|ALP/i.test(f.text)));

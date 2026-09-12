@@ -310,16 +310,16 @@ export function buildShareConsentAnswer(input: {
   const wantsDaughter = /\bdaughter\b/i.test(input.question);
   const who = wantsDaughter ? 'your daughter' : 'family or supporters';
   const answer = input.viewerIsPatient
-    ? `Sharing is controlled by you in People. You choose who can see appointments, results, and documents — nothing goes to ${who} unless you grant it. I can help adjust consent, or open People to change access.`
-    : `I can't change who has access from this viewer. Sharing and consent are controlled by the patient in People. Ask them to review access if they want to share more with ${who}.`;
+    ? `Sharing is controlled in Kindred Circle — three sharing levels (Everything, Only practical, Important updates). Nothing goes to ${who} unless you put them on a level. Open Circle in Kindred, or CareCircle’s Circle tab to adjust the Ask demo filter.`
+    : `I can't change who has access from this viewer. Kindred Circle owns sharing levels; the patient manages access there (or in CareCircle’s Circle tab for this Ask demo). Ask them to review access if they want to share more with ${who}.`;
   return {
     answer,
     facts: [],
     policyNotice: input.policyNotice || undefined,
     citations: [],
     escalation: input.viewerIsPatient
-      ? 'Open People to adjust who can see which topics.'
-      : 'Ask the patient to open People if they want to change sharing.',
+      ? 'Open Kindred Circle (or CareCircle → Circle) to change sharing levels.'
+      : 'Ask the patient to open Kindred Circle if they want to change sharing.',
   };
 }
 
@@ -354,7 +354,7 @@ export function buildDeterministicAnswer(input: {
       facts: [],
       policyNotice: input.policyNotice,
       citations: [],
-      escalation: 'Ask the patient to review People and access if they want to share more.',
+      escalation: 'Ask the patient to review Kindred Circle (sharing levels) if they want to share more.',
     };
   }
 

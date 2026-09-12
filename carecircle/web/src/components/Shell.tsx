@@ -55,7 +55,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         { to: `${base}/ask`, label: 'Ask', icon: <AskIcon /> },
         { to: `${base}/care`, label: 'My care', icon: <CareIcon /> },
         { to: `${base}/results`, label: 'Results', icon: <ResultsIcon /> },
-        { to: `${base}/people`, label: 'People', icon: <PeopleIcon /> },
+        { to: `${base}/people`, label: 'Circle', icon: <PeopleIcon /> },
       ]
     : [];
 

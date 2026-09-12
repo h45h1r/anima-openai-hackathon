@@ -81,6 +81,7 @@ interface AppContextValue extends AppState {
   setViewer: (viewerId: string) => Promise<void>;
   ask: (question: string) => Promise<void>;
   saveConsent: (viewerId: string, updates: Record<string, boolean>) => Promise<void>;
+  saveSharingLevel: (viewerId: string, sharingLevel: 'everything' | 'practical' | 'updates') => Promise<void>;
   setDisclosure: (resourceId: string, state: 'held' | 'cleared') => Promise<void>;
   advanceClock: (minutes?: number) => Promise<void>;
   openSource: (source: any | null) => void;
@@ -585,6 +586,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [sid, state.session?.selectedPatientId, state.policy],
   );
 
+  const saveSharingLevel = useCallback(
+    async (viewerId: string, sharingLevel: 'everything' | 'practical' | 'updates') => {
+      if (!state.session?.selectedPatientId || !state.policy) return;
+      try {
+        const res = await api<any>(`/api/consent/${state.session.selectedPatientId}`, {
+          method: 'PUT',
+          sessionId: sid,
+          body: JSON.stringify({
+            viewerId,
+            sharingLevel,
+            expectedVersion: state.policy.policyVersion,
+          }),
+        });
+        setState((s) => ({ ...s, policy: res.policy, lastAnswer: null, error: null }));
+      } catch (err) {
+        setState((s) => ({
+          ...s,
+          error: err instanceof Error ? err.message : 'Sharing level update failed',
+        }));
+        throw err;
+      }
+    },
+    [sid, state.session?.selectedPatientId, state.policy],
+  );
+
   const setDisclosure = useCallback(
     async (resourceId: string, dState: 'held' | 'cleared') => {
       if (!state.session?.selectedPatientId) return;
@@ -631,6 +657,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setViewer,
       ask,
       saveConsent,
+      saveSharingLevel,
       setDisclosure,
       advanceClock,
       openSource: (source) => setState((s) => ({ ...s, sourceOpen: source })),
@@ -649,6 +676,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setViewer,
       ask,
       saveConsent,
+      saveSharingLevel,
       setDisclosure,
       advanceClock,
       resetDemo,

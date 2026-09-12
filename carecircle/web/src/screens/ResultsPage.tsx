@@ -53,8 +53,8 @@ export default function ResultsPage() {
       <Card tone="plum">
         <h1 className="page-title">Results</h1>
         <p className="muted" style={{ marginBottom: 0 }}>
-          Consent blocks this — laboratory results are outside this viewer&apos;s CareCircle access. Switch to the
-          patient or update People and access.
+          Consent blocks this — laboratory results are outside this viewer&apos;s Kindred sharing level. Switch to the
+          patient or update Circle (sharing levels).
         </p>
       </Card>
     );

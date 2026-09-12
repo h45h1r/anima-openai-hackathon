@@ -8,10 +8,17 @@ import type {
   Measurement,
   NormalisedEvent,
   PolicyDecision,
-  Relationship,
   Viewer,
 } from '../types/domain.js';
 import { buildUserFacingPolicyNotice, patientFirstName } from './messages.js';
+import {
+  classesForLevel,
+  DEMO_CUSTOM_CLASS_SETS,
+  DEMO_VIEWER_LEVELS,
+  levelForClasses,
+  levelLabel,
+  type KindredSharingLevel,
+} from './kindredBridge.js';
 
 export const INFORMATION_CLASSES: InformationClass[] = [
   'appointments',
@@ -32,57 +39,59 @@ export interface ConsentPolicyState {
   grants: ConsentGrant[];
   disclosures: DisclosureEvent[];
   audit: { at: string; actor: string; message: string; policyVersion: number }[];
+  /** Kindred sharing level per family viewer — authority model for access. */
+  sharingLevels?: Record<string, KindredSharingLevel>;
 }
 
-const DEFAULT_MATRIX: Record<Relationship, Partial<Record<InformationClass, boolean>>> = {
-  self: Object.fromEntries(INFORMATION_CLASSES.map((c) => [c, true])) as Record<InformationClass, boolean>,
-  full_care_proxy: {
-    appointments: true,
-    logistics: true,
-    tasks: true,
-    treatment_summary: true,
-    symptoms: true,
-    laboratory_results: true,
-    clinical_documents: true,
-    medications: true,
-    private_notes: false,
-  },
-  practical_supporter: {
-    appointments: true,
-    logistics: true,
-    tasks: true,
-    treatment_summary: false,
-    symptoms: true,
-    laboratory_results: false,
-    clinical_documents: false,
-    medications: true,
-    private_notes: false,
-  },
-  family_member: {
-    appointments: true,
-    logistics: true,
-    tasks: false,
-    treatment_summary: false,
-    symptoms: false,
-    laboratory_results: false,
-    clinical_documents: false,
-    medications: false,
-    private_notes: false,
-  },
-  clinician_reviewer: Object.fromEntries(INFORMATION_CLASSES.map((c) => [c, true])) as Record<InformationClass, boolean>,
-};
+const SELF_MATRIX = Object.fromEntries(INFORMATION_CLASSES.map((c) => [c, true])) as Record<
+  InformationClass,
+  boolean
+>;
 
 export function createDefaultPolicy(patientId: string, patientName: string): ConsentPolicyState {
   const viewers: Viewer[] = [
     { viewerId: 'patient', patientId, displayName: patientName, relationship: 'self', status: 'active' },
-    { viewerId: 'sarah', patientId, displayName: 'Sarah (care proxy)', relationship: 'full_care_proxy', status: 'active' },
-    { viewerId: 'john', patientId, displayName: 'John (practical support)', relationship: 'practical_supporter', status: 'active' },
-    { viewerId: 'tom', patientId, displayName: 'Tom (extended family)', relationship: 'family_member', status: 'active' },
+    {
+      viewerId: 'sarah',
+      patientId,
+      displayName: `Sarah · ${levelLabel('everything')}`,
+      relationship: 'full_care_proxy',
+      status: 'active',
+    },
+    {
+      viewerId: 'john',
+      patientId,
+      displayName: `John · ${levelLabel('practical')}`,
+      relationship: 'practical_supporter',
+      status: 'active',
+    },
+    {
+      viewerId: 'tom',
+      patientId,
+      displayName: 'Tom · Custom',
+      relationship: 'family_member',
+      status: 'active',
+    },
   ];
+  const sharingLevels: Record<string, KindredSharingLevel> = {};
+  for (const [id, level] of Object.entries(DEMO_VIEWER_LEVELS)) {
+    if (level) sharingLevels[id] = level;
+  }
   const grants: ConsentGrant[] = [];
   let version = 1;
   for (const viewer of viewers) {
-    const matrix = DEFAULT_MATRIX[viewer.relationship];
+    let matrix: Record<InformationClass, boolean>;
+    if (viewer.relationship === 'self') {
+      matrix = SELF_MATRIX;
+    } else if (sharingLevels[viewer.viewerId]) {
+      matrix = classesForLevel(sharingLevels[viewer.viewerId]);
+    } else {
+      const custom = new Set(DEMO_CUSTOM_CLASS_SETS[viewer.viewerId] || []);
+      matrix = Object.fromEntries(INFORMATION_CLASSES.map((c) => [c, custom.has(c)])) as Record<
+        InformationClass,
+        boolean
+      >;
+    }
     for (const infoClass of INFORMATION_CLASSES) {
       grants.push({
         grantId: nanoid(8),
@@ -103,11 +112,13 @@ export function createDefaultPolicy(patientId: string, patientName: string): Con
     viewers,
     grants,
     disclosures: [],
+    sharingLevels,
     audit: [
       {
         at: new Date().toISOString(),
         actor: 'system',
-        message: 'Initial CareCircle demo consent presets created (editable prototype data).',
+        message:
+          'Kindred-aligned sharing levels seeded for Ask filtering (Everything / Only practical / Important updates). Edit access in Kindred Circle; use Circle here only for the Ask demo filter.',
         policyVersion: version,
       },
     ],
@@ -189,10 +200,21 @@ export function updateGrants(
       revokedAt: updates[g.informationClass] === false ? new Date().toISOString() : undefined,
     };
   });
+  const allowed = grants
+    .filter((g) => g.viewerId === viewerId && g.allowed && !g.revokedAt)
+    .map((g) => g.informationClass);
+  const inferred = levelForClasses(allowed);
+  const sharingLevels = { ...(policy.sharingLevels || {}) };
+  if (inferred === 'everything' || inferred === 'practical' || inferred === 'updates') {
+    sharingLevels[viewerId] = inferred;
+  } else {
+    delete sharingLevels[viewerId];
+  }
   return {
     ...policy,
     policyVersion: nextVersion,
     grants,
+    sharingLevels,
     audit: [
       ...policy.audit,
       {
@@ -203,6 +225,54 @@ export function updateGrants(
       },
     ],
   };
+}
+
+/** Primary access write path: Kindred sharing level → CareCircle class grants. */
+export function updateSharingLevel(
+  policy: ConsentPolicyState,
+  viewerId: string,
+  level: KindredSharingLevel,
+  expectedVersion: number,
+  actor: string,
+): ConsentPolicyState {
+  if (viewerId === 'patient') {
+    throw new Error('Cannot set a sharing level on the patient self viewer.');
+  }
+  if (!policy.viewers.some((v) => v.viewerId === viewerId && v.status === 'active')) {
+    throw new Error('Unknown viewer for this CareCircle.');
+  }
+  const updates = classesForLevel(level);
+  const next = updateGrants(policy, viewerId, updates, expectedVersion, actor);
+  const viewers = next.viewers.map((v) =>
+    v.viewerId === viewerId ? { ...v, displayName: `${v.displayName.split(' · ')[0]} · ${levelLabel(level)}` } : v,
+  );
+  return {
+    ...next,
+    viewers,
+    sharingLevels: { ...(next.sharingLevels || {}), [viewerId]: level },
+    audit: [
+      ...next.audit.slice(0, -1),
+      {
+        at: new Date().toISOString(),
+        actor,
+        message: `Set Kindred sharing level for ${viewerId} to ${levelLabel(level)}`,
+        policyVersion: next.policyVersion,
+      },
+    ],
+  };
+}
+
+export function viewerSharingLevel(
+  policy: ConsentPolicyState,
+  viewerId: string,
+): ReturnType<typeof levelForClasses> {
+  if (viewerId === 'patient') return 'everything';
+  const stored = policy.sharingLevels?.[viewerId];
+  if (stored) return stored;
+  const allowed = policy.grants
+    .filter((g) => g.viewerId === viewerId && g.allowed && !g.revokedAt)
+    .map((g) => g.informationClass);
+  return levelForClasses(allowed);
 }
 
 export interface EvidenceItem {

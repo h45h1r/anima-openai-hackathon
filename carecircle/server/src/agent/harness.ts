@@ -22,6 +22,7 @@ import {
   evaluateConsent,
   filterEvidence,
   updateGrants,
+  updateSharingLevel,
   type ConsentPolicyState,
   type EvidenceItem,
 } from '../consent/policy.js';
@@ -232,11 +233,12 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
   const updateConsentTool = app.tool({
     name: 'update_consent',
     description:
-      'Patient-only: update an information-class grant for a family viewer. Rejected for non-patient viewers.',
+      'Patient-only: set a Kindred sharing level (everything | practical | updates) for a family viewer. Prefer levels over raw class toggles. Rejected for non-patient viewers.',
     schema: z.object({
       targetViewerId: z.string(),
-      informationClass: z.string(),
-      allowed: z.boolean(),
+      sharingLevel: z.enum(['everything', 'practical', 'updates']).optional(),
+      informationClass: z.string().optional(),
+      allowed: z.boolean().optional(),
     }),
     execute: (ctx) => {
       const t0 = Date.now();
@@ -251,26 +253,30 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         return { ok: false, error: 'only_patient_may_edit_consent' };
       }
       try {
-        const next = updateGrants(
-          bag.policy,
-          ctx.args.targetViewerId,
-          { [ctx.args.informationClass as InformationClass]: ctx.args.allowed },
-          bag.policy.policyVersion,
-          'patient',
-        );
+        const level = ctx.args.sharingLevel;
+        const next =
+          level === 'everything' || level === 'practical' || level === 'updates'
+            ? updateSharingLevel(bag.policy, ctx.args.targetViewerId, level, bag.policy.policyVersion, 'patient')
+            : updateGrants(
+                bag.policy,
+                ctx.args.targetViewerId,
+                {
+                  [ctx.args.informationClass as InformationClass]: Boolean(ctx.args.allowed),
+                },
+                bag.policy.policyVersion,
+                'patient',
+              );
         bag.policy = next;
         input.onConsentUpdate?.(next);
-        emit({
-          type: 'tool',
-          tool: 'update_consent',
-          status: 'ok',
-          detail: `${ctx.args.targetViewerId}:${ctx.args.informationClass}=${ctx.args.allowed}`,
-        });
+        const detail = level
+          ? `${ctx.args.targetViewerId}:level=${level}`
+          : `${ctx.args.targetViewerId}:${ctx.args.informationClass}=${ctx.args.allowed}`;
+        emit({ type: 'tool', tool: 'update_consent', status: 'ok', detail });
         appendTrace(ctx, {
           tool: 'update_consent',
           status: 'ok',
           latencyMs: Date.now() - t0,
-          detail: `${ctx.args.targetViewerId} ${ctx.args.informationClass}=${ctx.args.allowed}`,
+          detail,
         });
         return { ok: true, policyVersion: next.policyVersion };
       } catch (err) {

@@ -189,14 +189,15 @@ export default function AskPage() {
       <div className="panel stack">
         <div className="section-title">Who can see what</div>
         <p className="muted small" style={{ marginTop: 0 }}>
-          Snapshot of consent and grounding for this ask — not a second copy of the answer. Open Sources under a reply for cited records.
+          Ask filter for this viewer — Kindred Circle owns real access (Everything / Only practical / Important
+          updates). Open Circle to change the demo level.
         </p>
 
         <div className="context-card">
           <div className="muted small">Active viewer</div>
           <strong>
             {viewer?.displayName || viewerId}
-            {viewer?.relationship ? ` · ${viewer.relationship}` : ''}
+            {viewer?.sharingLevel ? ` · ${viewer.sharingLevel}` : viewer?.relationship ? ` · ${viewer.relationship}` : ''}
           </strong>
         </div>
 
@@ -265,7 +266,8 @@ export default function AskPage() {
 
         <div className="section-title">Consent check</div>
         <p className="muted small">
-          Switch the viewer above, then ask again — the thread resets per viewer so Tom cannot inherit Sarah’s answers.
+          Switch the Ask persona above, then ask again — the thread resets per viewer. Change levels under{' '}
+          <strong>Circle</strong> (Kindred-aligned), not a class matrix.
         </p>
       </div>
     </div>

@@ -13,8 +13,11 @@ import {
   evaluateConsent,
   holdResource,
   updateGrants,
+  updateSharingLevel,
+  viewerSharingLevel,
   type ConsentPolicyState,
 } from './consent/policy.js';
+import type { KindredSharingLevel } from './consent/kindredBridge.js';
 import {
   animaStatusForKind,
   humanMessage,
@@ -284,12 +287,18 @@ app.put('/api/consent/:patientId', (req, res) => {
   }
   try {
     const policy = store.ensurePolicy(req.params.patientId, session.selectedPatientName || req.params.patientId);
-    const { viewerId, updates, expectedVersion } = req.body as {
+    const { viewerId, sharingLevel, updates, expectedVersion } = req.body as {
       viewerId: string;
-      updates: Partial<Record<InformationClass, boolean>>;
+      /** Preferred: Kindred sharing level (Everything / Only practical / Important updates). */
+      sharingLevel?: KindredSharingLevel;
+      /** Legacy class map — still accepted for evals/smoke; UI uses sharingLevel. */
+      updates?: Partial<Record<InformationClass, boolean>>;
       expectedVersion: number;
     };
-    const next = updateGrants(policy, viewerId, updates || {}, Number(expectedVersion), 'patient');
+    const next =
+      sharingLevel === 'everything' || sharingLevel === 'practical' || sharingLevel === 'updates'
+        ? updateSharingLevel(policy, viewerId, sharingLevel, Number(expectedVersion), 'patient')
+        : updateGrants(policy, viewerId, updates || {}, Number(expectedVersion), 'patient');
     store.savePolicy(next);
     res.json({ policy: publicPolicy(next) });
   } catch {
@@ -548,10 +557,16 @@ app.get('/api/runs', (req, res) => {
 });
 
 function publicPolicy(policy: ConsentPolicyState) {
+  const family = policy.viewers.filter((v) => v.viewerId !== 'patient');
   return {
     patientId: policy.patientId,
     policyVersion: policy.policyVersion,
-    viewers: policy.viewers,
+    accessModel: 'kindred_sharing_levels',
+    viewers: policy.viewers.map((v) => ({
+      ...v,
+      sharingLevel: viewerSharingLevel(policy, v.viewerId),
+    })),
+    sharingLevels: Object.fromEntries(family.map((v) => [v.viewerId, viewerSharingLevel(policy, v.viewerId)])),
     grants: policy.grants.map((g) => ({
       viewerId: g.viewerId,
       informationClass: g.informationClass,

@@ -62,15 +62,27 @@ export default function HomePage() {
           )}
         </Card>
         <Card className="stack">
-          <div className="section-title">People helping</div>
-          {people.map((p: any) => (
+          <div className="section-title">Circle (Ask demo)</div>
+          <p className="muted small" style={{ marginTop: 0 }}>
+            Kindred Circle owns real access. These personas only drive CareCircle Ask filtering.
+          </p>
+          {people.map((p: { viewerId: string; displayName: string; sharingLevel?: string; relationship: string }) => (
             <div key={p.viewerId} className="list-item">
               <div>
                 <strong className="font-display">{p.displayName}</strong>
-                <div className="muted small">{p.relationship.replaceAll('_', ' ')}</div>
+                <div className="muted small">
+                  {p.sharingLevel && p.sharingLevel !== 'custom'
+                    ? `Kindred level · ${p.sharingLevel}`
+                    : p.relationship.replaceAll('_', ' ')}
+                </div>
               </div>
             </div>
           ))}
+          <Link href={`/patient/${app.session?.selectedPatientId}/people`}>
+            <Button type="button" variant="secondary" size="sm">
+              Open Circle
+            </Button>
+          </Link>
           <div className="section-title">Record classes returned</div>
           <div className="pill-row">
             {(app.context?.recordClasses || []).map((c: string) => (

@@ -10,8 +10,13 @@ The main app is the existing **Kindred** Next.js app in `web/`. Its Circle scree
 
 | Surface | Path | Ports | Role |
 | --- | --- | --- | --- |
-| **Kindred** (core) | `web/` + `sim-app/` | web **:3111**, sim **:4192** | Design-system app, Circle consent, companion backend on main |
-| **CareCircle** (MVP demo) | `carecircle/` | web **:3112**, API **:8787** | Clinical Ask / consent / results stack on live Anima; separate Express API |
+| **Kindred** (core) | `web/` + `sim-app/` | web **:3111**, sim **:4192** | Design-system app, **Circle consent / sharing levels**, companion backend on main |
+| **CareCircle** (MVP demo) | `carecircle/` | web **:3112**, API **:8787** | Clinical **Ask / Results** on live Anima; Ask filter maps Kindred levels — not a competing access product |
+
+### Who owns what
+
+- **Kindred owns people / access / control** — Circle diagram, three sharing levels (Everything / Only practical / Important updates), dynamic family members, `?as=` personas, companion Postgres consent.
+- **CareCircle owns Ask / clinical demo** — grounded answers, disclosure holds, Results, My care. Its Circle tab mirrors Kindred levels for Ask filtering and deep-links to Kindred Circle; it does **not** present the old class matrix as primary access UX.
 
 This PR lands CareCircle as a portable stack beside Kindred. It does **not** rewrite Ask into Kindred Next routes or replace Kindred consent/GP flows.
 
@@ -26,7 +31,9 @@ npm install
 npm run dev            # API :8787 · Next web :3112
 ```
 
-See [`carecircle/README.md`](./carecircle/README.md) for env vars, demos (patient Amira), Ask streaming, consent/results, and evals.
+Open CareCircle at [http://localhost:3112](http://localhost:3112). For access control, open Kindred Circle at [http://localhost:3111/?tab=circle](http://localhost:3111/?tab=circle) (or CareCircle → **Circle**, which links there).
+
+See [`carecircle/README.md`](./carecircle/README.md) for env vars, demos (patient Amira), Ask streaming, and evals.
 
 ## Start Kindred locally
 

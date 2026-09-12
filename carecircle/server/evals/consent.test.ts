@@ -5,6 +5,8 @@ import {
   evaluateConsent,
   holdResource,
   updateGrants,
+  updateSharingLevel,
+  viewerSharingLevel,
   type EvidenceItem,
 } from '../src/consent/policy.js';
 import { assertHumanPolicyCopy, buildUserFacingPolicyNotice } from '../src/consent/messages.js';
@@ -80,6 +82,23 @@ describe('consent policy', () => {
     assert.equal(decision.outcome, 'deny');
     assert.deepEqual(decision.allowedEvidenceIds, []);
     assert.ok(!JSON.stringify(decision).includes('99'));
+  });
+
+  it('maps Kindred sharing levels onto Ask grants', () => {
+    let policy = createDefaultPolicy('SIM-000001', 'Amira Khan');
+    assert.equal(viewerSharingLevel(policy, 'sarah'), 'everything');
+    assert.equal(viewerSharingLevel(policy, 'john'), 'practical');
+    assert.equal(viewerSharingLevel(policy, 'tom'), 'custom');
+
+    policy = updateSharingLevel(policy, 'tom', 'updates', policy.policyVersion, 'patient');
+    assert.equal(viewerSharingLevel(policy, 'tom'), 'updates');
+    const decision = evaluateConsent({
+      policy,
+      viewerId: 'tom',
+      evidence: [meas({ evidenceId: 'e1', resourceId: 'r1', value: 12 })],
+    });
+    assert.equal(decision.outcome, 'allow');
+    assert.ok(decision.allowedEvidenceIds.includes('e1'));
   });
 
   it('holds newly disclosed results for Sarah even with grant', () => {
