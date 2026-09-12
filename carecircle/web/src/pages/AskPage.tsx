@@ -77,7 +77,7 @@ export default function AskPage() {
   return (
     <div className="grid-2">
       <div className="panel stack">
-        <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>Ask CareCircle</h1>
+        <h1 className="page-title">Ask CareCircle</h1>
         <p className="muted small">
           Conversation for <strong>{app.session?.selectedPatientName || app.session?.selectedPatientId}</strong>,
           filtered for <strong>{viewerId}</strong>
@@ -117,11 +117,7 @@ export default function AskPage() {
           </div>
         ) : null}
 
-        {busy && !streamingText ? (
-          <div className="info-banner">{app.askStatus || 'Retrieving evidence and checking consent…'}</div>
-        ) : null}
-
-        {thread.length || streamingText ? (
+        {thread.length || streamingText || busy ? (
           <div className="ask-thread" aria-live="polite">
             {thread.map((msg) => (
               <ThreadBubble
@@ -140,6 +136,13 @@ export default function AskPage() {
                 <div className="answer-prose" style={{ whiteSpace: 'pre-wrap' }}>
                   {streamingText}
                   <span className="stream-caret">▍</span>
+                </div>
+              </div>
+            ) : busy ? (
+              <div className="thread-bubble assistant">
+                <div className="thread-role">CareCircle</div>
+                <div className="muted small" style={{ margin: 0 }}>
+                  {app.askStatus || 'Retrieving…'}
                 </div>
               </div>
             ) : null}
@@ -289,7 +292,7 @@ function ThreadBubble({
   return (
     <div className="thread-bubble assistant">
       <div className="thread-role">CareCircle</div>
-      <div className="answer-prose" style={{ whiteSpace: 'pre-wrap', fontSize: '1.05rem', lineHeight: 1.45 }}>
+      <div className="answer-prose" style={{ whiteSpace: 'pre-wrap' }}>
         {msg.text}
       </div>
 

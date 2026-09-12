@@ -91,6 +91,7 @@ function humanizeCode(code: string): string {
 export type AskWsEvent =
   | { type: 'status'; message: string }
   | { type: 'tool'; tool: string; status: 'ok' | 'error' | 'skipped'; detail?: string }
+  | { type: 'stream_reset' }
   | { type: 'token'; text: string }
   | {
       type: 'final';

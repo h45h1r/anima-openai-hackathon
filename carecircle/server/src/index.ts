@@ -719,7 +719,7 @@ wss.on('connection', (socket: WebSocket, req) => {
         return;
       }
 
-      send({ type: 'status', message: 'Connected — running Ask CareCircle…' });
+      send({ type: 'status', message: 'Retrieving…' });
       const { run, suggestions } = await executeAsk({
         session,
         patientId,

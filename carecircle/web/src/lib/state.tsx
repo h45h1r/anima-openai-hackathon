@@ -303,18 +303,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           { sessionId: sid, patientId, viewerId, question, history },
           (event) => {
             if (event.type === 'status') {
-              setState((s) => ({ ...s, askStatus: event.message, askTransport: 'ws' }));
+              setState((s) => ({
+                ...s,
+                askStatus: calmAskStatus(event.message),
+                askTransport: 'ws',
+              }));
             } else if (event.type === 'tool') {
               setState((s) => ({
                 ...s,
-                askStatus: `${event.tool}: ${event.detail || event.status}`,
+                askStatus: calmToolStatus(event.tool),
+                askTransport: 'ws',
+              }));
+            } else if (event.type === 'stream_reset') {
+              setState((s) => ({
+                ...s,
+                askStreamText: '',
+                askStatus: s.askStatus || 'Writing…',
                 askTransport: 'ws',
               }));
             } else if (event.type === 'token') {
               setState((s) => ({
                 ...s,
                 askStreamText: s.askStreamText + event.text,
-                askStatus: 'Streaming answer…',
+                askStatus: 'Writing…',
                 askTransport: 'ws',
               }));
             }
@@ -462,4 +473,41 @@ export function useApp() {
   const v = useContext(Ctx);
   if (!v) throw new Error('AppProvider missing');
   return v;
+}
+
+/** Map server status strings to calm, judge-friendly copy (never tool dumps). */
+function calmAskStatus(message: string): string {
+  const m = String(message || '').trim();
+  if (!m) return 'Retrieving…';
+  if (/^ADK:/i.test(m) || /^Tool:/i.test(m)) return 'Checking…';
+  if (/retriev|prepar|connect|evidence|context/i.test(m)) return 'Retrieving…';
+  if (/consent|disclosure/i.test(m)) return 'Checking consent…';
+  if (/appoint/i.test(m)) return 'Checking appointments…';
+  if (/writ|stream|ask|openai|refine|model/i.test(m)) return 'Writing…';
+  if (/prefer|remember|memory/i.test(m)) return 'Checking preferences…';
+  // Already calm short messages from the server
+  if (/^(Retrieving|Checking|Writing|Saving|Updating)/i.test(m)) return m.replace(/\.\.\.$/, '…');
+  return 'Working…';
+}
+
+function calmToolStatus(tool: string): string {
+  switch (tool) {
+    case 'patient.context.read':
+      return 'Retrieving…';
+    case 'consent.evaluate':
+      return 'Checking consent…';
+    case 'memory.recall':
+      return 'Checking preferences…';
+    case 'appointment_assist':
+      return 'Checking appointments…';
+    case 'answer.generate':
+    case 'answer.refine':
+      return 'Writing…';
+    case 'remember':
+      return 'Saving preference…';
+    case 'update_consent':
+      return 'Updating access…';
+    default:
+      return 'Checking…';
+  }
 }

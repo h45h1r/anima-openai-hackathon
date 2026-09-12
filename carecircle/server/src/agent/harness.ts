@@ -85,8 +85,29 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
   const runId = nanoid(10);
   const emit = input.onEvent || (() => undefined);
   const modelName = input.openaiModel || 'gpt-4o-mini';
+  /** True once any token has been sent for this ask (so we can clear before a replacement). */
+  let tokensEmitted = false;
 
-  emit({ type: 'status', message: 'Preparing patient-bound evidence…' });
+  const emitStatus = (message: string) => emit({ type: 'status', message });
+  const emitStreamReset = () => {
+    if (!tokensEmitted) return;
+    emit({ type: 'stream_reset' });
+    tokensEmitted = false;
+  };
+  /** Emit only final user-facing prose (chunked for caret UX). Never dump tool JSON. */
+  const emitAnswerTokens = (text: string) => {
+    const clean = String(text || '').trim();
+    if (!clean) return;
+    emitStreamReset();
+    emitStatus('Writing…');
+    const chunk = 28;
+    for (let i = 0; i < clean.length; i += chunk) {
+      emit({ type: 'token', text: clean.slice(i, i + chunk) });
+      tokensEmitted = true;
+    }
+  };
+
+  emitStatus('Retrieving…');
 
   const bag: {
     evidence: EvidenceItem[];
@@ -107,9 +128,8 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
     policy: input.policy,
   };
 
-  const app = createCareCircleAdkApp({
-    onEvent: (type) => emit({ type: 'status', message: `ADK: ${type}` }),
-  });
+  // ADK lifecycle noise stays off the wire — client only sees calm status / answer tokens.
+  const app = createCareCircleAdkApp();
 
   const appendTrace = (
     ctx: { state: { toolTraceJson?: string; update: (p: Record<string, unknown>) => void } },
@@ -271,6 +291,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       const t0 = Date.now();
       bag.evidence = catalogueEvidence(input.context);
       emit({ type: 'tool', tool: 'patient.context.read', status: 'ok', detail: input.context.patientId });
+      emitStatus('Retrieving…');
       appendTrace(ctx, {
         tool: 'patient.context.read',
         status: 'ok',
@@ -280,7 +301,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       });
 
       const t1 = Date.now();
-      emit({ type: 'status', message: 'Evaluating consent & disclosure…' });
+      emitStatus('Checking consent…');
       const decision = evaluateConsent({
         policy: bag.policy,
         viewerId: input.viewerId,
@@ -363,7 +384,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         (/\b(appoint(ment)?s?|book(ing)?|slots?)\b/i.test(input.question) &&
           !/\b(blood|result|lab|lft|alt|alp|egfr|hba1c|explain)\b/i.test(input.question));
       if (primaryAppt && decision.outcome !== 'deny' && decision.outcome !== 'hold') {
-        emit({ type: 'status', message: 'Checking appointments…' });
+        emitStatus('Checking appointments…');
         bag.appointmentAssist = await clarifyAppointment(input.client, bag.allowedEvents, input.question);
         ctx.state.update({ appointmentStage: bag.appointmentAssist.stage });
         emit({
@@ -462,19 +483,21 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           status: 'skipped',
           detail: input.openaiApiKey ? `policy=${outcome}` : 'no_openai_key',
         });
-        if (bag.answer?.answer) emit({ type: 'token', text: bag.answer.answer });
+        // No refine — stream the deterministic answer once (it is the final).
+        if (bag.answer?.answer) emitAnswerTokens(bag.answer.answer);
         ctx.respond(bag.answer?.answer || '');
         return;
       }
 
       process.env.OPENAI_API_KEY = input.openaiApiKey;
       const t0 = Date.now();
-      emit({ type: 'status', message: 'Asking via OpenAI Responses (ADK)…' });
+      emitStatus('Writing…');
 
       try {
         const tools = [getPermittedEvidenceTool, appointmentAssistTool, rememberTool, updateConsentTool];
         const askAgent = createAskAgent(app, modelName, tools);
-        let streamed = '';
+        // Buffer ADK deltas only — never forward mid-tool drafts / pack dumps to the UI.
+        let buffered = '';
         const facts = bag.answer?.facts || [];
         const short = prefersShortPlain(
           bag.memoriesUsed.map((m) => m.content).join(' '),
@@ -529,22 +552,24 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           }
           const event = step.value;
           if (event.type === 'assistant_delta' && 'text' in event && event.text) {
-            // Some adapters emit cumulative snapshots; only forward the new suffix.
-            const next = event.text;
-            let piece = next;
-            if (next.startsWith(streamed)) {
-              piece = next.slice(streamed.length);
-              streamed = next;
+            // Cumulative snapshots vs incremental pieces — buffer only.
+            const next = String(event.text);
+            if (next.startsWith(buffered)) {
+              buffered = next;
+            } else if (buffered.startsWith(next)) {
+              /* shrink / duplicate — ignore */
             } else {
-              streamed += next;
+              // New generation (e.g. after a tool round) — keep the latest draft only.
+              buffered = next;
             }
-            if (piece) emit({ type: 'token', text: piece });
           }
           if (event.type === 'tool_call' && 'name' in event && event.name) {
-            emit({ type: 'status', message: `Tool: ${event.name}` });
+            // Tool rounds discard prior assistant drafts; UI stays on calm status.
+            buffered = '';
+            emitStatus(statusForToolName(String(event.name)));
           }
         }
-        const text = String(nested?.output?.text || streamed || '').trim();
+        const text = String(nested?.output?.text || buffered || '').trim();
         const parsed = tryParseModelExtras(text);
         const prose = stripTrailingJson(text) || parsed.answer;
         const grounded =
@@ -560,7 +585,8 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             uncertainty: parsed.uncertainty || bag.answer.uncertainty,
             appointmentAssist: bag.appointmentAssist || bag.answer.appointmentAssist,
           };
-          if (!streamed) emit({ type: 'token', text: prose });
+          // Stream only the grounded final prose — never the raw buffer / tool pack.
+          emitAnswerTokens(prose);
 
           // Auto-remember short preference phrases the model flagged
           for (const rem of parsed.remembered || []) {
@@ -600,7 +626,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             memoriesHint: bag.memoriesUsed.map((m) => m.content).join(' '),
           });
           bag.answer = { ...bag.answer, answer: fallback };
-          emit({ type: 'token', text: fallback });
+          emitAnswerTokens(fallback);
           ctx.state.update({
             answerJson: JSON.stringify(bag.answer),
             modelLabel: 'deterministic-grounded-after-drift',
@@ -623,6 +649,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       } catch (err) {
         // Fallback: Responses API via fetch (still not Chat Completions)
         try {
+          emitStatus('Writing…');
           const refined = await refineWithResponsesApi({
             apiKey: input.openaiApiKey!,
             model: modelName,
@@ -633,7 +660,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             draft: bag.answer!,
             memories: bag.memoriesUsed,
             history: input.history,
-            onToken: (t) => emit({ type: 'token', text: t }),
+            // Do not stream partial JSON from the HTTP body — emit once below.
           });
           if (refined && bag.answer) {
             const facts = bag.answer.facts || [];
@@ -656,6 +683,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
               answer,
               uncertainty: refined.uncertainty || bag.answer.uncertainty,
             };
+            emitAnswerTokens(answer);
             ctx.state.update({
               answerJson: JSON.stringify(bag.answer),
               modelLabel: ok
@@ -675,7 +703,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
               latencyMs: Date.now() - t0,
               detail: err instanceof Error ? err.message : 'model failed',
             });
-            if (bag.answer?.answer) emit({ type: 'token', text: bag.answer.answer });
+            if (bag.answer?.answer) emitAnswerTokens(bag.answer.answer);
           }
         } catch (inner) {
           const detail = [
@@ -688,7 +716,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             latencyMs: Date.now() - t0,
             detail: detail.slice(0, 300),
           });
-          if (bag.answer?.answer) emit({ type: 'token', text: bag.answer.answer });
+          if (bag.answer?.answer) emitAnswerTokens(bag.answer.answer);
         }
       }
 
@@ -809,6 +837,22 @@ function safeJson<T>(raw: unknown, fallback: T): T {
   }
 }
 
+/** Calm status copy for tool rounds — never surface pack dumps or raw tool JSON. */
+function statusForToolName(name: string): string {
+  switch (name) {
+    case 'get_permitted_evidence':
+      return 'Retrieving…';
+    case 'appointment_assist':
+      return 'Checking appointments…';
+    case 'remember':
+      return 'Saving preference…';
+    case 'update_consent':
+      return 'Updating access…';
+    default:
+      return 'Checking…';
+  }
+}
+
 function tryParseModelExtras(text: string): {
   answer?: string;
   uncertainty?: string;
@@ -862,7 +906,6 @@ async function refineWithResponsesApi(input: {
   draft: AgentAnswer;
   memories: CareCircleMemoryItem[];
   history?: ChatTurn[];
-  onToken?: (text: string) => void;
 }): Promise<{ answer: string; uncertainty?: string } | null> {
   const { STATIC_SYSTEM_PROMPT } = await import('./prompts.js');
   const res = await fetch('https://api.openai.com/v1/responses', {
@@ -920,7 +963,6 @@ async function refineWithResponsesApi(input: {
   try {
     const parsed = JSON.parse(content) as { answer?: string; uncertainty?: string };
     if (parsed.answer) {
-      input.onToken?.(parsed.answer);
       return { answer: parsed.answer, uncertainty: parsed.uncertainty };
     }
   } catch {
@@ -928,7 +970,6 @@ async function refineWithResponsesApi(input: {
   }
   const prose = content.trim();
   if (!prose) return null;
-  input.onToken?.(prose);
   return { answer: prose };
 }
 
