@@ -22,3 +22,8 @@ docs/research/screenshots/*
 !docs/research/screenshots/messages-prototype.png
 !docs/research/screenshots/kindred-circle-connected.png
 !docs/research/screenshots/kindred-gp-consent-connected.png
+
+# Local prototype and sweep artefacts
+.venv/
+__pycache__/
+web/scripts/.cache/

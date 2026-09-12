@@ -1,27 +1,86 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { AppState } from "@/lib/types";
 import { CATEGORIES, personById } from "@/lib/types";
 import type { KindredActions } from "@/hooks/useKindred";
-import { Avatar, Button, Card, LockIcon, Pill, fmtClock, fmtLongDay } from "../ui";
+import { READING_LEVELS, loadReadingLevel, saveReadingLevel, type ReadingLevel } from "@/lib/reading-level";
+import { Avatar, Button, Card, Pill, fmtClock, fmtLongDay, fmtDay } from "../ui";
+import HealthOverview, { direction } from "./HealthOverview";
+import AfterAppointment, { nextStepsFromRecord } from "./AfterAppointment";
 
-export default function PatientHome({ state, actions, onOpenCircle, onOpenChat }: { state: AppState; actions: KindredActions; onOpenCircle: () => void; onOpenChat: () => void }) {
+// Home in three time bands: What's happened, How things are now, What's next.
+// A reading-level switch changes the wording everywhere. Every line is
+// derived from the live record; nothing here is a diagnosis.
+
+export default function PatientHome({ state, actions, onOpenChat }: { state: AppState; actions: KindredActions; onOpenChat: () => void }) {
+  const [level, setLevel] = useState<ReadingLevel>("standard");
+  useEffect(() => setLevel(loadReadingLevel()), []);
+  const choose = (l: ReadingLevel) => { setLevel(l); saveReadingLevel(l); };
+
   const patient = personById(state, state.patientId);
   const next = state.appointments[0];
   const pending = state.consentRequests.filter((r) => r.status === "pending");
-  const actionsOpen = state.nextActions.filter((a) => !a.done);
-  const sharedCount = Object.values(state.consent).reduce((n, s) => n + CATEGORIES.filter((c) => s[c.id]).length, 0);
   const hour = new Date(state.now).getUTCHours() + 1; // Europe/London in September
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <div className="text-sm font-semibold text-muted">{fmtLongDay(state.now)}</div>
-        <h1 className="font-display text-[28px] font-bold leading-tight sm:text-4xl">{greeting}, {patient.shortName}</h1>
-      </div>
+  const nowOut = state.labs.filter((l) => l.flag !== "normal");
+  const worseningOut = nowOut.filter((l) => direction(l) === "worse");
+  const clinicActions = state.nextActions.filter((a) => !a.done && a.owner === "clinic");
+  const daysToNext = next ? Math.round((new Date(next.start).getTime() - new Date(state.now).getTime()) / 86400000) : null;
 
-      <div className="grid gap-4 md:grid-cols-2">
+  // History strip: what the record holds this year.
+  const year = new Date(state.now).getFullYear();
+  const visits = state.careNotes.filter((n) => n.kind !== "letter" && n.date.startsWith(String(year))).length;
+  const letters = state.careNotes.filter((n) => n.kind === "letter").length;
+  const testDates = new Set(state.labs.flatMap((l) => l.history.map((h) => h.date))).size;
+
+  // Today: one sentence, one action, worded for the reading level.
+  let today: { text: string; action?: { label: string; onClick: () => void }; tone: "amber" | "moss" };
+  if (next && daysToNext != null && daysToNext <= 7) {
+    const when = daysToNext <= 0 ? "today" : daysToNext === 1 ? "tomorrow" : `on ${fmtDay(next.start)}`;
+    today = {
+      tone: "amber",
+      text: level === "simple"
+        ? `You have an appointment ${when} at ${fmtClock(next.start)}.`
+        : `Your ${next.title.toLowerCase()} is ${when} at ${fmtClock(next.start)}. ${next.announcedToFamily ? "Your family have been told." : "Kindred will let your family know."}`,
+      action: { label: "Who's taking me?", onClick: onOpenChat },
+    };
+  } else if (worseningOut.length) {
+    const w = worseningOut[0];
+    today = {
+      tone: "amber",
+      text: level === "simple"
+        ? `One of your ${systemName(w.panel)} test results needs a look. Your practice will call you. Nothing to do now.`
+        : level === "detailed"
+          ? `${w.name} is ${w.value} ${w.unit} (usual range ${w.refRange}), ${w.previous ? `up from ${w.previous.value} on ${fmtDay(w.previous.date)}` : "outside the usual range"}. Your practice reads it with the rest of your record; nothing to do until they call.`
+          : `Your latest ${systemName(w.panel)} test has something outside the usual range, and it moved the wrong way since last time. Your practice reads it with the rest of your record; nothing to do until they call.`,
+      action: { label: "Ask Kindred what it means", onClick: onOpenChat },
+    };
+  } else if (clinicActions.length) {
+    today = { tone: "moss", text: level === "simple" ? "Nothing to do today." : `Nothing for you to do today. ${clinicActions[0].text}` };
+  } else {
+    today = { tone: "moss", text: "Nothing needs doing today." };
+  }
+
+  const nextSteps = nextStepsFromRecord(state, level);
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-muted">{fmtLongDay(state.now)}</div>
+          <h1 className="font-display text-[28px] font-bold leading-tight sm:text-4xl">{greeting}, {patient.shortName}</h1>
+        </div>
+        <div role="radiogroup" aria-label="How much detail" className="flex items-center gap-2">
+          <span className="text-sm text-muted">Explain it</span>
+          <div className="flex rounded-full border border-line bg-card p-0.5">
+            {READING_LEVELS.map((l) => (
+              <button key={l.id} role="radio" aria-checked={level === l.id} title={l.blurb} onClick={() => choose(l.id)} className={`rounded-full px-3 py-1 text-sm font-semibold transition ${level === l.id ? "bg-plum text-white" : "text-muted hover:text-ink"}`}>{l.label}</button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {pending.map((r) => {
         const who = personById(state, r.requesterId);
@@ -43,87 +102,77 @@ export default function PatientHome({ state, actions, onOpenCircle, onOpenChat }
         );
       })}
 
-      {next ? (
-        <Card tone="amber">
-          <div className="flex items-center justify-between">
-            <Pill tone="amber">Next appointment</Pill>
-            <span className="text-sm font-semibold text-[#7a520c]">{daysUntil(state.now, next.start)}</span>
-          </div>
-          <div className="mt-2 font-display text-[22px] font-bold leading-tight">{next.title}</div>
-          <div className="mt-1 text-[16px]">{fmtLongDay(next.start)} at {fmtClock(next.start)}</div>
-          <div className="text-[15px] text-muted">{next.location}{next.mode ? ` · ${next.mode}` : ""}</div>
-          <div className="mt-1 text-[15px] text-muted">with {personById(state, next.clinicianId).name}</div>
-          {next.prep.length > 0 && (
-            <details className="mt-3">
-              <summary className="cursor-pointer text-[15px] font-semibold text-[#7a520c]">On your record for this visit</summary>
-              <ul className="mt-2 space-y-1.5 pl-5 text-[15px]">{next.prep.map((p) => <li key={p} className="list-disc">{p}</li>)}</ul>
-            </details>
-          )}
-          {next.announcedToFamily ? <div className="mt-3 flex items-center gap-1.5 text-sm text-moss-deep"><CheckIcon /> Your family have been told</div> : <div className="mt-3 text-sm text-muted">Kindred will remind your family a week before.</div>}
+      {/* NOW */}
+      <section aria-labelledby="now-h" className="space-y-3">
+        <SectionHead id="now-h" kicker="Now" title="How things are" />
+        <Card tone={today.tone}>
+          <Pill tone={today.tone === "amber" ? "amber" : "moss"}>Today</Pill>
+          <p className={`mt-2 leading-snug ${level === "simple" ? "text-[21px] sm:text-[24px]" : "text-[19px] sm:text-[21px]"}`}>{today.text}</p>
+          {today.action && <div className="mt-3"><Button variant="secondary" size="lg" onClick={today.action.onClick}>{today.action.label}</Button></div>}
         </Card>
-      ) : (
-        <Card>
-          <div className="font-display text-lg font-bold">No appointments booked</div>
-          <p className="mt-1 text-[15px] text-muted">Nothing is in the practice diary for you right now.</p>
-        </Card>
-      )}
+        <HealthOverview state={state} onAsk={onOpenChat} level={level} />
+      </section>
 
-      <Card>
-        <div className="flex items-center justify-between">
-          <div className="font-display text-lg font-bold">To do</div>
-          <span className="text-sm text-muted">{actionsOpen.length} open</span>
-        </div>
-        {actionsOpen.length === 0 && <p className="mt-2 text-[15px] text-muted">Nothing outstanding.</p>}
-        <ul className="mt-2 divide-y divide-line">
-          {actionsOpen.map((a) => (
-            <li key={a.id} className="flex items-start gap-3 py-2.5">
-              <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${a.owner === "family" ? "bg-rust" : a.owner === "clinic" ? "bg-[#3C5A7A]" : "bg-moss"}`} />
-              <div className="min-w-0 flex-1">
-                <div className="text-[16px] leading-snug">{a.text}</div>
-                <div className="text-sm text-muted">
-                  {a.owner === "family" ? "For the family" : a.owner === "clinic" ? "Practice / clinic" : "For you"}
-                  {a.due ? ` · by ${new Date(a.due).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}` : ""}
-                  {a.source ? ` · ${a.source}` : ""}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      {/* PAST */}
+      <section aria-labelledby="past-h" className="space-y-3">
+        <SectionHead id="past-h" kicker="Before" title="What's happened" sub={level === "simple" ? undefined : `This year on your record: ${visits} practice contact${visits === 1 ? "" : "s"}, ${testDates} blood test${testDates === 1 ? "" : "s"}, ${letters} hospital letter${letters === 1 ? "" : "s"}.`} />
+        <AfterAppointment state={state} onAsk={onOpenChat} level={level} />
+      </section>
 
-      <button onClick={onOpenCircle} className="w-full rounded-2xl border border-plum/30 bg-plum-soft p-4 text-left transition hover:brightness-[0.98]">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-plum text-white"><LockIcon size={20} /></span>
-          <div className="flex-1">
-            <div className="font-display text-lg font-bold leading-tight">Your circle</div>
-            <div className="text-[15px] text-muted">{Object.keys(state.consent).length} people · {sharedCount} things shared · v{state.ehr.consentVersion} on your {state.patient.practice} record</div>
-          </div>
-          <Chevron />
-        </div>
-      </button>
-
-      <button onClick={onOpenChat} className="w-full rounded-2xl border border-line bg-card p-4 text-left transition hover:bg-paper md:col-span-2">
-        <div className="flex items-center gap-3">
-          <Avatar person={personById(state, state.agentId)} size={44} />
-          <div className="flex-1">
-            <div className="font-display text-lg font-bold leading-tight">Ask Kindred</div>
-            <div className="text-[15px] text-muted">“What do my latest blood tests mean?”</div>
-          </div>
-          <Chevron />
-        </div>
-      </button>
-      </div>
+      {/* FUTURE */}
+      <section aria-labelledby="next-h" className="space-y-3">
+        <SectionHead id="next-h" kicker="Next" title="What's coming" />
+        {next ? (
+          <Card tone="amber">
+            <div className="flex items-center justify-between">
+              <Pill tone="amber">Appointment</Pill>
+              <span className="text-sm font-semibold text-[#7a520c]">{daysUntil(state.now, next.start)}</span>
+            </div>
+            <div className="mt-2 font-display text-[22px] font-bold leading-tight">{next.title}</div>
+            <div className="mt-1 text-[16px]">{fmtLongDay(next.start)} at {fmtClock(next.start)}</div>
+            <div className="text-[15px] text-muted">{next.location}{next.mode ? ` · ${next.mode}` : ""} · with {personById(state, next.clinicianId).name}</div>
+            {level !== "simple" && next.prep.length > 0 && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-[15px] font-semibold text-[#7a520c]">On your record for this visit</summary>
+                <ul className="mt-2 space-y-1.5 pl-5 text-[15px]">{next.prep.map((p) => <li key={p} className="list-disc">{p}</li>)}</ul>
+              </details>
+            )}
+            {next.announcedToFamily ? <div className="mt-3 text-sm text-moss-deep">Your family have been told.</div> : <div className="mt-3 text-sm text-muted">Kindred will remind your family a week before.</div>}
+          </Card>
+        ) : (
+          <Card>
+            <div className="font-display text-lg font-bold">No date booked yet</div>
+            <p className="mt-1 text-[16px] text-muted">{level === "simple" ? "The clinic will write to you with a date." : clinicActions[0] ? clinicActions[0].text : "Nothing is in the practice diary for you right now."}</p>
+          </Card>
+        )}
+        {nextSteps.length > 0 && (
+          <Card>
+            <div className="font-display text-lg font-bold">What happens next</div>
+            <ul className="mt-2 space-y-2 text-[16px] leading-relaxed">
+              {nextSteps.map((s, i) => <li key={i} className="flex gap-3"><span className="mt-2.5 h-2 w-2 shrink-0 rounded-full bg-amber" /><span>{s}</span></li>)}
+            </ul>
+            <div className="mt-3"><Button variant="secondary" size="lg" onClick={onOpenChat}>Ask Kindred about what's next</Button></div>
+          </Card>
+        )}
+      </section>
     </div>
   );
 }
 
+function SectionHead({ id, kicker, title, sub }: { id: string; kicker: string; title: string; sub?: string }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-3">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-plum">{kicker}</span>
+      <h2 id={id} className="font-display text-xl font-bold">{title}</h2>
+      {sub && <span className="basis-full text-sm text-muted sm:basis-auto">{sub}</span>}
+    </div>
+  );
+}
+
+function systemName(panel: string) {
+  return ({ "Full blood count (FBC)": "blood", "HbA1c": "blood sugar", "Liver function tests (LFT)": "liver", "Urea & electrolytes (U&E)": "kidney", "C-reactive protein (CRP)": "inflammation", "Lipid profile": "cholesterol" } as Record<string, string>)[panel] ?? panel;
+}
 function daysUntil(now: string, then: string) {
   const d = Math.round((new Date(then).getTime() - new Date(now).getTime()) / 86400000);
   return d <= 0 ? "Today" : d === 1 ? "Tomorrow" : `In ${d} days`;
-}
-function Chevron() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-muted"><path d="M9 6l6 6-6 6" /></svg>;
-}
-function CheckIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>;
 }
