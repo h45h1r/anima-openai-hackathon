@@ -4,9 +4,31 @@ A care companion for older people and patients with chronic conditions. Patients
 
 The main app is the existing **Kindred** Next.js app in `web/`. Its Circle screen manages family membership, sharing levels and six permission categories. Consent changes persist through the backend in `sim-app/`, which updates the GP observation and consent audit in one PostgreSQL transaction.
 
-[Mission statement](mission-statement.md) · [Neon setup](sim-app/deployment/README.md) · [Backend details](sim-app/README.md)
+[Mission statement](mission-statement.md) · [Design system](docs/design-system.md) · [Neon setup](sim-app/deployment/README.md) · [Backend details](sim-app/README.md)
 
-## Start locally
+## Two surfaces in this repo
+
+| Surface | Path | Ports | Role |
+| --- | --- | --- | --- |
+| **Kindred** (core) | `web/` + `sim-app/` | web **:3111**, sim **:4192** | Design-system app, Circle consent, companion backend on main |
+| **CareCircle** (MVP demo) | `carecircle/` | web **:3112**, API **:8787** | Clinical Ask / consent / results stack on live Anima; separate Express API |
+
+This PR lands CareCircle as a portable stack beside Kindred. It does **not** rewrite Ask into Kindred Next routes or replace Kindred consent/GP flows.
+
+## CareCircle MVP
+
+[`carecircle/`](./carecircle/) is a patient-controlled family communication demo on synthetic Anima clinical data, with consent-gated answers and an optional OpenAI refine pass. It matches Kindred’s **Next.js App Router** + **SSE** coding language and design system, while keeping a separate Express API for live Anima ADK agents.
+
+```bash
+cd carecircle
+cp .env.example .env   # add ANIMA_API_KEY; optional OPENAI_API_KEY
+npm install
+npm run dev            # API :8787 · Next web :3112
+```
+
+See [`carecircle/README.md`](./carecircle/README.md) for env vars, demos (patient Amira), Ask streaming, consent/results, and evals.
+
+## Start Kindred locally
 
 Use Node.js 22.18 or newer. Install each service's locked dependencies:
 
@@ -46,6 +68,7 @@ The existing people and family relationships are demo configuration, not verifie
 | Directory | Purpose |
 | --- | --- |
 | `web/` | Active Kindred app, Circle, family views and agent tools |
+| `carecircle/` | CareCircle hackathon MVP (Express API + Next.js web, SSE Ask) |
 | `sim-app/` | Copied simulator frontend, local workflow API, consent service and tests |
 | `sim-app/deployment/` | Neon project metadata, migration verification and hosting configuration examples |
 | `replica/` | Read-only capture/import tools, SQL schema and database documentation |

@@ -1,0 +1,27 @@
+# Environment / secrets — never commit real keys
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+web/.env
+web/.env.*
+**/carecircle_anima_key*
+**/secrets/
+*.pem
+*.key
+
+# Local data / logs
+data/
+*.log
+.DS_Store
+
+# Dependencies / build
+node_modules/
+server/dist/
+web/dist/
+coverage/
+.vite/
+dist/
+build/
+*.tsbuildinfo
