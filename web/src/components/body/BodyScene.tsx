@@ -330,6 +330,7 @@ export default function BodyScene({ focus, tint, onPick, reducedMotion = false }
     interface Marker { dot: THREE.Sprite; ring: THREE.Sprite; system: SystemId; phase: number }
     const markerList: Marker[] = [];
     for (const [i, def] of SYSTEMS.entries()) {
+      if (def.marker === false) continue;
       const dot = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex, color: "#9aa8a1", transparent: true, opacity: 0.95, depthWrite: false, depthTest: false }));
       dot.scale.set(MARKER_DOT, MARKER_DOT, 1);
       dot.renderOrder = 20;
