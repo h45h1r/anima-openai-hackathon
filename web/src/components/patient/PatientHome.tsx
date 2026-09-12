@@ -128,7 +128,7 @@ export default function PatientHome({ state, actions, onOpenChat }: { state: App
             <ul className="mt-2 space-y-2 text-[16px] leading-relaxed">
               {nextSteps.map((s, i) => <li key={i} className="flex gap-3"><span className="mt-2.5 h-2 w-2 shrink-0 rounded-full bg-amber" /><span>{s}</span></li>)}
             </ul>
-            <div className="mt-3"><Button variant="secondary" size="lg" onClick={onOpenChat}>Ask Kindred about what's next</Button></div>
+            <div className="mt-3"><Button variant="secondary" size="lg" onClick={onOpenChat}>Ask Kindred about what&rsquo;s next</Button></div>
           </Card>
         )}
       </section>
