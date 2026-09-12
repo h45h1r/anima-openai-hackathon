@@ -4,13 +4,14 @@ import type { AppState } from "@/lib/types";
 import { CATEGORIES, personById } from "@/lib/types";
 import type { KindredActions } from "@/hooks/useKindred";
 import { Avatar, Button, Card, Pill, fmtClock, fmtLongDay, fmtDay } from "../ui";
-import HealthOverview, { direction } from "./HealthOverview";
-import AfterAppointment, { nextStepsFromRecord } from "./AfterAppointment";
+import { direction } from "./HealthOverview";
+import { nextStepsFromRecord } from "./AfterAppointment";
+import BodyView from "../body/BodyView";
 
-// Home in three time bands: How things are now, What's happened, What's next.
+// Home in two time bands: How things are now (with the body view), What's next.
 // Every line is derived from the live record; nothing here is a diagnosis.
 
-export default function PatientHome({ state, actions, onOpenChat }: { state: AppState; actions: KindredActions; onOpenChat: () => void }) {
+export default function PatientHome({ state, actions, onOpenChat, onAsk }: { state: AppState; actions: KindredActions; onOpenChat: () => void; onAsk?: (q: string) => void }) {
   const patient = personById(state, state.patientId);
   const next = state.appointments[0];
   const pending = state.consentRequests.filter((r) => r.status === "pending");
@@ -21,12 +22,6 @@ export default function PatientHome({ state, actions, onOpenChat }: { state: App
   const worseningOut = nowOut.filter((l) => direction(l) === "worse");
   const clinicActions = state.nextActions.filter((a) => !a.done && a.owner === "clinic");
   const daysToNext = next ? Math.round((new Date(next.start).getTime() - new Date(state.now).getTime()) / 86400000) : null;
-
-  // History strip: what the record holds this year.
-  const year = new Date(state.now).getFullYear();
-  const visits = state.careNotes.filter((n) => n.kind !== "letter" && n.date.startsWith(String(year))).length;
-  const letters = state.careNotes.filter((n) => n.kind === "letter").length;
-  const testDates = new Set(state.labs.flatMap((l) => l.history.map((h) => h.date))).size;
 
   // Today: one sentence, one action, worded for the reading level.
   let today: { text: string; action?: { label: string; onClick: () => void }; tone: "amber" | "moss" };
@@ -87,13 +82,7 @@ export default function PatientHome({ state, actions, onOpenChat }: { state: App
           <p className="mt-2 text-[19px] leading-snug sm:text-[21px]">{today.text}</p>
           {today.action && <div className="mt-3"><Button variant="secondary" size="lg" onClick={today.action.onClick}>{today.action.label}</Button></div>}
         </Card>
-        <HealthOverview state={state} onAsk={onOpenChat} />
-      </section>
-
-      {/* PAST */}
-      <section aria-labelledby="past-h" className="space-y-3">
-        <SectionHead id="past-h" kicker="Before" title="What's happened" sub={`This year on your record: ${visits} practice contact${visits === 1 ? "" : "s"}, ${testDates} blood test${testDates === 1 ? "" : "s"}, ${letters} hospital letter${letters === 1 ? "" : "s"}.`} />
-        <AfterAppointment state={state} onAsk={onOpenChat} />
+        <BodyView state={state} viewerId={state.patientId} embedded onAsk={onAsk ?? (() => onOpenChat())} />
       </section>
 
       {/* FUTURE */}
