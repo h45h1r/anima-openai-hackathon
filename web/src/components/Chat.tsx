@@ -28,14 +28,31 @@ export default function Chat({
   onOpenCircle?: () => void;
 }) {
   const thread = state.threads[threadId];
-  const msgs = visibleMessages(state, threadId, viewerId);
+  const committedMessages = visibleMessages(state, threadId, viewerId);
   const [pending, setPending] = useState(false);
-  const busy = pending || state.busyThreads.includes(threadId);
+  const [outgoing, setOutgoing] = useState<{ message: Message; knownIds: Set<string>; replyId?: string } | null>(null);
+  const sendLock = useRef(false);
+  const outgoingCommitted = outgoing && committedMessages.some(message =>
+    !outgoing.knownIds.has(message.id) && message.senderId === viewerId && message.text === outgoing.message.text);
+  const msgs = outgoing && !outgoingCommitted ? [...committedMessages, outgoing.message] : committedMessages;
+  const replyVisible = outgoing && committedMessages.some(message => outgoing.replyId
+    ? message.id === outgoing.replyId
+    : !outgoing.knownIds.has(message.id) && message.senderId === state.agentId && message.kind === "chat" && !message.streaming);
+  const busy = pending || Boolean(outgoing) || state.busyThreads.includes(threadId);
+  const showTyping = Boolean(outgoing && !replyVisible && !committedMessages.some(message => message.streaming));
   const [draft, setDraft] = useState("");
   const [err, setErr] = useState<string | null>(null);
-  const endRef = useRef<HTMLDivElement>(null);
-  const lastCount = useRef(0);
-  const lastText = useRef("");
+  const [failedText, setFailedText] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const followBottom = useRef(true);
+  const lastMessage = msgs[msgs.length - 1];
+
+  useEffect(() => {
+    if (outgoing?.replyId && committedMessages.some(message => message.id === outgoing.replyId)) {
+      sendLock.current = false;
+      setOutgoing(null);
+    }
+  }, [outgoing, committedMessages]);
 
   useEffect(() => {
     if (thread.kind !== "direct") return;
@@ -48,23 +65,33 @@ export default function Chat({
   }, [state.patient.simId, viewerId, thread.kind]);
 
   useEffect(() => {
-    const last = msgs[msgs.length - 1];
-    if (msgs.length !== lastCount.current || (last && last.text !== lastText.current)) {
-      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-      lastCount.current = msgs.length;
-      lastText.current = last?.text ?? "";
+    if (followBottom.current && scrollRef.current) {
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
     }
-  }, [msgs]);
+  }, [msgs.length, lastMessage?.id, lastMessage?.text, showTyping]);
 
   const send = async (text: string) => {
-    if (!text.trim() || busy) return;
+    const message = text.trim();
+    if (!message || busy || sendLock.current) return;
+    sendLock.current = true;
+    followBottom.current = true;
     setPending(true);
-    setDraft("");
+    setOutgoing({
+      message: { id: crypto.randomUUID(), threadId, senderId: viewerId, text: message, ts: new Date().toISOString(), kind: "chat" },
+      knownIds: new Set(committedMessages.map(item => item.id)),
+    });
+    setDraft(current => current.trim() === message ? "" : current);
     setErr(null);
+    setFailedText(null);
     try {
-      await actions.sendChat(threadId, viewerId, text.trim());
+      const response = await actions.sendChat(threadId, viewerId, message);
+      setOutgoing(current => current ? { ...current, replyId: response.messageId } : null);
     } catch (e) {
+      sendLock.current = false;
+      setOutgoing(null);
       setErr(e instanceof Error ? e.message : String(e));
+      setFailedText(message);
+      setDraft(current => current || message);
     } finally {
       setPending(false);
     }
@@ -73,14 +100,17 @@ export default function Chat({
   const isGroup = thread.kind === "group";
   const latestAnswerId = [...msgs].reverse().find(m => m.clinicalAnswer)?.id;
   const clear = async () => {
-    if (busy) return;
+    if (busy || sendLock.current) return;
+    sendLock.current = true;
     setPending(true);
     setErr(null);
+    setFailedText(null);
     try {
       await actions.clearChat(threadId, viewerId);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
+      sendLock.current = false;
       setPending(false);
     }
   };
@@ -88,7 +118,9 @@ export default function Chat({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-paper lg:overflow-hidden lg:rounded-2xl lg:border lg:border-line lg:bg-card/40">
-      <div className="scroll-thin flex-1 space-y-3 overflow-y-auto px-3 pb-3 pt-4 sm:px-5">
+      <div ref={scrollRef} role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text"
+        onScroll={event => { const el = event.currentTarget; followBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
+        className="scroll-thin flex-1 space-y-3 overflow-y-auto px-3 pb-3 pt-4 sm:px-5">
         {msgs.length === 0 && (
           <div className="mt-10 text-center text-sm text-muted">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-plum-soft text-plum"><KindredMark size={26} /></div>
@@ -113,11 +145,12 @@ export default function Chat({
                       mine ? "rounded-br-md bg-moss text-white" : isAgent ? (m.kind === "notification" ? "rounded-bl-md border border-plum/25 bg-plum-soft text-ink" : "rounded-bl-md bg-card text-ink shadow-sm ring-1 ring-line") : "rounded-bl-md bg-card text-ink ring-1 ring-line"
                     }`}
                   >
-                    {m.text ? <Prose text={m.text} /> : <span className="pulse-soft text-muted">Kindred is thinking…</span>}
+                    {m.text ? <Prose text={m.text} /> : <span role="status" className="pulse-soft text-muted">Kindred is thinking…</span>}
                     {m.streaming && m.text && <span className="pulse-soft ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 rounded-sm bg-plum/60" />}
                   </div>
                   <div className="flex items-center gap-2 px-1 text-[11px] text-muted">
                     <span>{fmtTime(m.ts)}</span>
+                    {m.id === outgoing?.message.id && <span className="text-moss-deep">{outgoing.replyId ? "Sent" : "Sending…"}</span>}
                     {m.audience && viewerId === state.patientId && (
                       <span className="inline-flex items-center gap-1 text-plum"><LockIcon size={11} /> seen by {m.audience.filter((a) => a !== state.patientId).map((a) => personById(state, a).shortName).join(", ") || "only you"}</span>
                     )}
@@ -132,7 +165,12 @@ export default function Chat({
             </div>
           );
         })}
-        <div ref={endRef} />
+        {showTyping && <div className="rise flex items-end gap-2">
+          <Avatar person={personById(state, state.agentId)} size={big ? 34 : 28} />
+          <div role="status" className={`rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 ${textSize} text-muted shadow-sm ring-1 ring-line`}>
+            <span className="pulse-soft">Kindred is thinking…</span>
+          </div>
+        </div>}
       </div>
 
       {canCompose && (
@@ -158,7 +196,7 @@ export default function Chat({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                   e.preventDefault();
                   send(draft);
                 }
@@ -177,7 +215,13 @@ export default function Chat({
             </span>
             {msgs.some(m => m.kind === "chat") && <button type="button" disabled={busy} onClick={() => void clear()} className="font-semibold hover:text-ink disabled:opacity-40">Clear conversation</button>}
           </div>}
-          {err && <div className="mt-2 text-xs text-rust">{err}</div>}
+          {err && <div role="alert" className="mt-2 rounded-xl border border-rust/30 bg-[#f8e6df] px-3 py-2 text-sm text-rust">
+            <p>{err}</p>
+            {failedText && <>
+              <p className="mt-1 whitespace-pre-wrap text-xs">Could not confirm delivery: {failedText}</p>
+              <button type="button" disabled={busy} onClick={() => void send(failedText)} className="mt-2 font-semibold underline disabled:opacity-40">Retry message</button>
+            </>}
+          </div>}
         </div>
       )}
     </div>
