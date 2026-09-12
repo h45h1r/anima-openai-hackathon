@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { buildClinicalContext, extractMeasurements } from '../src/anima/normalise.js';
+import { buildClinicalContext, extractMeasurements, humaniseResourceData } from '../src/anima/normalise.js';
+import {
+  buildDeterministicAnswer,
+  buildPermittedPack,
+  buildVisualisation,
+  factsContainRawJson,
+  proseMatchesFacts,
+} from '../src/agent/grounding.js';
 import { runAgentQuestion } from '../src/agent/harness.js';
 import { ScopedMemoryService } from '../src/agent/memoryStore.js';
 import { createDefaultPolicy, holdResource } from '../src/consent/policy.js';
@@ -44,6 +51,52 @@ function labResource(): AnimaResource {
           high: 130,
         },
       ],
+    },
+    version: 1,
+  };
+}
+
+function bloodResultResource(): AnimaResource {
+  return {
+    id: 'blood-v1-fbc-5',
+    patientId,
+    kind: 'report',
+    title: 'Full blood count (FBC) · synthetic blood results',
+    status: 'available',
+    owner: 'gp',
+    visibleTo: ['gp'],
+    priority: 'routine',
+    createdAt: Date.parse('2026-09-11T09:00:00Z'),
+    data: {
+      kind: 'blood-result',
+      panel: { id: 'fbc', name: 'Full blood count (FBC)' },
+      analytes: [
+        { id: 'haemoglobin', name: 'Haemoglobin', unit: 'g/L', value: 161, referenceLow: 115, referenceHigh: 165 },
+        { id: 'white-cell-count', name: 'White Cell Count', unit: '×10⁹/L', value: 4.1, referenceLow: 3.5, referenceHigh: 11 },
+      ],
+    },
+    version: 1,
+  };
+}
+
+function dischargeResource(): AnimaResource {
+  return {
+    id: 'discharge-summary-example',
+    patientId,
+    kind: 'discharge-summary',
+    title: 'Discharge summary · monitoring handover',
+    status: 'sent',
+    owner: 'gp',
+    visibleTo: ['gp'],
+    priority: 'routine',
+    createdAt: Date.parse('2026-09-12T08:00:00Z'),
+    data: {
+      stage: 'sent',
+      sentBy: 'Dr Morgan Bell',
+      sections: {
+        reason: 'Synthetic admission for a monitoring scenario.',
+        course: 'Observation and discharge planning completed.',
+      },
     },
     version: 1,
   };
@@ -100,6 +153,104 @@ describe('grounding and visualisation', () => {
       assert.equal(p.date, m!.sampledAt);
     }
     assert.ok(run.answer.facts.every((f) => f.evidenceIds.length > 0));
+  });
+
+  it('does not auto-visualise a generic blood ask without a named analyte or trend', async () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource(), apptResource()] }],
+    });
+    const policy = createDefaultPolicy(patientId, 'Amira Khan');
+    const fakeClient = { getAppointments: async () => ({}) } as unknown as AnimaClient;
+    const run = await runAgentQuestion({
+      client: fakeClient,
+      context: ctx,
+      policy,
+      viewerId: 'patient',
+      question: 'Explain my latest blood tests',
+      memory: memory(),
+    });
+    assert.equal(run.answer.visualisationSpec, undefined);
+  });
+
+  it('never puts raw JSON into blood-test facts and demotes discharge noise', async () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource(), bloodResultResource(), dischargeResource(), apptResource()] }],
+    });
+    const policy = createDefaultPolicy(patientId, 'Amira Khan');
+    const fakeClient = { getAppointments: async () => ({}) } as unknown as AnimaClient;
+    const run = await runAgentQuestion({
+      client: fakeClient,
+      context: ctx,
+      policy,
+      viewerId: 'patient',
+      question: 'Explain my latest blood tests',
+      memory: memory(),
+    });
+    assert.equal(factsContainRawJson(run.answer.facts), false);
+    for (const f of run.answer.facts) {
+      assert.ok(!/"stage"\s*:/.test(f.text), `fact leaked JSON: ${f.text}`);
+      assert.ok(!f.text.trim().startsWith('{'), `fact starts with JSON: ${f.text}`);
+    }
+    assert.ok(!run.answer.citations.some((c) => /discharge/i.test(c.title)));
+    assert.ok(run.answer.facts.some((f) => /ALT|ALP|blood results/i.test(f.text)));
+  });
+
+  it('humanises nested blood-result and discharge payloads', () => {
+    const blood = humaniseResourceData(bloodResultResource().data, bloodResultResource().title);
+    assert.ok(/Haemoglobin 161/.test(blood));
+    assert.ok(!blood.includes('{"'));
+    const discharge = humaniseResourceData(dischargeResource().data, dischargeResource().title);
+    assert.ok(/Synthetic admission|Dr Morgan Bell|Status/i.test(discharge));
+    assert.ok(!discharge.includes('{"stage"'));
+  });
+
+  it('rejects model prose that invents numbers not in facts', () => {
+    const facts = [{ text: 'Latest Haemoglobin is 161 g/L (sampled 11 September 2026).' }];
+    assert.equal(proseMatchesFacts('Haemoglobin is 161 g/L.', facts), true);
+    assert.equal(proseMatchesFacts('Haemoglobin is 157 g/L.', facts), false);
+  });
+
+  it('permitted pack prefers newest measurements over oldest history', () => {
+    const old = extractMeasurements(labResource(), patientId, 'gp').map((m) => ({
+      ...m,
+      sampledAt: '2025-09-12T09:00:00.000Z',
+      value: 12,
+      evidenceId: `${m.evidenceId}:old`,
+    }));
+    const latest = extractMeasurements(labResource(), patientId, 'gp');
+    const pack = buildPermittedPack({
+      patientId,
+      viewerId: 'patient',
+      outcome: 'allow',
+      measurements: [...old, ...latest],
+      events: [],
+      allowedEvidenceIds: [],
+      filteredCount: 0,
+    });
+    assert.ok(pack.measurements.some((m) => m.value === 48));
+    // At most 2 points per analyte → year-ago extras beyond the prior value are dropped.
+    const alt = pack.measurements.filter((m) => /alt/i.test(m.name));
+    assert.ok(alt.every((m) => m.value === 48 || m.value === 40));
+    assert.ok(!pack.measurements.some((m) => m.value === 12));
+  });
+
+  it('uses short plain-language deterministic prose when memory prefers it', () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource()] }],
+    });
+    const answer = buildDeterministicAnswer({
+      question: 'Explain my latest blood tests',
+      outcome: 'allow',
+      measurements: ctx.measurements,
+      events: ctx.events,
+      memoriesHint: 'I prefer short plain-language updates',
+    });
+    assert.ok(answer.answer.length < 600);
+    assert.ok(!/feel free to ask/i.test(answer.answer));
+    assert.ok(proseMatchesFacts(answer.answer, answer.facts, ctx.measurements));
   });
 
   it('does not leak held result content to Sarah', async () => {
@@ -211,5 +362,16 @@ describe('grounding and visualisation', () => {
     assert.ok(sarah.some((m) => /afternoon/i.test(m.content)));
     assert.ok(!tom.some((m) => /afternoon/i.test(m.content)));
     assert.ok(!sarah.some((m) => m.metadata.viewerId === 'tom'));
+  });
+
+  it('buildVisualisation only returns named or trend series', () => {
+    const ctx = buildClinicalContext({
+      patientId,
+      siteResources: [{ site: 'gp', resources: [labResource()] }],
+    });
+    assert.equal(buildVisualisation('Explain my latest blood tests', ctx.measurements), undefined);
+    const named = buildVisualisation('How has ALT changed over time?', ctx.measurements);
+    assert.ok(named);
+    assert.ok(named!.points!.every((p) => p.label === 'ALT'));
   });
 });

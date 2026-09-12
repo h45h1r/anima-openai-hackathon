@@ -114,7 +114,8 @@ export function cacheFriendlyContext(app: CareCircleAdkApp) {
             `patientId=${patientId}`,
             `policyOutcome=${outcome}`,
             `MEMORIES_FOR_THIS_VIEWER:\n${JSON.stringify(memories)}`,
-            `PERMITTED_EVIDENCE:\n${JSON.stringify(pack)}`,
+            `PERMITTED_EVIDENCE (newest first; use these values only):\n${JSON.stringify(pack)}`,
+            `Never invent numbers. Prefer short plain language when memories ask for it.`,
           ].join('\n\n')
         : [
             `DYNAMIC_CONTEXT (not cached):`,
@@ -168,21 +169,22 @@ export function createAskAgent(
   const explicitCache =
     process.env.OPENAI_PROMPT_CACHE === '1' ||
     /gpt-4\.1|gpt-5|o[0-9]/i.test(modelName);
-  const cacheKey = `carecircle-v2-${modelName}`.slice(0, 64);
+  const cacheKey = `carecircle-v3-${modelName}`.slice(0, 64);
   return app.agent({
     name: 'carecircle_ask',
     model: openai(
       modelName,
       explicitCache
         ? {
-            temperature: 0.2,
+            temperature: 0.1,
+            maxTokens: 450,
             promptCache: {
               key: cacheKey,
               mode: 'explicit',
               ttl: '30m',
             },
           }
-        : { temperature: 0.2 },
+        : { temperature: 0.1, maxTokens: 450 },
     ),
     maxSteps: 4,
     tools,

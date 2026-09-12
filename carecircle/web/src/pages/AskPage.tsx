@@ -7,11 +7,13 @@ export default function AskPage() {
   const [question, setQuestion] = useState('');
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
   const run = app.lastAnswer;
 
   async function submit(q: string) {
     setBusy(true);
     setLocalError(null);
+    setSourcesOpen(false);
     try {
       await app.ask(q);
       setQuestion('');
@@ -28,19 +30,31 @@ export default function AskPage() {
     void submit(question.trim());
   }
 
+  const written = (app.memoriesWritten?.length ? app.memoriesWritten : run?.memoriesWritten) || [];
+  const used = run?.memoriesUsed || [];
+  const memoryLine = written.length
+    ? `Remembered for next time: ${written.map((m: { text: string }) => m.text).join(' · ')}`
+    : used.length
+      ? `Using your preference: ${used.map((m: { text: string }) => m.text).join(' · ')}`
+      : null;
+
+  const answerText = busy && app.askStreamText ? app.askStreamText : run?.answer?.answer;
+  const citations = run?.answer?.citations || [];
+
   return (
     <div className="grid-2">
       <div className="panel stack">
         <h1 style={{ fontFamily: 'var(--serif)', marginTop: 0 }}>Ask CareCircle</h1>
         <p className="muted small">
-          Answers retrieve live evidence for <strong>{app.session?.selectedPatientId}</strong>, apply consent for{' '}
-          <strong>{app.session?.activeViewerId}</strong>, then explain with citations. Prompt identity claims are ignored.
+          Live evidence for <strong>{app.session?.selectedPatientId}</strong>, filtered for{' '}
+          <strong>{app.session?.activeViewerId}</strong>
           {app.askTransport ? (
             <>
               {' '}
-              Transport: <strong>{app.askTransport === 'ws' ? 'WebSocket stream' : 'REST fallback'}</strong>.
+              · <strong>{app.askTransport === 'ws' ? 'WebSocket' : 'REST'}</strong>
             </>
           ) : null}
+          .
         </p>
 
         {!run && !busy ? (
@@ -69,74 +83,36 @@ export default function AskPage() {
             </button>
           </div>
         ) : null}
-        {busy ? (
-          <div className="info-banner">
-            {app.askStatus || 'Retrieving evidence and checking consent…'}
-            {app.askStreamText ? (
-              <p className="stream-preview" style={{ marginTop: '0.75rem', whiteSpace: 'pre-wrap' }}>
-                {app.askStreamText}
-                <span className="stream-caret">▍</span>
-              </p>
-            ) : null}
-          </div>
+
+        {busy && !app.askStreamText ? (
+          <div className="info-banner">{app.askStatus || 'Retrieving evidence and checking consent…'}</div>
         ) : null}
 
-        {run ? (
-          <article className="answer">
-            <h2>{run.answer.answer}</h2>
-            {run.answer.policyNotice ? <div className="info-banner">{run.answer.policyNotice}</div> : null}
-            {(app.memoriesWritten?.length || run.memoriesWritten?.length) ? (
-              <div className="info-banner remembered">
-                Remembered for next time:{' '}
-                {(app.memoriesWritten?.length ? app.memoriesWritten : run.memoriesWritten)
-                  .map((m: { text: string }) => m.text)
-                  .join(' · ')}
-              </div>
+        {answerText ? (
+          <article className="answer stack">
+            <div className="answer-prose" style={{ whiteSpace: 'pre-wrap', fontSize: '1.05rem', lineHeight: 1.45 }}>
+              {answerText}
+              {busy ? <span className="stream-caret">▍</span> : null}
+            </div>
+
+            {!busy && memoryLine ? <p className="muted small">{memoryLine}</p> : null}
+
+            {!busy && run?.answer?.policyNotice && !/^Remembered:/i.test(run.answer.policyNotice) ? (
+              <div className="info-banner">{run.answer.policyNotice}</div>
             ) : null}
-            {run.memoriesUsed?.length ? (
-              <p className="muted small">
-                Used prior memory: {run.memoriesUsed.map((m: { text: string }) => m.text).join(' · ')}
-              </p>
-            ) : null}
-            {run.answer.facts?.length ? (
+
+            {!busy && run?.answer?.facts?.length ? (
               <div>
-                <div className="section-title">What the record says</div>
-                <ul>
-                  {run.answer.facts.map((f: any, i: number) => (
+                <div className="section-title">Key points from the record</div>
+                <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.1rem' }}>
+                  {run.answer.facts.slice(0, 8).map((f: { text: string }, i: number) => (
                     <li key={i}>{f.text}</li>
                   ))}
                 </ul>
               </div>
             ) : null}
-            {run.answer.uncertainty ? (
-              <div>
-                <div className="section-title">Uncertainty</div>
-                <p className="muted">{run.answer.uncertainty}</p>
-              </div>
-            ) : null}
-            {run.answer.recordedNextStep ? (
-              <div>
-                <div className="section-title">Recorded next step</div>
-                <p>{run.answer.recordedNextStep.text}</p>
-              </div>
-            ) : null}
-            {run.answer.appointmentAssist ? (
-              <div className="info-banner">
-                Appointment stage: <strong>{run.answer.appointmentAssist.stage}</strong> —{' '}
-                {run.answer.appointmentAssist.notice}
-                {run.answer.appointmentAssist.availableSlots?.length ? (
-                  <ul>
-                    {run.answer.appointmentAssist.availableSlots.map((s: any, i: number) => (
-                      <li key={i}>
-                        {s.startsAt}
-                        {s.clinician ? ` · ${s.clinician}` : ''}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            ) : null}
-            {run.answer.visualisationSpec?.points?.length ? (
+
+            {!busy && run?.answer?.visualisationSpec?.points?.length ? (
               <ResultChart
                 title={run.answer.visualisationSpec.title}
                 unit={run.answer.visualisationSpec.unit}
@@ -146,35 +122,58 @@ export default function AskPage() {
                 referenceLabel={run.answer.visualisationSpec.referenceLabel}
               />
             ) : null}
-            <div>
-              <div className="section-title">Sources</div>
-              <div className="pill-row">
-                {run.answer.citations?.map((c: any) => (
-                  <button key={c.evidenceId} type="button" className="chip" onClick={() => app.openSource(c)}>
-                    {c.title}
-                    {c.date ? ` · ${new Date(c.date).toLocaleDateString('en-GB')}` : ''}
-                  </button>
-                ))}
+
+            {!busy && run?.answer?.appointmentAssist ? (
+              <div className="info-banner">
+                Appointment: <strong>{run.answer.appointmentAssist.stage}</strong> —{' '}
+                {run.answer.appointmentAssist.notice}
               </div>
-            </div>
-            <details>
-              <summary className="muted">How this answer was made</summary>
-              <pre className="trace">
-                {JSON.stringify(
-                  {
-                    model: run.model,
-                    promptVersion: run.promptVersion,
-                    policy: run.policy,
-                    tools: run.tools,
-                    latencyMs: run.latencyMs,
-                    memoriesUsed: run.memoriesUsed,
-                    memoriesWritten: run.memoriesWritten,
-                  },
-                  null,
-                  2,
-                )}
-              </pre>
-            </details>
+            ) : null}
+
+            {!busy && citations.length ? (
+              <div>
+                <button type="button" className="secondary" onClick={() => setSourcesOpen((v) => !v)}>
+                  {sourcesOpen ? 'Hide sources' : `Sources (${citations.length})`}
+                </button>
+                {sourcesOpen ? (
+                  <div className="pill-row" style={{ marginTop: '0.5rem' }}>
+                    {citations.map((c: { evidenceId: string; title: string; date?: string }) => (
+                      <button key={c.evidenceId} type="button" className="chip" onClick={() => app.openSource(c)}>
+                        {c.title}
+                        {c.date ? ` · ${formatSourceDate(c.date)}` : ''}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {!busy && run?.answer?.uncertainty ? (
+              <p className="muted small" style={{ marginBottom: 0 }}>
+                {run.answer.uncertainty}
+              </p>
+            ) : null}
+
+            {!busy && run ? (
+              <details>
+                <summary className="muted">How this answer was made</summary>
+                <pre className="trace">
+                  {JSON.stringify(
+                    {
+                      model: run.model,
+                      promptVersion: run.promptVersion,
+                      policy: run.policy,
+                      tools: run.tools,
+                      latencyMs: run.latencyMs,
+                      memoriesUsed: run.memoriesUsed,
+                      memoriesWritten: run.memoriesWritten,
+                    },
+                    null,
+                    2,
+                  )}
+                </pre>
+              </details>
+            ) : null}
           </article>
         ) : null}
 
@@ -186,7 +185,7 @@ export default function AskPage() {
             id="ask"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="e.g. Explain my latest blood tests — I prefer afternoon appointments"
+            placeholder="e.g. Explain my latest blood tests"
           />
           <button type="submit" disabled={busy || !question.trim()}>
             {busy ? 'Working…' : 'Ask'}
@@ -208,4 +207,18 @@ export default function AskPage() {
       </div>
     </div>
   );
+}
+
+function formatSourceDate(iso: string): string {
+  const day = iso.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    const [y, m, d] = day.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+  }
+  return new Date(iso).toLocaleDateString('en-GB');
 }

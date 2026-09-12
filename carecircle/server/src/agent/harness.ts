@@ -47,6 +47,9 @@ import {
   buildVisualisation,
   catalogueEvidence,
   clarifyAppointment,
+  prefersShortPlain,
+  proseFromFacts,
+  proseMatchesFacts,
   sanitizeAnswerCitations,
 } from './grounding.js';
 import {
@@ -397,9 +400,11 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       }
 
       const visualisationSpec = buildVisualisation(input.question, bag.allowedMeasurements);
-      const memoryGreeting =
-        bag.memoriesUsed.find((m) => m.metadata.kind === 'greeting' || m.metadata.kind === 'preference')
-          ?.content;
+      const memoryPref = bag.memoriesUsed
+        .filter((m) => m.metadata.kind === 'preference' || m.metadata.kind === 'clarification' || m.metadata.kind === 'greeting')
+        .map((m) => m.content)
+        .slice(0, 2)
+        .join(' · ');
       bag.answer = buildDeterministicAnswer({
         question: input.question,
         policyNotice: decision.userNotice,
@@ -408,31 +413,8 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         events: bag.allowedEvents,
         visualisationSpec,
         appointmentAssist: bag.appointmentAssist,
-        memoriesHint: memoryGreeting
-          ? `Based on what I remember for you: ${memoryGreeting}. Ask another question if you need something else from the record.`
-          : undefined,
+        memoriesHint: memoryPref || undefined,
       });
-
-      // Soft personalisation for allow/partial when we have memories
-      if (
-        (decision.outcome === 'allow' || decision.outcome === 'partial') &&
-        bag.memoriesUsed.length &&
-        bag.answer
-      ) {
-        const pref = bag.memoriesUsed
-          .filter((m) => m.metadata.kind === 'preference' || m.metadata.kind === 'clarification')
-          .map((m) => m.content)
-          .slice(0, 2);
-        if (pref.length && !/outside your current|cannot confirm/i.test(bag.answer.answer)) {
-          bag.answer = {
-            ...bag.answer,
-            answer: bag.answer.answer,
-            policyNotice: [bag.answer.policyNotice, pref.length ? `Remembered: ${pref.join(' · ')}` : '']
-              .filter(Boolean)
-              .join(' '),
-          };
-        }
-      }
 
       ctx.state.update({
         answerJson: JSON.stringify(bag.answer),
@@ -487,12 +469,23 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         const tools = [getPermittedEvidenceTool, appointmentAssistTool, rememberTool, updateConsentTool];
         const askAgent = createAskAgent(app, modelName, tools);
         let streamed = '';
+        const facts = bag.answer?.facts || [];
+        const short = prefersShortPlain(
+          bag.memoriesUsed.map((m) => m.content).join(' '),
+          input.question,
+        );
         const prompt = [
           `Authenticated viewer: ${input.viewerId} (${viewerRole}).`,
           `Patient: ${input.context.patientId}.`,
-          `Draft facts (grounded, already filtered): ${JSON.stringify(bag.answer?.facts || [])}.`,
+          `Memories: ${JSON.stringify(bag.memoriesUsed.map((m) => ({ kind: m.metadata.kind, text: m.content })))}.`,
+          `STRUCTURED_FACTS (authoritative — every number in your answer must appear here):`,
+          JSON.stringify(facts),
+          `Draft answer (fallback): ${bag.answer?.answer || ''}`,
           `Question: ${input.question}`,
-          `Rewrite a clear CareCircle answer using only permitted evidence and memories. Call tools if needed.`,
+          short
+            ? `Style: short plain language, 3–6 sentences max. No full panel dump. No cheerleading closer.`
+            : `Style: concise. Prefer highlights over a full dump unless asked.`,
+          `Rewrite using ONLY the structured facts above. Do not introduce any number not listed in STRUCTURED_FACTS.`,
         ].join('\n');
 
         // Fresh session so nested agent state does not collide with the pipeline session.
@@ -540,8 +533,13 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         const text = String(nested?.output?.text || streamed || '').trim();
         const parsed = tryParseModelExtras(text);
         const prose = stripTrailingJson(text) || parsed.answer;
+        const grounded =
+          Boolean(prose) &&
+          proseMatchesFacts(prose!, facts, bag.allowedMeasurements.filter((m) =>
+            facts.some((f) => f.evidenceIds.includes(m.evidenceId)),
+          ));
 
-        if (prose && bag.answer) {
+        if (prose && bag.answer && grounded) {
           bag.answer = {
             ...bag.answer,
             answer: prose,
@@ -577,6 +575,34 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             status: 'ok',
             detail: 'responses_api',
           });
+        } else if (prose && bag.answer && !grounded) {
+          // Model drifted (wrong numbers) — keep deterministic prose from facts.
+          const fallback = proseFromFacts(facts, {
+            short: prefersShortPlain(
+              bag.memoriesUsed.map((m) => m.content).join(' '),
+              input.question,
+            ),
+            labIntent: /\b(blood|result|lab|lft|egfr|alt|haemoglobin|hemoglobin)\b/i.test(input.question),
+            memoriesHint: bag.memoriesUsed.map((m) => m.content).join(' '),
+          });
+          bag.answer = { ...bag.answer, answer: fallback };
+          emit({ type: 'token', text: fallback });
+          ctx.state.update({
+            answerJson: JSON.stringify(bag.answer),
+            modelLabel: 'deterministic-grounded-after-drift',
+          });
+          appendTrace(ctx, {
+            tool: 'answer.refine',
+            status: 'ok',
+            latencyMs: Date.now() - t0,
+            detail: 'numeric_drift_fallback',
+          });
+          emit({
+            type: 'tool',
+            tool: 'answer.refine',
+            status: 'ok',
+            detail: 'numeric_drift_fallback',
+          });
         } else {
           throw new Error('empty_model_output');
         }
@@ -595,20 +621,37 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
             onToken: (t) => emit({ type: 'token', text: t }),
           });
           if (refined && bag.answer) {
+            const facts = bag.answer.facts || [];
+            const ok = proseMatchesFacts(
+              refined.answer,
+              facts,
+              bag.allowedMeasurements.filter((m) => facts.some((f) => f.evidenceIds.includes(m.evidenceId))),
+            );
+            const answer = ok
+              ? refined.answer
+              : proseFromFacts(facts, {
+                  short: prefersShortPlain(
+                    bag.memoriesUsed.map((m) => m.content).join(' '),
+                    input.question,
+                  ),
+                  labIntent: /\b(blood|result|lab|lft|egfr|alt|haemoglobin|hemoglobin)\b/i.test(input.question),
+                });
             bag.answer = {
               ...bag.answer,
-              answer: refined.answer,
+              answer,
               uncertainty: refined.uncertainty || bag.answer.uncertainty,
             };
             ctx.state.update({
               answerJson: JSON.stringify(bag.answer),
-              modelLabel: `openai-responses:${modelName}`,
+              modelLabel: ok
+                ? `openai-responses:${modelName}`
+                : 'deterministic-grounded-after-drift',
             });
             appendTrace(ctx, {
               tool: 'answer.refine',
               status: 'ok',
               latencyMs: Date.now() - t0,
-              detail: 'responses api direct fallback',
+              detail: ok ? 'responses api direct fallback' : 'numeric_drift_fallback',
             });
           } else {
             appendTrace(ctx, {
@@ -815,7 +858,8 @@ async function refineWithResponsesApi(input: {
     body: JSON.stringify({
       model: input.model,
       store: false,
-      temperature: 0.2,
+      temperature: 0.1,
+      max_output_tokens: 450,
       // Stable prefix first for prompt-cache friendliness; dynamic pack last.
       input: [
         {
@@ -832,7 +876,8 @@ async function refineWithResponsesApi(input: {
             facts: input.draft.facts,
             draftAnswer: input.draft.answer,
             question: input.question,
-            instruction: 'Return JSON only: {answer, uncertainty}',
+            instruction:
+              'Rephrase STRUCTURED facts only. Every number must appear in facts. Short plain language if memories ask for it. No cheerleading. Return JSON only: {answer, uncertainty}',
           }),
         },
       ],

@@ -44,16 +44,68 @@ function asString(v: unknown): string | undefined {
 
 function toIsoDate(v: unknown): string | undefined {
   if (typeof v === 'number' && Number.isFinite(v)) {
-    // Heuristic: ms vs days
+    // Heuristic: ms vs seconds (avoid treating small day-counts as dates)
     const ms = v > 1e12 ? v : v > 1e9 ? v * 1000 : undefined;
     if (ms) return new Date(ms).toISOString();
   }
   if (typeof v === 'string') {
-    const t = Date.parse(v);
+    const s = v.trim();
+    // Calendar dates: keep noon UTC so en-GB formatting never shifts the day/year.
+    const dayOnly = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dayOnly) return `${dayOnly[1]}-${dayOnly[2]}-${dayOnly[3]}T12:00:00.000Z`;
+    const t = Date.parse(s);
     if (!Number.isNaN(t)) return new Date(t).toISOString();
-    return v;
+    return s;
   }
   return undefined;
+}
+
+/** Turn nested simulator payloads into short readable prose (never raw JSON). */
+export function humaniseResourceData(data: Record<string, unknown>, title = ''): string {
+  const preferred = ['text', 'body', 'summary', 'notes', 'reason', 'statusText', 'followUp', 'message', 'notice'];
+  for (const key of preferred) {
+    const v = asString(data[key]);
+    if (v && !v.trim().startsWith('{')) return v.slice(0, 500);
+  }
+  if (Array.isArray(data.analytes)) {
+    const panel = asString((data.panel as { name?: string } | undefined)?.name) || title || 'Panel';
+    const bits = (data.analytes as Record<string, unknown>[])
+      .slice(0, 8)
+      .map((a) => {
+        const name = asString(a.name) || asString(a.id) || 'result';
+        const value = asNumber(a.value);
+        const unit = asString(a.unit) || '';
+        return value !== undefined ? `${name} ${value}${unit ? ` ${unit}` : ''}` : name;
+      });
+    return `${panel}: ${bits.join('; ')}`;
+  }
+  if (data.sections && typeof data.sections === 'object') {
+    const secs = data.sections as Record<string, unknown>;
+    const parts: string[] = [];
+    for (const k of ['reason', 'course', 'plan', 'actions', 'followUp', 'gpActions']) {
+      const t = asString(secs[k]);
+      if (t) parts.push(t.slice(0, 160));
+    }
+    const stage = asString(data.stage);
+    const who = asString(data.sentBy);
+    const head = [stage && `Status: ${stage}`, who && `From ${who}`].filter(Boolean).join('. ');
+    if (parts.length || head) return [head, parts.join(' ')].filter(Boolean).join(' — ').slice(0, 500);
+  }
+  if (Array.isArray(data.entries)) {
+    const bodies = (data.entries as Record<string, unknown>[])
+      .map((e) => asString(e.body) || asString(e.text))
+      .filter(Boolean)
+      .slice(0, 2) as string[];
+    if (bodies.length) return bodies.join(' ').slice(0, 500);
+  }
+  if (asString(data.gpActions)) return String(data.gpActions).slice(0, 500);
+  if (asString(data.clinicalDetails)) return String(data.clinicalDetails).slice(0, 500);
+  // Last resort: flatten scalar fields only (never JSON.stringify the whole object).
+  const scalars = Object.entries(data)
+    .filter(([, v]) => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')
+    .slice(0, 6)
+    .map(([k, v]) => `${k}: ${v}`);
+  return scalars.join('; ').slice(0, 400);
 }
 
 function pickPanelId(resource: AnimaResource, data: Record<string, unknown>): string {
@@ -230,12 +282,13 @@ export function resourceToEvent(resource: AnimaResource, patientId: string, serv
   const summaryParts: string[] = [];
   for (const key of ['text', 'body', 'summary', 'notes', 'reason', 'statusText', 'followUp', 'gpActions', 'clinicalDetails']) {
     const v = asString(data[key]);
-    if (v) summaryParts.push(v.slice(0, 500));
+    if (v && !v.trim().startsWith('{') && !v.trim().startsWith('[')) summaryParts.push(v.slice(0, 500));
   }
   if (summaryParts.length === 0) {
-    const snippet = JSON.stringify(data);
-    if (snippet && snippet !== '{}') summaryParts.push(snippet.slice(0, 400));
+    const human = humaniseResourceData(data, resource.title);
+    if (human) summaryParts.push(human);
   }
+  // Never fall back to raw JSON.stringify — that leaks into Ask facts.
   return {
     evidenceId: `${resource.id}:event`,
     resourceId: resource.id,

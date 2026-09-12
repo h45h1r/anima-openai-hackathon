@@ -14,6 +14,12 @@ import type {
 } from '../types/domain.js';
 import type { EvidenceItem } from '../consent/policy.js';
 
+const LAB_Q =
+  /\b(result|results|blood|lab|labs|lft|egfr|alt|alp|hba1c|haemoglobin|hemoglobin|panel|analyte|creatinine|sodium|potassium)\b/i;
+const TREND_Q = /\b(trend|chart|graph|changed|over time|history|compare|how has)\b/i;
+const APPT_Q = /\b(appoint(ment)?s?|book(ing)?|slots?|diary|afternoon|prefer)\b/i;
+const DOC_Q = /\b(discharge|handover|document|letter|summary|next step|follow.?up task)\b/i;
+
 export function catalogueEvidence(ctx: ClinicalContext): EvidenceItem[] {
   const items: EvidenceItem[] = [];
   for (const m of ctx.measurements) {
@@ -48,22 +54,55 @@ export function buildPermittedPack(input: {
   allowedEvidenceIds: string[];
   filteredCount: number;
 }) {
+  // Newest per analyte first — never hand the model an oldest-only slice of a long history.
+  const byAnalyte = new Map<string, Measurement[]>();
+  for (const m of input.measurements) {
+    const list = byAnalyte.get(m.analyteId) || [];
+    list.push(m);
+    byAnalyte.set(m.analyteId, list);
+  }
+  const newestMeasurements: Measurement[] = [];
+  const sixMonths = 1000 * 60 * 60 * 24 * 180;
+  for (const series of byAnalyte.values()) {
+    const sorted = [...series].sort((a, b) => b.sampledAt.localeCompare(a.sampledAt));
+    const latest = sorted[0];
+    if (!latest) continue;
+    newestMeasurements.push(latest);
+    const prev = sorted[1];
+    if (prev) {
+      const latestMs = Date.parse(latest.sampledAt);
+      const prevMs = Date.parse(prev.sampledAt);
+      if (
+        Number.isFinite(latestMs) &&
+        Number.isFinite(prevMs) &&
+        latestMs - prevMs <= sixMonths
+      ) {
+        newestMeasurements.push(prev);
+      }
+    }
+  }
+  newestMeasurements.sort((a, b) => b.sampledAt.localeCompare(a.sampledAt));
+  const capped = newestMeasurements.slice(0, 28);
+  const newestEvents = [...input.events].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 10);
+
   return {
     patientId: input.patientId,
     viewerId: input.viewerId,
     outcome: input.outcome,
-    measurements: input.measurements.slice(0, 20).map((m) => ({
+    measurements: capped.map((m) => ({
       evidenceId: m.evidenceId,
       name: m.displayName,
       value: m.value,
       unit: m.unit,
       sampledAt: m.sampledAt,
+      referenceLow: m.referenceLow,
+      referenceHigh: m.referenceHigh,
     })),
-    events: input.events.slice(0, 12).map((e) => ({
+    events: newestEvents.map((e) => ({
       evidenceId: e.evidenceId,
       title: e.title,
       status: e.status,
-      summary: truncate(e.summary, 300),
+      summary: truncate(humaniseEventSummary(e), 280),
     })),
     allowedEvidenceIds: input.allowedEvidenceIds,
     filteredCount: input.filteredCount,
@@ -73,43 +112,85 @@ export function buildPermittedPack(input: {
 export function buildVisualisation(question: string, measurements: Measurement[]): VisualisationSpec | undefined {
   if (!measurements.length) return undefined;
   const q = question.toLowerCase();
+  const wantsTrend = TREND_Q.test(q);
   const byAnalyte = new Map<string, Measurement[]>();
   for (const m of measurements) {
     const list = byAnalyte.get(m.analyteId) || [];
     list.push(m);
     byAnalyte.set(m.analyteId, list);
   }
+
   let chosen: Measurement[] | undefined;
+  let named = false;
   for (const [, series] of byAnalyte) {
-    if (q.includes(series[0].analyteId) || q.includes(series[0].displayName.toLowerCase())) {
+    const id = series[0].analyteId.toLowerCase();
+    const name = series[0].displayName.toLowerCase();
+    if (q.includes(id) || q.includes(name) || nameTokensMatch(q, name)) {
       chosen = series;
+      named = true;
       break;
     }
   }
+
+  // Only visualise when the analyte is named, or the user clearly asks for a trend.
+  if (!named && !wantsTrend) return undefined;
   if (!chosen) {
+    if (!wantsTrend) return undefined;
     chosen = [...byAnalyte.values()].sort((a, b) => b.length - a.length)[0];
   }
-  if (!chosen || chosen.length < 1) return undefined;
-  if (!/trend|chart|graph|changed|over time|explain|result|blood|lft|compare/.test(q) && chosen.length < 2) {
-    if (!/explain|result|blood|latest|what/.test(q)) return undefined;
-  }
+  if (!chosen?.length) return undefined;
+
   const sorted = [...chosen].sort((a, b) => a.sampledAt.localeCompare(b.sampledAt));
-  const unit = sorted[0].unit;
+  // Prefer a coherent recent window (drop sparse year-ago outliers when a dense recent series exists).
+  const recent = trimStaleSeries(sorted);
+  if (recent.length < 1) return undefined;
+  if (!named && !wantsTrend && recent.length < 2) return undefined;
+
+  const unit = recent[0].unit;
   return {
     type: 'result_trend',
-    title: `${sorted[0].displayName} (${unit})`,
+    title: `${recent[0].displayName} (${unit})`,
     unit,
-    evidenceIds: sorted.map((m) => m.evidenceId),
-    points: sorted.map((m) => ({
+    evidenceIds: recent.map((m) => m.evidenceId),
+    points: recent.map((m) => ({
       date: m.sampledAt,
       value: m.value,
       label: m.displayName,
       evidenceId: m.evidenceId,
     })),
-    referenceLow: sorted.find((m) => m.referenceLow !== undefined)?.referenceLow,
-    referenceHigh: sorted.find((m) => m.referenceHigh !== undefined)?.referenceHigh,
-    referenceLabel: sorted.find((m) => m.referenceLabel)?.referenceLabel || 'Illustrative simulator interval',
+    referenceLow: recent.find((m) => m.referenceLow !== undefined)?.referenceLow,
+    referenceHigh: recent.find((m) => m.referenceHigh !== undefined)?.referenceHigh,
+    referenceLabel: recent.find((m) => m.referenceLabel)?.referenceLabel || 'Illustrative simulator interval',
   };
+}
+
+/** Drop a single distant year-ago point when the rest of the series is clustered. */
+function trimStaleSeries(sorted: Measurement[]): Measurement[] {
+  if (sorted.length < 3) return sorted;
+  const times = sorted.map((m) => Date.parse(m.sampledAt));
+  if (times.some((t) => Number.isNaN(t))) return sorted;
+  const latest = times[times.length - 1];
+  const gaps = times.slice(1).map((t, i) => t - times[i]);
+  const medianGap = [...gaps].sort((a, b) => a - b)[Math.floor(gaps.length / 2)] || 0;
+  // If the first gap is > ~4 months and much larger than typical spacing, drop the oldest point.
+  const fourMonths = 1000 * 60 * 60 * 24 * 120;
+  if (gaps[0] > fourMonths && gaps[0] > medianGap * 3) {
+    return sorted.slice(1);
+  }
+  // Also drop points older than ~10 months before latest when a shorter recent run exists.
+  const tenMonths = 1000 * 60 * 60 * 24 * 300;
+  const recent = sorted.filter((_, i) => latest - times[i] <= tenMonths);
+  return recent.length >= 2 ? recent : sorted;
+}
+
+function nameTokensMatch(q: string, name: string): boolean {
+  const tokens = name.split(/\W+/).filter((t) => t.length > 3);
+  return tokens.length > 0 && tokens.every((t) => q.includes(t));
+}
+
+export function prefersShortPlain(memoriesHint?: string, question?: string): boolean {
+  const blob = `${memoriesHint || ''} ${question || ''}`.toLowerCase();
+  return /short|plain.?language|brief|concise|simple updates|not too (long|much)/i.test(blob);
 }
 
 export function buildDeterministicAnswer(input: {
@@ -150,54 +231,99 @@ export function buildDeterministicAnswer(input: {
     citations.push({ evidenceId, resourceId, title, date, service, kind });
   };
 
-  if (input.measurements.length && /result|blood|lft|egfr|trend|explain|alt|alp|hba1c/i.test(input.question)) {
-    const byAnalyte = new Map<string, Measurement[]>();
-    for (const m of input.measurements) {
-      const list = byAnalyte.get(m.analyteId) || [];
-      list.push(m);
-      byAnalyte.set(m.analyteId, list);
-    }
-    const series = [...byAnalyte.values()].sort((a, b) => b.length - a.length)[0];
-    const sorted = [...series].sort((a, b) => a.sampledAt.localeCompare(b.sampledAt));
-    const latest = sorted[sorted.length - 1];
+  const labIntent = LAB_Q.test(input.question);
+  const short = prefersShortPlain(input.memoriesHint, input.question);
+  const wantsFullPanel = /\b(full|every|all|complete|entire)\b.*\b(panel|result|blood|lab)/i.test(input.question);
+
+  if (input.measurements.length && labIntent) {
+    const latestDay = latestSampleDay(input.measurements);
+    const latestPanel = input.measurements
+      .filter((m) => sampleDay(m.sampledAt) === latestDay)
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+    const flagged = latestPanel.filter(isOutOfRange);
+    const highlight = flagged.length ? flagged : latestPanel.slice(0, short && !wantsFullPanel ? 3 : 8);
+
     facts.push({
-      text: `Latest ${latest.displayName} is ${latest.value} ${latest.unit} (sampled ${formatDate(latest.sampledAt)}).`,
-      evidenceIds: [latest.evidenceId],
+      text: `Latest blood results on record are from ${formatDate(latestDay)}.`,
+      evidenceIds: highlight.map((m) => m.evidenceId),
     });
-    cite(latest.displayName, latest.evidenceId, latest.resourceId, latest.service, 'measurement', latest.sampledAt);
-    if (sorted.length >= 2) {
-      const prev = sorted[sorted.length - 2];
+
+    for (const m of wantsFullPanel || !short ? latestPanel : highlight) {
+      const range =
+        m.referenceLow !== undefined || m.referenceHigh !== undefined
+          ? ` (illustrative range ${m.referenceLow ?? '—'}–${m.referenceHigh ?? '—'} ${m.unit})`
+          : '';
+      const flag = isOutOfRange(m) ? ' — outside illustrative range' : '';
       facts.push({
-        text: `Previous value was ${prev.value} ${prev.unit} on ${formatDate(prev.sampledAt)}.`,
-        evidenceIds: [prev.evidenceId],
+        text: `${m.displayName}: ${formatNum(m.value)} ${m.unit}${flag}${range}.`,
+        evidenceIds: [m.evidenceId],
       });
-      cite(prev.displayName, prev.evidenceId, prev.resourceId, prev.service, 'measurement', prev.sampledAt);
+      cite(m.displayName, m.evidenceId, m.resourceId, m.service, 'measurement', m.sampledAt);
     }
-    if (latest.referenceLow !== undefined || latest.referenceHigh !== undefined) {
+
+    // Prior value for the primary highlighted analyte (longest series or first flagged).
+    const primary = pickPrimaryAnalyte(input.measurements, input.question, flagged[0]);
+    if (primary) {
+      const sorted = [...primary].sort((a, b) => a.sampledAt.localeCompare(b.sampledAt));
+      if (sorted.length >= 2) {
+        const prev = sorted[sorted.length - 2];
+        const latest = sorted[sorted.length - 1];
+        facts.push({
+          text: `Previous ${latest.displayName} was ${formatNum(prev.value)} ${prev.unit} on ${formatDate(prev.sampledAt)}.`,
+          evidenceIds: [prev.evidenceId],
+        });
+        cite(prev.displayName, prev.evidenceId, prev.resourceId, prev.service, 'measurement', prev.sampledAt);
+      }
+    }
+
+    // Lab-related resources only (skip discharge/appointment noise).
+    for (const ev of rankEvents(input.question, input.events, { labIntent: true }).slice(0, 3)) {
+      if (!isLabRelatedEvent(ev)) continue;
       facts.push({
-        text: `Simulator illustrative interval: ${latest.referenceLow ?? '—'} to ${latest.referenceHigh ?? '—'} ${latest.unit}. This is not a universal clinical threshold.`,
+        text: formatEventFact(ev),
+        evidenceIds: [ev.evidenceId],
+      });
+      cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+    }
+  } else {
+    const relevantEvents = rankEvents(input.question, input.events, {
+      labIntent: false,
+      apptIntent: APPT_Q.test(input.question),
+      docIntent: DOC_Q.test(input.question),
+    }).slice(0, 5);
+    for (const ev of relevantEvents) {
+      facts.push({
+        text: formatEventFact(ev),
+        evidenceIds: [ev.evidenceId],
+      });
+      cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
+    }
+
+    if (input.measurements.length && /result|value|number|level/i.test(input.question)) {
+      const byAnalyte = groupByAnalyte(input.measurements);
+      const series = [...byAnalyte.values()].sort((a, b) => b.length - a.length)[0];
+      const sorted = [...series].sort((a, b) => a.sampledAt.localeCompare(b.sampledAt));
+      const latest = sorted[sorted.length - 1];
+      facts.unshift({
+        text: `Latest ${latest.displayName} is ${formatNum(latest.value)} ${latest.unit} (sampled ${formatDate(latest.sampledAt)}).`,
         evidenceIds: [latest.evidenceId],
       });
+      cite(latest.displayName, latest.evidenceId, latest.resourceId, latest.service, 'measurement', latest.sampledAt);
     }
-  }
-
-  const relevantEvents = rankEvents(input.question, input.events).slice(0, 5);
-  for (const ev of relevantEvents) {
-    facts.push({
-      text: `${ev.title} (${ev.status}) — ${truncate(ev.summary, 220)}`,
-      evidenceIds: [ev.evidenceId],
-    });
-    cite(ev.title, ev.evidenceId, ev.resourceId, ev.service, ev.kind, ev.at);
   }
 
   let recordedNextStep: AgentAnswer['recordedNextStep'];
-  const next = input.events.find((e) => /follow|task|appoint|action|review/i.test(`${e.title} ${e.summary} ${e.status}`));
-  if (next) {
-    recordedNextStep = {
-      text: `Recorded next step from source: ${next.title} — ${truncate(next.summary, 180)} (status: ${next.status}).`,
-      evidenceIds: [next.evidenceId],
-    };
-    cite(next.title, next.evidenceId, next.resourceId, next.service, next.kind, next.at);
+  if (!labIntent || DOC_Q.test(input.question) || /next step|what happens next|follow.?up/i.test(input.question)) {
+    const next = input.events.find((e) =>
+      /follow|task|appoint|action|review/i.test(`${e.title} ${e.summary} ${e.status}`),
+    );
+    if (next) {
+      recordedNextStep = {
+        text: `Recorded next step: ${next.title} — ${truncate(humaniseEventSummary(next), 160)} (${humanStatus(next.status)}).`,
+        evidenceIds: [next.evidenceId],
+      };
+      cite(next.title, next.evidenceId, next.resourceId, next.service, next.kind, next.at);
+    }
   }
 
   if (!facts.length) {
@@ -213,16 +339,16 @@ export function buildDeterministicAnswer(input: {
     };
   }
 
-  const answerLead =
-    input.appointmentAssist && /appoint|book|slot|afternoon/i.test(input.question)
+  const answer =
+    input.appointmentAssist && APPT_Q.test(input.question)
       ? input.appointmentAssist.notice
-      : facts[0].text;
+      : proseFromFacts(facts, { short, labIntent, memoriesHint: input.memoriesHint });
 
   return {
-    answer: answerLead,
+    answer,
     facts,
     uncertainty:
-      'This explanation restates what the synthetic record shows. It is not a diagnosis or treatment recommendation.',
+      'This restates what the synthetic record shows. It is not a diagnosis or treatment recommendation.',
     recordedNextStep,
     policyNotice: input.policyNotice || undefined,
     citations,
@@ -231,16 +357,305 @@ export function buildDeterministicAnswer(input: {
   };
 }
 
-function rankEvents(question: string, events: NormalisedEvent[]): NormalisedEvent[] {
-  const tokens = question.toLowerCase().split(/\W+/).filter((t) => t.length > 3);
-  return [...events].sort((a, b) => score(b, tokens) - score(a, tokens));
+/** Deterministic patient-facing prose from structured facts only. */
+export function proseFromFacts(
+  facts: { text: string; evidenceIds: string[] }[],
+  opts?: { short?: boolean; labIntent?: boolean; memoriesHint?: string },
+): string {
+  if (!facts.length) return 'I could not find permitted evidence for that question.';
+  const short = opts?.short ?? false;
+  const lines = facts.map((f) => f.text);
+
+  if (opts?.labIntent) {
+    const dateLine = lines.find((l) => /latest blood results on record/i.test(l));
+    const valueLines = lines.filter((l) => /: .+/.test(l) && !/previous |illustrative range|on record/i.test(l));
+    const prev = lines.find((l) => /^Previous /i.test(l));
+    const flagged = valueLines.filter((l) => /outside illustrative range/i.test(l));
+    const ok = valueLines.filter((l) => !/outside illustrative range/i.test(l));
+
+    const parts: string[] = [];
+    if (dateLine) parts.push(dateLine.replace(/\.$/, ''));
+    if (flagged.length) {
+      parts.push(
+        `What stands out: ${flagged
+          .slice(0, short ? 3 : 6)
+          .map(stripFactChrome)
+          .join('; ')}.`,
+      );
+    }
+    if (ok.length) {
+      const sample = ok.slice(0, short ? 2 : 4).map(stripFactChrome);
+      parts.push(
+        flagged.length
+          ? `Other noted values include ${sample.join('; ')}.`
+          : `Key values: ${sample.join('; ')}.`,
+      );
+    }
+    if (prev && !short) parts.push(prev);
+    if (short) {
+      return `${parts.slice(0, 4).join(' ')} Ask if you want the full panel.`;
+    }
+    return parts.join(' ');
+  }
+
+  const lead = lines[0];
+  const rest = lines.slice(1, short ? 3 : 5).map(stripFactChrome);
+  if (!rest.length) return lead;
+  return `${lead} ${rest.join(' ')}`;
 }
 
-function score(ev: NormalisedEvent, tokens: string[]): number {
-  const hay = `${ev.title} ${ev.summary} ${ev.kind} ${ev.status}`.toLowerCase();
+function stripFactChrome(line: string): string {
+  return line
+    .replace(/\s*—\s*outside illustrative range/gi, ' (outside illustrative range)')
+    .replace(/\s*\(illustrative range[^)]*\)\.?/gi, '')
+    .replace(/\.$/, '');
+}
+
+export function formatEventFact(ev: NormalisedEvent): string {
+  const summary = truncate(humaniseEventSummary(ev), 220);
+  return `${ev.title} (${humanStatus(ev.status)})${summary ? ` — ${summary}` : ''}.`;
+}
+
+export function humaniseEventSummary(ev: NormalisedEvent): string {
+  const raw = (ev.summary || ev.rawSnippet || '').trim();
+  if (!raw) return '';
+  if (looksLikeJson(raw)) {
+    return humaniseJsonBlob(raw) || ev.title;
+  }
+  if (looksLikeJson(raw.slice(raw.indexOf('{')))) {
+    const start = raw.indexOf('{');
+    const prefix = raw.slice(0, start).trim().replace(/[—:-]+$/, '').trim();
+    const human = humaniseJsonBlob(raw.slice(start));
+    return [prefix, human].filter(Boolean).join(' — ');
+  }
+  return raw.replace(/\s+/g, ' ').trim();
+}
+
+function looksLikeJson(s: string): boolean {
+  const t = s.trim();
+  return t.startsWith('{') || t.startsWith('[');
+}
+
+export function humaniseJsonBlob(raw: string): string {
+  try {
+    const obj = JSON.parse(raw);
+    return summariseUnknown(obj, 0);
+  } catch {
+    // Truncated JSON in facts — strip braces and quote noise for readability.
+    return raw
+      .replace(/[{}\[\]"]/g, ' ')
+      .replace(/\b(stage|sentAt|sentBy|assignee|sections|entries|kind|panel|analytes|id|name|unit|value|referenceLow|referenceHigh|body|actor)\b/gi, ' ')
+      .replace(/[,:]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 220);
+  }
+}
+
+function summariseUnknown(value: unknown, depth: number): string {
+  if (value == null) return '';
+  if (typeof value === 'string') return value.slice(0, 240);
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (depth > 3) return '';
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, 4)
+      .map((v) => summariseUnknown(v, depth + 1))
+      .filter(Boolean)
+      .join('; ');
+  }
+  if (typeof value === 'object') {
+    const o = value as Record<string, unknown>;
+    // Blood panel shape
+    if (o.analytes && Array.isArray(o.analytes)) {
+      const panel = (o.panel as { name?: string } | undefined)?.name || (o.kind as string) || 'Panel';
+      const bits = (o.analytes as Record<string, unknown>[])
+        .slice(0, 6)
+        .map((a) => {
+          const name = String(a.name || a.id || 'result');
+          const v = a.value;
+          const unit = a.unit ? ` ${a.unit}` : '';
+          return v !== undefined ? `${name} ${v}${unit}` : name;
+        });
+      return `${panel}: ${bits.join('; ')}`;
+    }
+    if (Array.isArray(o.entries)) {
+      const bodies = (o.entries as Record<string, unknown>[])
+        .map((e) => asText(e.body) || asText(e.text))
+        .filter(Boolean)
+        .slice(0, 2);
+      if (bodies.length) return bodies.join(' ');
+    }
+    if (o.sections && typeof o.sections === 'object') {
+      const secs = o.sections as Record<string, unknown>;
+      const preferred = ['reason', 'course', 'plan', 'actions', 'followUp'];
+      const parts: string[] = [];
+      for (const k of preferred) {
+        const t = asText(secs[k]);
+        if (t) parts.push(t.slice(0, 120));
+      }
+      if (parts.length) {
+        const who = asText(o.sentBy);
+        const stage = asText(o.stage);
+        const head = [stage && `Status: ${humanStatus(stage)}`, who && `From ${who}`].filter(Boolean).join('. ');
+        return [head, parts.join(' ')].filter(Boolean).join(' — ');
+      }
+    }
+    const preferredKeys = ['text', 'body', 'summary', 'notes', 'reason', 'message', 'notice', 'statusText', 'followUp'];
+    for (const k of preferredKeys) {
+      const t = asText(o[k]);
+      if (t) return t.slice(0, 240);
+    }
+    const stage = asText(o.stage);
+    const status = asText(o.status);
+    if (stage || status) return `Status: ${humanStatus(stage || status || '')}`;
+    return Object.entries(o)
+      .slice(0, 4)
+      .map(([k, v]) => {
+        if (v && typeof v === 'object') return '';
+        return `${k}: ${String(v)}`;
+      })
+      .filter(Boolean)
+      .join('; ')
+      .slice(0, 220);
+  }
+  return '';
+}
+
+function asText(v: unknown): string | undefined {
+  if (typeof v === 'string' && v.trim()) return v.trim();
+  return undefined;
+}
+
+function humanStatus(status: string): string {
+  if (!status) return 'recorded';
+  if (looksLikeJson(status)) return humaniseJsonBlob(status) || 'recorded';
+  return status.replace(/_/g, ' ');
+}
+
+function isLabRelatedEvent(ev: NormalisedEvent): boolean {
+  const hay = `${ev.kind} ${ev.title} ${ev.informationClass}`.toLowerCase();
+  return /lab|blood|result|patholog|diagnostic|report|panel|fbc|lft|ue\b|hba1c|observation/.test(hay);
+}
+
+function isOutOfRange(m: Measurement): boolean {
+  if (m.referenceLow !== undefined && m.value < m.referenceLow) return true;
+  if (m.referenceHigh !== undefined && m.value > m.referenceHigh) return true;
+  return false;
+}
+
+function sampleDay(iso: string): string {
+  const d = iso.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : iso;
+}
+
+function latestSampleDay(measurements: Measurement[]): string {
+  return measurements.map((m) => sampleDay(m.sampledAt)).sort().at(-1) || '';
+}
+
+function groupByAnalyte(measurements: Measurement[]): Map<string, Measurement[]> {
+  const byAnalyte = new Map<string, Measurement[]>();
+  for (const m of measurements) {
+    const list = byAnalyte.get(m.analyteId) || [];
+    list.push(m);
+    byAnalyte.set(m.analyteId, list);
+  }
+  return byAnalyte;
+}
+
+function pickPrimaryAnalyte(
+  measurements: Measurement[],
+  question: string,
+  flagged?: Measurement,
+): Measurement[] | undefined {
+  const q = question.toLowerCase();
+  const byAnalyte = groupByAnalyte(measurements);
+  for (const [, series] of byAnalyte) {
+    const name = series[0].displayName.toLowerCase();
+    const id = series[0].analyteId.toLowerCase();
+    if (q.includes(id) || q.includes(name)) return series;
+  }
+  if (flagged) return byAnalyte.get(flagged.analyteId);
+  return [...byAnalyte.values()].sort((a, b) => b.length - a.length)[0];
+}
+
+function formatNum(n: number): string {
+  return Number.isInteger(n) ? String(n) : String(n);
+}
+
+/**
+ * Reject model prose that introduces numbers not present in structured facts / known measurements.
+ * Years and calendar day-of-month near month names are ignored.
+ */
+export function proseMatchesFacts(
+  prose: string,
+  facts: { text: string }[],
+  measurements: Measurement[] = [],
+): boolean {
+  const allowed = new Set<number>();
+  const absorb = (text: string) => {
+    for (const n of extractNumbers(text)) allowed.add(n);
+  };
+  for (const f of facts) absorb(f.text);
+  for (const m of measurements) {
+    allowed.add(m.value);
+    if (m.referenceLow !== undefined) allowed.add(m.referenceLow);
+    if (m.referenceHigh !== undefined) allowed.add(m.referenceHigh);
+  }
+
+  const cleaned = prose
+    .replace(/\b(19|20)\d{2}\b/g, ' ') // years
+    .replace(
+      /\b([0-3]?\d)\s+(January|February|March|April|May|June|July|August|September|October|November|December)\b/gi,
+      ' ',
+    )
+    .replace(/×\s*10\s*[⁹9]/gi, ' ')
+    .replace(/\b10[⁹9]\b/g, ' ');
+
+  for (const n of extractNumbers(cleaned)) {
+    if (n >= 1 && n <= 31) continue; // residual day/month fragments
+    if (!allowed.has(n)) return false;
+  }
+  return true;
+}
+
+function extractNumbers(text: string): number[] {
+  const out: number[] = [];
+  for (const m of text.matchAll(/\d+(?:\.\d+)?/g)) {
+    const n = Number(m[0]);
+    if (Number.isFinite(n)) out.push(n);
+  }
+  return out;
+}
+
+export function factsContainRawJson(facts: { text: string }[]): boolean {
+  return facts.some((f) => /[{[]/.test(f.text) && /".*":/.test(f.text));
+}
+
+function rankEvents(
+  question: string,
+  events: NormalisedEvent[],
+  intent?: { labIntent?: boolean; apptIntent?: boolean; docIntent?: boolean },
+): NormalisedEvent[] {
+  const tokens = question.toLowerCase().split(/\W+/).filter((t) => t.length > 3);
+  return [...events].sort((a, b) => score(b, tokens, intent) - score(a, tokens, intent));
+}
+
+function score(
+  ev: NormalisedEvent,
+  tokens: string[],
+  intent?: { labIntent?: boolean; apptIntent?: boolean; docIntent?: boolean },
+): number {
+  const hay = `${ev.title} ${ev.summary} ${ev.kind} ${ev.status} ${ev.informationClass}`.toLowerCase();
   let s = 0;
   for (const t of tokens) if (hay.includes(t)) s += 2;
-  if (/appoint|task|discharge|handover|result|pharmac|follow/i.test(hay)) s += 1;
+  if (intent?.labIntent) {
+    if (isLabRelatedEvent(ev)) s += 6;
+    else if (/discharge|appoint|message|conversation|booking|handover/.test(hay)) s -= 8;
+  }
+  if (intent?.apptIntent && /appoint|slot|book|diary/.test(hay)) s += 5;
+  if (intent?.docIntent && /discharge|document|letter|handover|summary/.test(hay)) s += 5;
+  if (/appoint|task|discharge|handover|result|pharmac|follow|blood|lab/.test(hay)) s += 1;
   return s;
 }
 
@@ -249,13 +664,17 @@ export async function clarifyAppointment(
   events: NormalisedEvent[],
   question: string,
 ): Promise<AppointmentAssist> {
-  const preference = events.find((e) => /afternoon|prefer|preference/i.test(`${e.title} ${e.summary}`));
-  const booked = events.find((e) => /appoint/i.test(e.kind + e.title) && /book|confirm|scheduled|arrived/i.test(e.status + e.summary));
-  const request = events.find((e) => /appoint/i.test(e.kind + e.title) && /request|waiting|pending/i.test(e.status + e.summary));
+  const preference = events.find((e) => /afternoon|prefer|preference/i.test(`${e.title} ${humaniseEventSummary(e)}`));
+  const booked = events.find(
+    (e) => /appoint/i.test(e.kind + e.title) && /book|confirm|scheduled|arrived/i.test(e.status + e.summary),
+  );
+  const request = events.find(
+    (e) => /appoint/i.test(e.kind + e.title) && /request|waiting|pending/i.test(e.status + e.summary),
+  );
   const wantsNewBooking = /book|find (an |a )?afternoon|find (an |a )?appointment|available slot/i.test(question);
 
   const preferenceSummary = preference
-    ? truncate(`${preference.title}: ${preference.summary}`, 200)
+    ? truncate(`${preference.title}: ${humaniseEventSummary(preference)}`, 200)
     : /afternoon/i.test(question)
       ? 'Question mentions an afternoon preference; no separate preference record was found in permitted evidence.'
       : undefined;
@@ -276,9 +695,9 @@ export async function clarifyAppointment(
       stage: slots.length ? 'slots' : request ? 'request' : preferenceSummary ? 'preference' : 'awaiting_confirmation',
       preferenceSummary,
       requestSummary: request
-        ? truncate(`${request.title}: ${request.summary}`, 200)
+        ? truncate(`${request.title}: ${humaniseEventSummary(request)}`, 200)
         : booked
-          ? `Existing recorded booking: ${booked.title} (${booked.status}). This is not a new CareCircle booking.`
+          ? `Existing recorded booking: ${booked.title} (${humanStatus(booked.status)}). This is not a new CareCircle booking.`
           : undefined,
       availableSlots: slots.slice(0, 8),
       notice:
@@ -290,12 +709,12 @@ export async function clarifyAppointment(
     return {
       stage: 'confirmed',
       preferenceSummary,
-      requestSummary: request ? truncate(request.summary, 180) : undefined,
+      requestSummary: request ? truncate(humaniseEventSummary(request), 180) : undefined,
       availableSlots: slots.slice(0, 8),
       confirmed: { startsAt: booked.at, resourceId: booked.resourceId },
-      notice: `A booked follow-up appears in the record (${booked.title}, status ${booked.status}${booked.at ? `, ${formatDate(booked.at)}` : ''}). ${
-        preferenceSummary ? `Preference note: ${preferenceSummary}. ` : ''
-      }An afternoon preference is not itself a booking.`,
+      notice: `A booked follow-up appears in the record (${booked.title}, status ${humanStatus(booked.status)}${
+        booked.at ? `, ${formatDate(booked.at)}` : ''
+      }). ${preferenceSummary ? `Preference note: ${preferenceSummary}. ` : ''}An afternoon preference is not itself a booking.`,
     };
   }
 
@@ -303,7 +722,7 @@ export async function clarifyAppointment(
     return {
       stage: 'slots',
       preferenceSummary,
-      requestSummary: request ? truncate(request.summary, 180) : undefined,
+      requestSummary: request ? truncate(humaniseEventSummary(request), 180) : undefined,
       availableSlots: slots.slice(0, 8),
       notice:
         'Available diary slots were retrieved from the GP appointment book. No booking has been made. Confirm an exact patient and slot before any book_appointment action.',
@@ -314,7 +733,7 @@ export async function clarifyAppointment(
     return {
       stage: request ? 'request' : 'preference',
       preferenceSummary,
-      requestSummary: request ? truncate(`${request.title}: ${request.summary}`, 200) : undefined,
+      requestSummary: request ? truncate(`${request.title}: ${humaniseEventSummary(request)}`, 200) : undefined,
       notice:
         'CareCircle can clarify preferences and recorded requests. Live open slots were not returned for the queried dates, so no booking is offered.',
     };
@@ -348,8 +767,10 @@ function extractSlots(book: unknown, date: string): NonNullable<AppointmentAssis
       out.push({
         startsAt: startsAt.includes('T') ? startsAt : `${date}T${startsAt}`,
         sessionId: typeof o.sessionId === 'string' ? o.sessionId : typeof o.id === 'string' ? o.id : undefined,
-        sessionVersion: typeof o.sessionVersion === 'number' ? o.sessionVersion : typeof o.version === 'number' ? o.version : undefined,
-        clinician: typeof o.clinician === 'string' ? o.clinician : typeof o.practitioner === 'string' ? o.practitioner : undefined,
+        sessionVersion:
+          typeof o.sessionVersion === 'number' ? o.sessionVersion : typeof o.version === 'number' ? o.version : undefined,
+        clinician:
+          typeof o.clinician === 'string' ? o.clinician : typeof o.practitioner === 'string' ? o.practitioner : undefined,
         title: typeof o.title === 'string' ? o.title : undefined,
       });
     }
@@ -362,6 +783,13 @@ function extractSlots(book: unknown, date: string): NonNullable<AppointmentAssis
 }
 
 export function formatDate(iso: string): string {
+  // Prefer calendar date from YYYY-MM-DD to avoid TZ day-shift.
+  const day = iso.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    const [y, m, d] = day.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  }
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -371,10 +799,7 @@ export function truncate(s: string, n: number): string {
   return s.length <= n ? s : `${s.slice(0, n - 1)}…`;
 }
 
-export function sanitizeAnswerCitations(
-  answer: AgentAnswer,
-  allowedIds: Set<string>,
-): AgentAnswer {
+export function sanitizeAnswerCitations(answer: AgentAnswer, allowedIds: Set<string>): AgentAnswer {
   const next = { ...answer };
   next.citations = (answer.citations || []).filter((c) => allowedIds.has(c.evidenceId));
   next.facts = (answer.facts || []).filter((f) => f.evidenceIds.every((id) => allowedIds.has(id)));
@@ -384,6 +809,15 @@ export function sanitizeAnswerCitations(
       evidenceIds: next.visualisationSpec.evidenceIds.filter((id) => allowedIds.has(id)),
       points: next.visualisationSpec.points?.filter((p) => allowedIds.has(p.evidenceId)),
     };
+    if (!next.visualisationSpec.points?.length) {
+      next.visualisationSpec = undefined;
+    }
   }
+  // Final safety: never surface raw JSON blobs in facts.
+  next.facts = (next.facts || []).map((f) =>
+    looksLikeJson(f.text) || /\{"/.test(f.text)
+      ? { ...f, text: humaniseJsonBlob(f.text.includes('{') ? f.text.slice(f.text.indexOf('{')) : f.text) || f.text }
+      : f,
+  );
   return next;
 }

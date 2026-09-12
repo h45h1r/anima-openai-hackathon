@@ -61,7 +61,16 @@ export default function ResultChart({
         <tbody>
           {sorted.map((p) => (
             <tr key={p.evidenceId}>
-              <td>{new Date(p.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+              <td>
+                {/^\d{4}-\d{2}-\d{2}/.test(p.date)
+                  ? new Date(`${p.date.slice(0, 10)}T12:00:00.000Z`).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                      timeZone: 'UTC',
+                    })
+                  : new Date(p.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </td>
               <td>{p.value}</td>
               <td>{unit}</td>
             </tr>
