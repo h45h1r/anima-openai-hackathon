@@ -152,14 +152,10 @@ export default function App() {
                 {connected ? "Live" : "Reconnecting"}
               </Pill>
             </span>
-            <Button variant="plum" size="sm" disabled={running} onClick={runCheck} title="Simulates Kindred's scheduled check: finds appointments in the next 7 days and tells the family">
-              <ClockIcon />
-              <span className="hidden sm:inline">{running ? "Checking…" : "Run check"}</span>
-            </Button>
             <button onClick={toggleAudit} className={`hidden h-9 w-9 items-center justify-center rounded-full border lg:flex ${showAudit ? "border-plum bg-plum-soft text-plum" : "border-line text-muted hover:bg-paper"}`} title={showAudit ? "Hide activity" : "Show activity"} aria-pressed={showAudit}>
               <ActivityIcon />
             </button>
-            <AccountMenu viewer={viewer} personas={personas} onSwitch={(id) => go({ as: id, tab: "home" })} onReload={() => actions.reset()} onActivity={() => go({ tab: "activity" })} status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }} />
+            <AccountMenu viewer={viewer} personas={personas} onSwitch={(id) => go({ as: id, tab: "home" })} onReload={() => actions.reset()} onActivity={() => go({ tab: "activity" })} onRunCheck={runCheck} running={running} status={{ data: `NHS-SIM · ${state.patient.name} (${state.patient.simId})`, agent: modeLabel, world: state.source.world }} />
           </div>
         </div>
       </header>
@@ -265,7 +261,7 @@ function Screen({ state, actions, viewer, tab, onAsk, go }: { state: AppState; a
   );
 }
 
-function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, status }: { viewer: Person; personas: Person[]; onSwitch: (id: string) => void; onReload: () => void; onActivity: () => void; status: { data: string; agent: string; world?: string } }) {
+function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, onRunCheck, running, status }: { viewer: Person; personas: Person[]; onSwitch: (id: string) => void; onReload: () => void; onActivity: () => void; onRunCheck: () => void; running: boolean; status: { data: string; agent: string; world?: string } }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -310,6 +306,8 @@ function AccountMenu({ viewer, personas, onSwitch, onReload, onActivity, status 
             </button>
           ))}
           <div className="border-t border-line p-2">
+            <div className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Demo controls</div>
+            <button role="menuitem" disabled={running} onClick={() => { setOpen(false); onRunCheck(); }} title="Simulates Kindred's scheduled job: finds appointments in the next 7 days and tells the family" className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper disabled:opacity-50"><ClockIcon /> {running ? "Running scheduled check…" : "Run scheduled check"}</button>
             <button role="menuitem" onClick={() => { setOpen(false); onActivity(); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-paper"><ActivityIcon /> Activity log</button>
             <button role="menuitem" onClick={() => { setOpen(false); onReload(); }} className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted hover:bg-paper hover:text-ink">Reload record from NHS-SIM</button>
           </div>
