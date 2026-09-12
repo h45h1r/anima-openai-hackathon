@@ -70,6 +70,7 @@ import {
 } from './memoryStore';
 import { PROMPT_VERSION, REFINE_STYLE_INSTRUCTIONS } from './prompts';
 import { buildUserFacingPolicyNotice, patientFirstName } from '../consent/messages';
+import { isCompanionAskIntent, runCompanionAsk } from './companionAsk';
 
 /** Align Ask refine with Kindred companion model when possible. */
 export function resolveAskModel(explicit?: string | null): string {
@@ -97,6 +98,22 @@ export type RunAgentInput = {
 };
 
 export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunResult> {
+  // Unified Ask: Kindred companion abilities (Circle sharing, access requests,
+  // next actions, goals/needs) share this thread with clinical grounded Q&A.
+  const intent = classifyAskIntent(input.question, input.history);
+  if (isCompanionAskIntent(input.question) || intent === 'share_consent' || intent === 'companion') {
+    const companion = await runCompanionAsk({
+      careViewerId: input.viewerId,
+      patientId: input.context.patientId,
+      question: input.question,
+      history: input.history,
+      policy: input.policy,
+      onConsentUpdate: input.onConsentUpdate,
+      onEvent: input.onEvent,
+    });
+    return companion;
+  }
+
   const started = Date.now();
   const queryId = nanoid(10);
   const runId = nanoid(10);
@@ -282,6 +299,13 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
       }
       try {
         const level = ctx.args.sharingLevel;
+        // Prefer Kindred Circle as source of truth when the companion store is live.
+        const kindredSynced = await applyKindredConsentMutation({
+          careViewerId: ctx.args.targetViewerId,
+          sharingLevel: level,
+          informationClass: ctx.args.informationClass,
+          allowed: ctx.args.allowed,
+        });
         const next =
           level === 'everything' || level === 'practical' || level === 'updates'
             ? updateSharingLevel(bag.policy, ctx.args.targetViewerId, level, bag.policy.policyVersion, 'patient')
@@ -297,8 +321,8 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
         await input.onConsentUpdate?.(next);
         bag.policy = next;
         const detail = level
-          ? `${ctx.args.targetViewerId}:level=${level}`
-          : `${ctx.args.targetViewerId}:${ctx.args.informationClass}=${ctx.args.allowed}`;
+          ? `${ctx.args.targetViewerId}:level=${level}${kindredSynced ? '+kindred' : ''}`
+          : `${ctx.args.targetViewerId}:${ctx.args.informationClass}=${ctx.args.allowed}${kindredSynced ? '+kindred' : ''}`;
         emit({ type: 'tool', tool: 'update_consent', status: 'ok', detail });
         appendTrace(ctx, {
           tool: 'update_consent',
@@ -306,7 +330,7 @@ export async function runAgentQuestion(input: RunAgentInput): Promise<AgentRunRe
           latencyMs: Date.now() - t0,
           detail,
         });
-        return { ok: true, policyVersion: next.policyVersion };
+        return { ok: true, policyVersion: next.policyVersion, kindredSynced };
       } catch (err) {
         const message = err instanceof Error ? err.message : 'consent_update_failed';
         emit({ type: 'tool', tool: 'update_consent', status: 'error', detail: message });
@@ -919,7 +943,14 @@ function statusForToolName(name: string): string {
     case 'remember':
       return 'Saving preference…';
     case 'update_consent':
-      return 'Updating access…';
+    case 'set_sharing_level':
+    case 'get_consent':
+    case 'request_access':
+      return 'Updating Circle…';
+    case 'get_next_actions':
+      return 'Checking next actions…';
+    case 'companion.route':
+      return 'Thinking with Kindred…';
     default:
       return 'Looking through the record…';
   }
@@ -1219,13 +1250,124 @@ export function suggestionsForViewer(ctx: ClinicalContext, policy: ConsentPolicy
     ),
   ];
   const viewer = policy.viewers.find((v) => v.viewerId === viewerId);
+  const isPatient = viewerId === 'patient' || viewer?.relationship === 'self';
   const classes =
-    viewer?.relationship === 'self'
+    isPatient
       ? ctx.recordClasses
       : allowedClasses.length
         ? allowedClasses
         : ctx.recordClasses.filter((c) =>
             policy.grants.some((g) => g.viewerId === viewerId && g.informationClass === c && g.allowed && !g.revokedAt),
           );
-  return buildSuggestions(ctx, classes);
+  const clinical = buildSuggestions(ctx, classes);
+  const companion = companionSuggestions(isPatient);
+  // Interleave clinical + Kindred-style actions so empty-state shows both.
+  const mixed: string[] = [];
+  for (let i = 0; i < Math.max(clinical.length, companion.length); i++) {
+    if (clinical[i]) mixed.push(clinical[i]);
+    if (companion[i]) mixed.push(companion[i]);
+  }
+  return [...new Set(mixed)].slice(0, 6);
+}
+
+function companionSuggestions(isPatient: boolean): string[] {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const store = require('../../../store') as {
+      getState: () => {
+        patient?: { name?: string };
+        people: { role: string; shortName: string }[];
+      };
+    };
+    const state = store.getState();
+    const family = state.people.find((p) => p.role === 'family');
+    const patientFirst = (state.patient?.name || 'them').split(' ')[0];
+    if (isPatient) {
+      return [
+        family ? `Let ${family.shortName} see my test results` : 'Who can see what?',
+        'Who can see what?',
+        'What matters to me right now?',
+      ];
+    }
+    return [
+      `Please ask ${patientFirst} to share lab results with me`,
+      'What next actions are open?',
+    ];
+  } catch {
+    return isPatient
+      ? ['Who can see what?', 'What matters to me right now?']
+      : ['Please ask them to share lab results with me'];
+  }
+}
+
+/** Apply sharing change on Kindred Circle (source of truth) when store is available. */
+async function applyKindredConsentMutation(input: {
+  careViewerId: string;
+  sharingLevel?: string;
+  informationClass?: string;
+  allowed?: boolean;
+}): Promise<boolean> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const store = require('../../../store') as {
+      getState: () => { patientId: string; people: { id: string; role: string; shortName: string }[] };
+      setSharingLevel: (opts: {
+        granteeId: string;
+        level: 'everything' | 'practical' | 'updates';
+        actorId: string;
+        via: 'agent';
+      }) => Promise<unknown>;
+      setConsent: (opts: {
+        granteeId: string;
+        category: string;
+        allowed: boolean;
+        actorId: string;
+        via: 'agent';
+      }) => Promise<unknown>;
+    };
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { careViewerForKindred } = require('../../viewers') as {
+      careViewerForKindred: (state: unknown, id: string) => string;
+    };
+    const state = store.getState();
+    const grantee = state.people.find(
+      (p) =>
+        (p.role === 'family' || p.role === 'carer') &&
+        careViewerForKindred(state, p.id) === input.careViewerId,
+    );
+    if (!grantee) return false;
+    const level = input.sharingLevel;
+    if (level === 'everything' || level === 'practical' || level === 'updates') {
+      await store.setSharingLevel({
+        granteeId: grantee.id,
+        level,
+        actorId: state.patientId,
+        via: 'agent',
+      });
+      return true;
+    }
+    // Map common CareCircle classes onto Kindred categories when toggling a single class.
+    const classToCategory: Record<string, string> = {
+      laboratory_results: 'lab_results',
+      medications: 'medications',
+      appointments: 'appointments',
+      clinical_documents: 'care_notes',
+      treatment_summary: 'conditions',
+      private_notes: 'mental_health',
+    };
+    const category = input.informationClass ? classToCategory[input.informationClass] : undefined;
+    if (category && typeof input.allowed === 'boolean') {
+      await store.setConsent({
+        granteeId: grantee.id,
+        category,
+        allowed: input.allowed,
+        actorId: state.patientId,
+        via: 'agent',
+      });
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
 }

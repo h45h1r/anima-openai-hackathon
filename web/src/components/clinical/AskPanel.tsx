@@ -120,7 +120,18 @@ export default function AskPanel({
   const suggestions =
     care.suggestions.length > 0
       ? care.suggestions
-      : ["What do my latest blood tests show?", "When is my next appointment?", "How are my medicines looking?"];
+      : isPatient
+        ? [
+            "What do my latest blood tests show?",
+            "Who can see what?",
+            "When is my next appointment?",
+            "What matters to me right now?",
+          ]
+        : [
+            `What do ${patientName.split(" ")[0]}'s latest blood tests show?`,
+            "What next actions are open?",
+            `When is ${patientName.split(" ")[0]}'s next appointment?`,
+          ];
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-paper lg:overflow-hidden lg:rounded-2xl lg:border lg:border-line lg:bg-card/40">
@@ -131,7 +142,7 @@ export default function AskPanel({
               <KindredMark size={26} />
             </div>
             <p>
-              Ask Kindred anything about {isPatient ? "your" : `${patientName}'s`} care — grounded in the shared record.
+              Ask Kindred anything about {isPatient ? "your" : `${patientName}'s`} care — clinical questions, sharing, and what matters.
             </p>
             <p className="mt-2 inline-flex items-center gap-1 text-[11px] text-plum">
               <LockIcon size={11} /> {viewer.shortName} · {levelLabel(level)}

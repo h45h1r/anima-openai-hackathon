@@ -5,6 +5,7 @@
 
 export type AskIntent =
   | 'share_consent'
+  | 'companion'
   | 'vitals_bp'
   | 'appointment'
   | 'lab'
@@ -15,6 +16,10 @@ export type ChatTurn = { role: 'user' | 'assistant'; content: string };
 
 const SHARE_CONSENT_Q =
   /\b(share|sharing|shared with|consent|who (?:can|has|have) access|access (?:for|to)|permission|daughter|son|spouse|partner|family|people(?:\s+page)?|care\s*proxy|grant|revoke|who can see)\b/i;
+
+/** Kindred companion abilities that clinical Ask did not fully cover. */
+const COMPANION_Q =
+  /\b(let \w+ see|share everything|only practical|important updates|who can see what|who can see|who has access|request access|ask (?:her|him|them) to share|please ask (?:her|him)|next actions?|outstanding(?:\s+actions?)?|what matters|my goals?|recorded needs|personal context|post to (?:the )?family|sharing level|stop sharing|share (?:my )?(?:test results|labs?|medications?) with)\b/i;
 
 const VITALS_BP_Q =
   /\b(bp|b\.p\.|blood\s*pressure|systolic|diastolic|mm\s*hg|mmhg)\b/i;
@@ -33,6 +38,13 @@ const FOLLOWUP_Q =
 
 export function isShareConsentIntent(question: string): boolean {
   return SHARE_CONSENT_Q.test(question);
+}
+
+/** Route to Kindred companion tools (Circle mutations, next actions, goals/needs, access requests). */
+export function isCompanionAskIntent(question: string): boolean {
+  // Intentionally narrower than isShareConsentIntent — avoid stealing clinical asks that
+  // merely mention family/daughter/share in passing.
+  return COMPANION_Q.test(question);
 }
 
 export function isVitalsBpIntent(question: string): boolean {
@@ -76,6 +88,7 @@ export function isFollowUpQuestion(question: string, history?: ChatTurn[]): bool
 }
 
 export function classifyAskIntent(question: string, history?: ChatTurn[]): AskIntent {
+  if (isCompanionAskIntent(question)) return 'companion';
   if (isShareConsentIntent(question)) return 'share_consent';
   if (isVitalsBpIntent(question)) return 'vitals_bp';
   if (isAppointmentIntent(question) && !LAB_Q.test(question)) return 'appointment';
