@@ -9,9 +9,28 @@ const categories: Record<string, InformationClass[]> = {
   care_notes: ['clinical_documents'], mental_health: ['private_notes'],
 };
 
+function localPolicy(patientId: string, patientName: string): ConsentPolicyState {
+  return careStore().ensurePolicy(patientId, patientName);
+}
+
+/** Companion Circle is preferred; local Kindred-aligned policy keeps Ask usable when it is down. */
+async function tryConsentSnapshot(patientId: string) {
+  try {
+    return await getConsentSnapshot(patientId);
+  } catch (err) {
+    console.warn(
+      '[care] companion consent unavailable; using local Ask policy',
+      err instanceof Error ? err.message : err,
+    );
+    return null;
+  }
+}
+
 export async function canonicalPolicy(patientId: string, patientName: string): Promise<ConsentPolicyState> {
-  const snapshot = await getConsentSnapshot(patientId);
-  const previous = careStore().ensurePolicy(patientId, patientName);
+  const previous = localPolicy(patientId, patientName);
+  const snapshot = await tryConsentSnapshot(patientId);
+  if (!snapshot) return previous;
+
   const now = new Date().toISOString();
   const viewers: ConsentPolicyState['viewers'] = [
     { viewerId: 'patient', patientId, displayName: patientName, relationship: 'self', status: 'active' },
@@ -29,7 +48,12 @@ export async function canonicalPolicy(patientId: string, patientName: string): P
 }
 
 export async function saveCanonicalPolicy(next: ConsentPolicyState): Promise<void> {
-  const snapshot = await getConsentSnapshot(next.patientId);
+  const snapshot = await tryConsentSnapshot(next.patientId);
+  if (!snapshot) {
+    // Persist Ask filter locally so consent edits still work offline from companion.
+    careStore().savePolicy(next);
+    return;
+  }
   const previous = careStore().getPolicy(next.patientId);
   if (previous?.canonicalRevision !== snapshot.revision) throw new Error('Sharing changed in another window. Refresh and try again.');
   for (const member of snapshot.members.filter(member => member.status === 'active')) {
