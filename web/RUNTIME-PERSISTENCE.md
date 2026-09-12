@@ -33,3 +33,7 @@ Ask uses `public.kindred_care_state` with one JSON snapshot per session. It pers
 The Anima ADK agent used by Kindred refreshes canonical Circle members and category grants from the consent service before using clinical data. Consent edits go through that service, including its member version check and GP record sync. Kindred's selected patient is kept in an HTTP-only browser cookie; runtime storage remains separated by patient.
 
 Kindred keeps answer citations and charts on its persisted message. Agent replies carry the requesting viewer as their audience. Clearing a direct conversation removes its chat history from the server snapshot; audit records and communication preferences remain. The model sees only fixed communication preferences from memory, and old assistant text is excluded for family viewers so revoked records cannot re-enter through chat history.
+
+## Chat identifiers
+
+Chats use UUIDv5 identifiers derived from the patient ID and legacy conversation name. This gives each existing chat a stable UUID across cold starts without creating duplicate conversations. Legacy thread names in saved messages are mapped on load and persisted on the next successful write. Chat URLs use `?tab=kindred&chat=<uuid>`. The chat API accepts `chatId`; legacy `threadId` callers remain supported. UUIDs identify conversations and do not replace viewer membership checks or authentication.

@@ -101,13 +101,12 @@ export function createQuestionTools(input: RunAgentInput) {
   }
 
   const tools: ReturnType<typeof app.tool>[] = [
-    tool('get_test_results', 'Read laboratory results from this patient’s record. Optionally filter by a test or panel name, such as HbA1c or liver. Results include units, reference ranges and dates. Wearable readings are excluded.', z.object({ test: z.string().describe('Specific test or panel name only. Omit or use null for all tests; never use all as a name.').nullable().optional(), includeHistory: z.boolean().default(false) }), args => {
+    tool('get_test_results', 'Read this patient’s laboratory results, including all available test labels, values, units, reference ranges and dates. Set includeHistory for earlier measurements. Use the returned results to answer about a specific test. Wearable readings are excluded.', z.object({ includeHistory: z.boolean().default(false) }), args => {
       const matching = evidence.filter(item => {
         if (item.kind !== 'measurement' || item.informationClass !== 'laboratory_results') return false;
-        const m = item.payload as Measurement;
         const resource = input.context.resources.find(r => r.id === item.resourceId);
         if (resource?.kind !== 'report' && !/lab|blood|patholog|panel|result/i.test(`${resource?.kind || ''} ${resource?.title || ''}`)) return false;
-        return !args.test || `${m.displayName} ${m.analyteId} ${resource?.title || ''}`.toLowerCase().includes(args.test.toLowerCase());
+        return true;
       });
       const results = read(matching, ['laboratory_results'], 200);
       if (args.includeHistory || results.error) return results;

@@ -1,3 +1,4 @@
+import { chatId } from '../chat-ids';
 // Scheduled "morning check": runs without any user message. Reads upcoming
 // appointments from the live record and posts a consent-scoped reminder to
 // the family group through the same tools the chat agent uses.
@@ -25,7 +26,7 @@ export async function runProactiveCheck(): Promise<{ posted: number }> {
   if (due.length === 0) return { posted: 0 };
 
   const agentTools = TOOLS.filter((t) => t.allowedRoles.includes("agent"));
-  const ctx = { actorId: agentId, threadId: "family-group" };
+  const ctx = { actorId: agentId, threadId: chatId(getState().patient.simId, 'family-group') };
   let posted = 0;
 
   if (state.agentMode === "openai") {

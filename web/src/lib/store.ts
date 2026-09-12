@@ -1,3 +1,4 @@
+import { normaliseChatIds } from './chat-ids';
 // Local mode keeps process state; database mode restores and commits an isolated
 // patient snapshot for each request. Clinical data and consent come from the sim.
 
@@ -54,7 +55,7 @@ export async function withRuntimeState<T>(work: () => Promise<T>, write = true, 
       if (selectedPatientId) await ensureSyntheticCircle(scope.state);
       await refreshConsent(true);
       if (scope.state.ehr.syncError) throw new Error("Sharing preferences are unavailable. Please try again.");
-      scope.state = restoreRuntimeSnapshot(scope.state, saved);
+      scope.state = normaliseChatIds(restoreRuntimeSnapshot(scope.state, saved));
       try {
         const value = await work();
         const success = !(value instanceof Response) || value.ok;

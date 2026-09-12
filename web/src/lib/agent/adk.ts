@@ -1,3 +1,4 @@
+import { chatId } from '../chat-ids';
 import { z } from 'zod';
 import { getState, updateMessage, refreshConsent, addAudit, addFamilyMember, removeFamilyMember, setLevelDefinition, checkConsent } from '../store';
 import { personById, visibleMessages, CATEGORIES, type Category, type ToolTrace } from '../types';
@@ -29,7 +30,9 @@ export async function adkTurn(messageId: string, threadId: string, actorId: stri
   const initial = getState();
   const patientId = initial.patient.simId;
   const viewerId = actorId === initial.patientId ? 'patient' : actorId;
-  const sessionId = `kindred-${patientId}-${actorId}-${threadId}`;
+  const legacyThread = initial.threads[threadId]?.kind === 'group' ? 'family-group' : `${actorId}-kindred`;
+  const memoryThread = chatId(patientId, legacyThread) === threadId ? legacyThread : threadId;
+  const sessionId = `kindred-${patientId}-${actorId}-${memoryThread}`;
   await withCareRuntime(async () => {
     const client = process.env.DATABASE_URL ? new NeonClinicalClient() : new AnimaClient({ baseUrl: process.env.SIM_BASE_URL || 'http://localhost:4192', apiKey: process.env.SIM_API_KEY || 'local-demo' });
     let session = careStore().getSession(sessionId);

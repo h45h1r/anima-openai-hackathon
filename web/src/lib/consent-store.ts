@@ -1,3 +1,4 @@
+import { chatId, normaliseChatIds } from './chat-ids';
 import type { AppState, Category, Person } from './types';
 import { CATEGORIES, firstName, initialsOf } from './types';
 
@@ -54,13 +55,15 @@ export function applyConsentSnapshot(state: AppState, snapshot: Snapshot): AppSt
     const position = people.findIndex(p => p.id === id);
     if (position < 0) people.push(person); else people[position] = person;
     consent[id] = Object.fromEntries(CATEGORIES.map(c => [c.id, member.status === 'active' && member.categories.includes(toStoredCategory(c.id))])) as Record<Category, boolean>;
-    if (member.role !== 'clinician' && !threads[`${id}-kindred`]) threads[`${id}-kindred`] = { id: `${id}-kindred`, title: 'Kindred', memberIds: [id, state.agentId], kind: 'direct' };
+    const directId = chatId(state.patient.simId, `${id}-kindred`);
+    if (member.role !== 'clinician' && !threads[directId]) threads[directId] = { id: directId, title: 'Kindred', memberIds: [id, state.agentId], kind: 'direct' };
   }
   const memberIds = new Set(snapshot.members.map(m => m.externalId || `family-${m.id}`));
   for (const p of people) if (['family', 'carer', 'clinician'].includes(p.role) && !memberIds.has(p.id)) p.accessStatus = 'revoked';
-  if (threads['family-group']) threads['family-group'] = { ...threads['family-group'], memberIds: [state.patientId, ...people.filter(p => ['family', 'carer'].includes(p.role) && p.accessStatus !== 'revoked').map(p => p.id), state.agentId] };
+  const groupId = chatId(state.patient.simId, 'family-group');
+  if (threads[groupId]) threads[groupId] = { ...threads[groupId], memberIds: [state.patientId, ...people.filter(p => ['family', 'carer'].includes(p.role) && p.accessStatus !== 'revoked').map(p => p.id), state.agentId] };
   const persistedAudit = snapshot.audit.map(a => ({ id: `consent-db-${a.id}`, ts: a.createdAt, kind: 'consent.update' as const, actorId: state.patientId, summary: a.detail, ok: true }));
-  return { ...state, people, consent, threads, audit: [...persistedAudit, ...state.audit.filter(a => !a.id.startsWith('consent-db-'))].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 300),
+  return normaliseChatIds({ ...state, people, consent, threads, audit: [...persistedAudit, ...state.audit.filter(a => !a.id.startsWith('consent-db-'))].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 300),
     ehr: { consentVersion: snapshot.revision, lastSyncedAt: snapshot.updatedAt, lastResourceId: snapshot.sync.resourceId || undefined, gpConsentUrl: `${publicBase}/gp/consent/?patient=${encodeURIComponent(state.patient.simId)}`, persistent: true },
-  };
+  });
 }

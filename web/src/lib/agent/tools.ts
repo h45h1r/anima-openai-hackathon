@@ -1,3 +1,4 @@
+import { chatId } from '../chat-ids';
 // Agent tools. Defined provider-neutrally (name + description + JSON schema +
 // handler) so the same definitions can be registered with the Anthropic SDK
 // today and with the mycontinuum ADK / an MCP server later.
@@ -258,7 +259,7 @@ export const TOOLS: ToolDef[] = [
       const cat = CATEGORIES.find((c) => c.id === category)!;
       addAudit({ kind: "consent.request", actorId: ctx.actorId, summary: `${requester.shortName} asked to see ${cat.label}`, detail: req, ok: true });
       addMessage({
-        threadId: `${state.patientId}-kindred`,
+        threadId: chatId(state.patient.simId, `${state.patientId}-kindred`),
         senderId: state.agentId,
         kind: "notification",
         text: `${requester.shortName} has asked to see your ${cat.label.toLowerCase()}. Reason: "${req.reason}". You can approve or decline from your home screen — nothing is shared until you do.`,
@@ -283,7 +284,7 @@ export const TOOLS: ToolDef[] = [
     async handler(ctx, input) {
       const state = getState();
       const category = input.category as Category;
-      const group = state.threads["family-group"];
+      const group = state.threads[chatId(state.patient.simId, 'family-group')];
       const audience = group.memberIds.filter((id) => id !== state.agentId && (id === state.patientId || state.consent[id]?.[category]));
       const excluded = group.memberIds.filter((id) => id !== state.agentId && !audience.includes(id));
       for (const id of group.memberIds) {

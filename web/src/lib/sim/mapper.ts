@@ -1,3 +1,4 @@
+import { normaliseChatIds } from '../chat-ids';
 // Builds the app state from live NHS-SIM data for one patient. Everything
 // clinical (problems, medicines, blood results, appointments, notes) comes
 // from the sim's GP workspace; the circle (who is family) comes from circle.ts
@@ -255,7 +256,7 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string,
   };
   for (const f of family) threads[`${f.id}-kindred`] = { id: `${f.id}-kindred`, title: "Kindred", memberIds: [f.id, agentId], kind: "direct" };
 
-  return {
+  return normaliseChatIds<AppState>({
     loaded: true,
     source: { kind: "nhs-sim", baseUrl: sim.base, world: team?.world ?? view.id, fetchedAt: new Date().toISOString() },
     patientId,
@@ -282,7 +283,7 @@ export async function loadStateFromSim(agentMode: AgentMode, agentModel: string,
     ],
     ehr: { consentVersion: 1, lastSyncedAt: new Date().toISOString() },
     busyThreads: [],
-  };
+  });
 }
 
 function countBy(xs: string[]) {

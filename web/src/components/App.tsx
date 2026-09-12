@@ -31,12 +31,6 @@ export default function App() {
   const { state, connected, actions } = useKindred();
   const params = useSearchParams();
   const router = useRouter();
-  useEffect(() => {
-    if (params.get("tab") !== "ask") return;
-    const query = new URLSearchParams(params.toString());
-    query.set("tab", "kindred");
-    router.replace(`?${query.toString()}`);
-  }, [params, router]);
   const asParamEarly = params.get("as");
   const kindredViewerId =
     state?.loaded && asParamEarly && state.people.some((p) => p.id === asParamEarly && p.accessStatus !== "revoked")
@@ -44,6 +38,19 @@ export default function App() {
       : state?.loaded
         ? state.patientId
         : null;
+  const requestedChat = state?.threads[params.get("chat") || ""];
+  const selectedChat = requestedChat?.kind === "direct" && kindredViewerId && requestedChat.memberIds.includes(kindredViewerId)
+    ? requestedChat
+    : Object.values(state?.threads || {}).find(thread => thread.kind === "direct" && kindredViewerId && thread.memberIds.includes(kindredViewerId));
+  const selectedChatId = selectedChat?.id;
+  useEffect(() => {
+    const requestedTab = params.get("tab");
+    if (requestedTab !== "ask" && requestedTab !== "kindred") return;
+    const query = new URLSearchParams(params.toString());
+    query.set("tab", "kindred");
+    if (selectedChatId) query.set("chat", selectedChatId);
+    if (query.toString() !== params.toString()) router.replace(`?${query.toString()}`);
+  }, [params, router, selectedChatId]);
   const care = useCareClinical(state, kindredViewerId);
   const [running, setRunning] = useState(false);
   const patientPrefApplied = useRef(false);
@@ -146,10 +153,12 @@ export default function App() {
       : "home";
 
   const go = (next: { as?: string; tab?: Tab }) => {
-    const q = new URLSearchParams();
+    const q = new URLSearchParams(params.toString());
     q.set("as", next.as ?? viewerId);
+    if (next.as && next.as !== viewerId) q.delete("chat");
     const t = next.tab ?? (next.as && next.as !== viewerId ? "home" : tab);
     if (t !== "home") q.set("tab", t);
+    else q.delete("tab");
     router.replace(`?${q.toString()}`);
   };
   const askClinical = (question?: string) => {
@@ -238,6 +247,7 @@ export default function App() {
               tab={tab}
               care={care}
               onAskClinical={askClinical}
+              chatId={selectedChatId}
               go={go}
             />
           )}
@@ -271,6 +281,7 @@ function Screen({
   tab,
   care,
   onAskClinical,
+  chatId,
   go,
 }: {
   state: AppState;
@@ -279,11 +290,12 @@ function Screen({
   tab: Tab;
   care: CareClinical;
   onAskClinical: (q?: string) => void;
+  chatId?: string;
   go: (n: { tab?: Tab }) => void;
 }) {
   const isPatient = viewer.id === state.patientId;
   const patient = personById(state, state.patientId);
-  const dm = Object.values(state.threads).find((t) => t.kind === "direct" && t.memberIds.includes(viewer.id));
+  const dm = chatId ? state.threads[chatId] : undefined;
   const firstFamily = state.people.find((p) => p.role === "family");
 
   if (viewer.role === "clinician") {
