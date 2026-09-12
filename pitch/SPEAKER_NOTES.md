@@ -114,6 +114,16 @@ Removed from the slide on 12 Sep evening and kept here to say aloud: the eight-s
 
 ---
 
+## Slide 4b: After CareCircle (15 seconds)
+
+"So what changes for Eleanor. Her white cells were filed four times; now the trend is flagged the second time, in July. A result lands; instead of sitting there, it is held until the practice has talked her through it, and she says yes. Her daughter gets the numbers, her husband gets the lift to arrange, her son gets nothing-needed-this-week. And if nobody confirms within three days, a GP task is raised and her landline rings."
+
+Timing: take these 15 seconds from the demo (90 to 75) so the total stays at three minutes.
+
+Honesty: the right-hand column is what the demo shows across the app and the prototype; see the code-ownership table at the top. "Flagged in July" is the second low panel (14 July 2026, white cells 1.6) in the remote Anima record; the prototype's trend rule needs two consecutive out-of-range values, so July is the earliest it fires on her real data.
+
+---
+
 ## Slide 5: The demo (90 seconds)
 
 **Script, while clicking**

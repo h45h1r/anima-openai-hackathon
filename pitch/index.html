@@ -149,6 +149,15 @@ p { margin: 0; }
 .pillars.big .pillar { padding: 1.3rem 1.4rem 1.5rem; border-top-width: 4px; }
 .pillars.big .pillar b { font-size: clamp(1.2rem, 1.8vw, 1.7rem); }
 .pillars.big .pillar span { font-size: clamp(1rem, 1.3vw, 1.25rem); margin-top: 0.6rem; line-height: 1.4; }
+
+/* before / after */
+.ba-head { display: grid; grid-template-columns: 1fr 2.4rem 1.15fr; gap: 0 1rem; margin-top: 1.8rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.ba-head span:last-child { color: var(--plum); }
+.ba-grid { display: grid; gap: 0.6rem; margin-top: 0.5rem; }
+.ba-row { display: grid; grid-template-columns: 1fr 2.4rem 1.15fr; gap: 0 1rem; align-items: center; }
+.ba { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 0.8rem 1rem; font-size: clamp(0.92rem, 1.2vw, 1.15rem); line-height: 1.38; color: var(--muted); }
+.ba.after { border-color: rgba(109, 46, 91, 0.35); background: var(--plum-soft, #F1E4EC); color: var(--ink); }
+.ba-arrow { text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.4rem; color: var(--plum); }
 </style>
 </head>
 <body>
@@ -209,6 +218,22 @@ p { margin: 0; }
     </div>
   </div>
   <div class="foot"><span class="src">Proxy access gives a person the record. <span class="product">Kindred</span> gives each person their role.</span><span class="legal">All patient data synthetic · Fictional demo, not an official NHS product</span></div>
+</section>
+
+<!-- 4b. After CareCircle -->
+<section class="slide">
+  <span class="kicker">After <span class="product">Kindred</span></span>
+  <div class="body">
+    <h2 style="max-width:30ch">What happens to Eleanor now.</h2>
+    <div class="ba-head"><span>Today</span><span></span><span>With <span class="product">Kindred</span></span></div>
+    <div class="ba-grid">
+      <div class="ba-row"><div class="ba before">Four low white cell counts since May, each filed on its own.</div><div class="ba-arrow">→</div><div class="ba after">The trend is flagged as worsening the second time, in July, not filed a fourth time.</div></div>
+      <div class="ba-row"><div class="ba before">A result lands in the record. Nobody knows if she has been told.</div><div class="ba-arrow">→</div><div class="ba after">The result is held. The practice talks her through it. She says yes.</div></div>
+      <div class="ba-row"><div class="ba before">Her family knows nothing. She is the messenger.</div><div class="ba-arrow">→</div><div class="ba after">Grace gets the numbers. Idris gets the lift to arrange. Thomas gets “nothing needed this week”.</div></div>
+      <div class="ba-row"><div class="ba before">Nobody follows up. Nothing chases it.</div><div class="ba-arrow">→</div><div class="ba after">Three days with no confirmation: a GP task is raised and her landline rings.</div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="src">Every line on the right is something the demo shows. All patient data synthetic.</span><span class="legal">Fictional demo, not an official NHS product</span></div>
 </section>
 
 <!-- 5. The demo -->
