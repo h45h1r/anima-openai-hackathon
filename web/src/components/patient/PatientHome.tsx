@@ -12,7 +12,6 @@ import BodyView from "../body/BodyView";
 // Every line is derived from the live record; nothing here is a diagnosis.
 
 export default function PatientHome({ state, actions, onOpenChat, onAsk }: { state: AppState; actions: KindredActions; onOpenChat: () => void; onAsk?: (q: string) => void }) {
-  const patient = personById(state, state.patientId);
   const next = state.appointments[0];
   const pending = state.consentRequests.filter((r) => r.status === "pending");
 
