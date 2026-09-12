@@ -37,3 +37,7 @@ UUID migration checks passed: stable IDs across repeated requests, patient isola
 The production UUID rollout was also checked in Chrome: all 16 existing messages remained visible, every thread ID was a UUID, the legacy Ask URL opened the correct UUID chat, and no browser errors occurred.
 
 Chat feedback passed nine mocked-browser checks: instant outgoing bubble and typing status, double-submit prevention, no disappearing/duplicate bubble during a three-second POST-to-SSE delay, success draft preservation, failure recovery with and without an existing follow-up draft, retry, and zero browser errors. The change affects presentation only; no production requests were sent during these delayed-response tests.
+
+Follow-up regression: switching Home → Kindred while a reply was pending previously destroyed Chat-local pending state. Pending messages, locks and delivery failures now live in the parent hook, scoped by patient/viewer/chat. Browser checks passed for tab switching, repeated snapshots, delayed server echo, failures while away, draft recovery and retries. The chat appearance is unchanged.
+
+The ADK priority request test captures the actual outgoing OpenAI body and requires `service_tier: "priority"`. A live API request also returned `service_tier: "priority"` successfully.

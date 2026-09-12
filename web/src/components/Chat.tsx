@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { AppState, Message, ToolTrace } from "@/lib/types";
+import type { AppState, ToolTrace } from "@/lib/types";
 import { personById, visibleMessages } from "@/lib/types";
 import type { KindredActions } from "@/hooks/useKindred";
 import { Avatar, KindredMark, LockIcon, Prose, fmtDay, fmtTime } from "./ui";
@@ -30,7 +30,7 @@ export default function Chat({
   const thread = state.threads[threadId];
   const committedMessages = visibleMessages(state, threadId, viewerId);
   const [pending, setPending] = useState(false);
-  const [outgoing, setOutgoing] = useState<{ message: Message; knownIds: Set<string>; replyId?: string } | null>(null);
+  const outgoing = actions.getPendingChat(threadId, viewerId);
   const sendLock = useRef(false);
   const outgoingCommitted = outgoing && committedMessages.some(message =>
     !outgoing.knownIds.has(message.id) && message.senderId === viewerId && message.text === outgoing.message.text);
@@ -41,18 +41,13 @@ export default function Chat({
   const busy = pending || Boolean(outgoing) || state.busyThreads.includes(threadId);
   const showTyping = Boolean(outgoing && !replyVisible && !committedMessages.some(message => message.streaming));
   const [draft, setDraft] = useState("");
-  const [err, setErr] = useState<string | null>(null);
-  const [failedText, setFailedText] = useState<string | null>(null);
+  const [localError, setErr] = useState<string | null>(null);
+  const failure = actions.getChatFailure(threadId, viewerId);
+  const err = localError || failure?.error;
+  const failedText = failure?.text;
   const scrollRef = useRef<HTMLDivElement>(null);
   const followBottom = useRef(true);
   const lastMessage = msgs[msgs.length - 1];
-
-  useEffect(() => {
-    if (outgoing?.replyId && committedMessages.some(message => message.id === outgoing.replyId)) {
-      sendLock.current = false;
-      setOutgoing(null);
-    }
-  }, [outgoing, committedMessages]);
 
   useEffect(() => {
     if (thread.kind !== "direct") return;
@@ -65,6 +60,10 @@ export default function Chat({
   }, [state.patient.simId, viewerId, thread.kind]);
 
   useEffect(() => {
+    if (failure) setDraft(current => current || failure.text);
+  }, [failure]);
+
+  useEffect(() => {
     if (followBottom.current && scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "auto" });
     }
@@ -75,25 +74,15 @@ export default function Chat({
     if (!message || busy || sendLock.current) return;
     sendLock.current = true;
     followBottom.current = true;
-    setPending(true);
-    setOutgoing({
-      message: { id: crypto.randomUUID(), threadId, senderId: viewerId, text: message, ts: new Date().toISOString(), kind: "chat" },
-      knownIds: new Set(committedMessages.map(item => item.id)),
-    });
     setDraft(current => current.trim() === message ? "" : current);
     setErr(null);
-    setFailedText(null);
     try {
-      const response = await actions.sendChat(threadId, viewerId, message);
-      setOutgoing(current => current ? { ...current, replyId: response.messageId } : null);
+      await actions.sendChat(threadId, viewerId, message);
     } catch (e) {
-      sendLock.current = false;
-      setOutgoing(null);
       setErr(e instanceof Error ? e.message : String(e));
-      setFailedText(message);
       setDraft(current => current || message);
     } finally {
-      setPending(false);
+      sendLock.current = false;
     }
   };
 
@@ -104,9 +93,9 @@ export default function Chat({
     sendLock.current = true;
     setPending(true);
     setErr(null);
-    setFailedText(null);
     try {
       await actions.clearChat(threadId, viewerId);
+      actions.dismissChatFailure(threadId, viewerId);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -281,5 +270,3 @@ function TraceDisclosure({ trace, state }: { trace: ToolTrace[]; state: AppState
     </div>
   );
 }
-
-export type { Message };

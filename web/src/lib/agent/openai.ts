@@ -38,7 +38,7 @@ export async function openaiTurn(messageId: string, threadId: string, actorId: s
   for (let iter = 0; iter < 8; iter++) {
     let iterText = "";
     const stream = await client.responses.create({
-      model: OPENAI_MODEL,
+      model: OPENAI_MODEL, service_tier: "priority",
       instructions,
       input,
       tools,
@@ -102,7 +102,7 @@ export async function openaiRun(instructions: string, userText: string, defs: To
   const toolCalls: string[] = [];
   let text = "";
   for (let i = 0; i < 8; i++) {
-    const res = await client.responses.create({ model: OPENAI_MODEL, instructions, input, tools, reasoning: { effort: OPENAI_EFFORT }, previous_response_id: previousResponseId });
+    const res = await client.responses.create({ model: OPENAI_MODEL, service_tier: "priority", instructions, input, tools, reasoning: { effort: OPENAI_EFFORT }, previous_response_id: previousResponseId });
     text = res.output_text ?? text;
     const calls = res.output.filter((o): o is OpenAI.Responses.ResponseFunctionToolCall => o.type === "function_call");
     if (calls.length === 0) break;

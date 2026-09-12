@@ -1,13 +1,39 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AppState, Category, SharingLevel } from "@/lib/types";
+import type { AppState, Category, Message, SharingLevel } from "@/lib/types";
+
+interface PendingChat {
+  patientId: string;
+  message: Message;
+  knownIds: Set<string>;
+  replyId?: string;
+}
+
+const chatScope = (patientId: string, threadId: string, actorId: string) => `${patientId}:${actorId}:${threadId}`;
 
 export function useKindred() {
   const [state, setState] = useState<AppState | null>(null);
   const [connected, setConnected] = useState(false);
   const [patientRevision, setPatientRevision] = useState(0);
   const esRef = useRef<EventSource | null>(null);
+  const [pendingChats, setPendingChats] = useState<Record<string, PendingChat>>({});
+  const chatSendLocks = useRef(new Set<string>());
+  const [chatFailures, setChatFailures] = useState<Record<string, { text: string; error: string }>>({});
+
+  useEffect(() => {
+    if (!state?.loaded) return;
+    const messageIds = new Set(state.messages.map(message => message.id));
+    const completed = Object.entries(pendingChats).filter(([, pending]) =>
+      pending.patientId === state.patient.simId && pending.replyId && messageIds.has(pending.replyId));
+    if (!completed.length) return;
+    for (const [scope] of completed) chatSendLocks.current.delete(scope);
+    setPendingChats(current => {
+      const next = { ...current };
+      for (const [scope, pending] of completed) if (next[scope] === pending) delete next[scope];
+      return next;
+    });
+  }, [state, pendingChats]);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +77,42 @@ export function useKindred() {
     removeFamilyMember: (granteeId: string) => post('/api/family-members', { granteeId }, 'DELETE'),
     setSharingLevel: (granteeId: string, level: SharingLevel) => post("/api/sharing-level", { granteeId, level }),
     setLevelDefinition: (level: SharingLevel, categories: Category[]) => post("/api/levels", { level, categories }, "PATCH"),
-    sendChat: (threadId: string, actorId: string, text: string) => post("/api/chat", { chatId: threadId, actorId, text }),
+    getPendingChat: (threadId: string, actorId: string) => pendingChats[chatScope(state?.patient.simId || "", threadId, actorId)],
+    getChatFailure: (threadId: string, actorId: string) => chatFailures[chatScope(state?.patient.simId || "", threadId, actorId)],
+    dismissChatFailure: (threadId: string, actorId: string) => {
+      const scope = chatScope(state?.patient.simId || "", threadId, actorId);
+      setChatFailures(current => { const next = { ...current }; delete next[scope]; return next; });
+    },
+    sendChat: async (threadId: string, actorId: string, text: string) => {
+      if (!state?.loaded) throw new Error("The patient record is still loading.");
+      const patientId = state.patient.simId;
+      const scope = chatScope(patientId, threadId, actorId);
+      if (chatSendLocks.current.has(scope)) return;
+      chatSendLocks.current.add(scope);
+      setChatFailures(current => { const next = { ...current }; delete next[scope]; return next; });
+      const pending: PendingChat = {
+        patientId,
+        message: { id: crypto.randomUUID(), threadId, senderId: actorId, text, ts: new Date().toISOString(), kind: "chat" },
+        knownIds: new Set(state.messages.map(message => message.id)),
+      };
+      setPendingChats(current => ({ ...current, [scope]: pending }));
+      try {
+        const response = await post("/api/chat", { chatId: threadId, actorId, text });
+        setPendingChats(current => current[scope]?.message.id === pending.message.id
+          ? { ...current, [scope]: { ...current[scope], replyId: response.messageId } }
+          : current);
+      } catch (error) {
+        chatSendLocks.current.delete(scope);
+        setChatFailures(current => ({ ...current, [scope]: { text, error: error instanceof Error ? error.message : String(error) } }));
+        setPendingChats(current => {
+          if (current[scope]?.message.id !== pending.message.id) return current;
+          const next = { ...current };
+          delete next[scope];
+          return next;
+        });
+        throw error;
+      }
+    },
     clearChat: (threadId: string, actorId: string) => post("/api/chat/clear", { chatId: threadId, actorId }),
     runProactive: () => post("/api/proactive"),
     reset: () => post("/api/reset"),

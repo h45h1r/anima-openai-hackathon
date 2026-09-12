@@ -9,11 +9,12 @@
     "test": "node --test src/lib/nhs-demo/model.test.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint",
-    "test:care": "node --import tsx --test src/lib/chat-ids.test.ts src/lib/carecircle/server/agent/harness.test.ts src/lib/carecircle/server/agent/adversarial.test.ts src/lib/carecircle/server/store/runtime.test.ts src/lib/carecircle/server/neon/client.test.ts",
-    "eval:consent": "node --import tsx src/lib/carecircle/server/agent/evals/consent.ts"
+    "test:care": "node --import tsx --test src/lib/carecircle/server/agent/priority.test.ts src/lib/chat-ids.test.ts src/lib/carecircle/server/agent/harness.test.ts src/lib/carecircle/server/agent/adversarial.test.ts src/lib/carecircle/server/store/runtime.test.ts src/lib/carecircle/server/neon/client.test.ts",
+    "eval:consent": "node --import tsx src/lib/carecircle/server/agent/evals/consent.ts",
+    "postinstall": "patch-package"
   },
   "dependencies": {
-    "@animahealth/adk": "^0.6.0",
+    "@animahealth/adk": "0.6.0",
     "@anthropic-ai/sdk": "^0.125.0",
     "@types/three": "^0.186.0",
     "nanoid": "^5.1.16",
@@ -38,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "meshoptimizer": "^1.2.0",
+    "patch-package": "^8.0.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
     "typescript": "^5"

@@ -17,8 +17,8 @@ export function createAskAgent(app: CareCircleAdkApp, modelName: string, tools: 
   return app.agent({
     name: 'carecircle_ask',
     model: openai(modelName, reasoningModel
-      ? { reasoning: { effort: 'medium' }, maxTokens: 4096 }
-      : { temperature: 0.35, maxTokens: 1500 }),
+      ? { serviceTier: 'priority', reasoning: { effort: 'medium' }, maxTokens: 4096 }
+      : { serviceTier: 'priority', temperature: 0.35, maxTokens: 1500 }),
     maxSteps: 8,
     toolChoice: 'auto',
     tools,

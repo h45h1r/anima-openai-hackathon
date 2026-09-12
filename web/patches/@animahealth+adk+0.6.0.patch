@@ -1,0 +1,108 @@
+diff --git a/node_modules/@animahealth/adk/dist/chunk-YDAYRPES.mjs b/node_modules/@animahealth/adk/dist/chunk-YDAYRPES.mjs
+index 9227de5..5073c79 100644
+--- a/node_modules/@animahealth/adk/dist/chunk-YDAYRPES.mjs
++++ b/node_modules/@animahealth/adk/dist/chunk-YDAYRPES.mjs
+@@ -118,6 +118,7 @@ var OpenAIAdapter = class _OpenAIAdapter {
+         input,
+         tools: serializedTools,
+         store: false,
++        service_tier: config.serviceTier,
+         ...promptCacheOptions,
+         ...serializedToolChoice && { tool_choice: serializedToolChoice },
+         // OpenAI reasoning models (o-series, GPT-5.x) reject a non-default
+diff --git a/node_modules/@animahealth/adk/dist/index.js b/node_modules/@animahealth/adk/dist/index.js
+index 6c04e9d..5851944 100644
+--- a/node_modules/@animahealth/adk/dist/index.js
++++ b/node_modules/@animahealth/adk/dist/index.js
+@@ -3680,6 +3680,7 @@ var init_openai = __esm({
+             input,
+             tools: serializedTools,
+             store: false,
++            service_tier: config.serviceTier,
+             ...promptCacheOptions,
+             ...serializedToolChoice && { tool_choice: serializedToolChoice },
+             // OpenAI reasoning models (o-series, GPT-5.x) reject a non-default
+diff --git a/node_modules/@animahealth/adk/dist/openai/index.js b/node_modules/@animahealth/adk/dist/openai/index.js
+index 8ef088d..91c80e0 100644
+--- a/node_modules/@animahealth/adk/dist/openai/index.js
++++ b/node_modules/@animahealth/adk/dist/openai/index.js
+@@ -12035,6 +12035,7 @@ var OpenAIAdapter = class _OpenAIAdapter {
+         input,
+         tools: serializedTools,
+         store: false,
++        service_tier: config.serviceTier,
+         ...promptCacheOptions,
+         ...serializedToolChoice && { tool_choice: serializedToolChoice },
+         // OpenAI reasoning models (o-series, GPT-5.x) reject a non-default
+diff --git a/node_modules/@animahealth/adk/dist/openai/index.mjs b/node_modules/@animahealth/adk/dist/openai/index.mjs
+index 9ecdb7e..59263fb 100644
+--- a/node_modules/@animahealth/adk/dist/openai/index.mjs
++++ b/node_modules/@animahealth/adk/dist/openai/index.mjs
+@@ -12003,6 +12003,7 @@ var OpenAIAdapter = class _OpenAIAdapter {
+         input,
+         tools: serializedTools,
+         store: false,
++        service_tier: config.serviceTier,
+         ...promptCacheOptions,
+         ...serializedToolChoice && { tool_choice: serializedToolChoice },
+         // OpenAI reasoning models (o-series, GPT-5.x) reject a non-default
+diff --git a/node_modules/@animahealth/adk/dist/testing/index.js b/node_modules/@animahealth/adk/dist/testing/index.js
+index 68fd480..6f1c731 100644
+--- a/node_modules/@animahealth/adk/dist/testing/index.js
++++ b/node_modules/@animahealth/adk/dist/testing/index.js
+@@ -3595,6 +3595,7 @@ var init_openai = __esm({
+             input: input2,
+             tools: serializedTools,
+             store: false,
++            service_tier: config.serviceTier,
+             ...promptCacheOptions,
+             ...serializedToolChoice && { tool_choice: serializedToolChoice },
+             // OpenAI reasoning models (o-series, GPT-5.x) reject a non-default
+diff --git a/node_modules/@animahealth/adk/dist/types/runnables.d.ts b/node_modules/@animahealth/adk/dist/types/runnables.d.ts
+index 3950e04..77e0edc 100644
+--- a/node_modules/@animahealth/adk/dist/types/runnables.d.ts
++++ b/node_modules/@animahealth/adk/dist/types/runnables.d.ts
+@@ -45,6 +45,7 @@ export interface NoiseReductionConfig {
+ }
+ export interface OpenAIModel extends BaseModelConfig {
+     provider: 'openai';
++    serviceTier?: 'auto' | 'default' | 'flex' | 'priority';
+     reasoning?: {
+         effort: 'minimal' | 'low' | 'medium' | 'high';
+         summary?: 'auto' | 'detailed';
+diff --git a/node_modules/@animahealth/adk/dist/voice/index.js b/node_modules/@animahealth/adk/dist/voice/index.js
+index 5c3fe0e..e03a954 100644
+--- a/node_modules/@animahealth/adk/dist/voice/index.js
++++ b/node_modules/@animahealth/adk/dist/voice/index.js
+@@ -3604,6 +3604,7 @@ var init_openai = __esm({
+             input,
+             tools: serializedTools,
+             store: false,
++            service_tier: config.serviceTier,
+             ...promptCacheOptions,
+             ...serializedToolChoice && { tool_choice: serializedToolChoice },
+             // OpenAI reasoning models (o-series, GPT-5.x) reject a non-default
+diff --git a/node_modules/@animahealth/adk/src/providers/openai.ts b/node_modules/@animahealth/adk/src/providers/openai.ts
+index db6c4f6..3c5f1ad 100644
+--- a/node_modules/@animahealth/adk/src/providers/openai.ts
++++ b/node_modules/@animahealth/adk/src/providers/openai.ts
+@@ -182,6 +182,7 @@ export class OpenAIAdapter implements ModelAdapter {
+         input,
+         tools: serializedTools,
+         store: false,
++        service_tier: config.provider === 'openai' ? config.serviceTier : undefined,
+         ...promptCacheOptions,
+         ...(serializedToolChoice && { tool_choice: serializedToolChoice }),
+         // OpenAI reasoning models (o-series, GPT-5.x) reject a non-default
+diff --git a/node_modules/@animahealth/adk/src/types/runnables.ts b/node_modules/@animahealth/adk/src/types/runnables.ts
+index d91f7e3..9945ff0 100644
+--- a/node_modules/@animahealth/adk/src/types/runnables.ts
++++ b/node_modules/@animahealth/adk/src/types/runnables.ts
+@@ -53,6 +53,7 @@ export interface NoiseReductionConfig {
+ 
+ export interface OpenAIModel extends BaseModelConfig {
+   provider: 'openai'
++  serviceTier?: 'auto' | 'default' | 'flex' | 'priority'
+   reasoning?: {
+     effort: 'minimal' | 'low' | 'medium' | 'high'
+     summary?: 'auto' | 'detailed'
